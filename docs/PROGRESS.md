@@ -7,11 +7,12 @@ Read this first at the start of every session.
 **All five phases are built and working for the starting case** (1 million barrels, US Gulf Coast
 to west coast India, Suez or Cape). 63 tests pass. The dashboard runs locally with six pages.
 
-Still to do, and both need the owner:
+The project now lives in `Desktop\crude-arb-project\arb-engine`, with its Python environment
+set up there (`.venv`) and the tests and dashboard confirmed working from that folder.
+
+Still to do, and it needs the owner:
 1. **Publish**: put the code on GitHub and deploy on Streamlit Community Cloud. Step-by-step
    instructions are in `docs/DEPLOY.md`. Not done yet because it needs the owner's accounts.
-2. **Move the project to a permanent folder** and create the Python environment there (see
-   "How to run" below).
 
 ## What was built
 
@@ -65,7 +66,10 @@ At the one-year time-charter rate the arb is closed by $7.47; at calm-market rat
 
 ## How to run
 
-The Python environment is not stored with the project. In a terminal in the project folder:
+Easiest: double-click `run_dashboard.bat` in the project folder. It opens the dashboard in the
+browser (and sets up the Python packages first if they are missing).
+
+By hand, in a terminal in the project folder (the first two lines are only needed once):
 
 ```
 python -m venv .venv

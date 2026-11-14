@@ -40,7 +40,8 @@ Every number lives in a YAML file under [`data/assumptions/`](data/assumptions) 
 
 ## Run it
 
-You need Python 3.10 or newer. In a terminal, from this folder:
+You need Python 3.10 or newer. On Windows, double-click `run_dashboard.bat`: it installs the
+packages on first use and opens the dashboard. Or, in a terminal, from this folder:
 
 ```
 python -m venv .venv
