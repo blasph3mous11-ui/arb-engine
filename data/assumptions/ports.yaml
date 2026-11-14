@@ -1,0 +1,156 @@
+# Ports, canal tolls and reference distances.
+# Port costs are quoted for a Suezmax; other ship sizes scale by the
+# port_cost_factor in vessels.yaml.
+
+ports:
+  corpus_christi:
+    name: {value: "Corpus Christi, USA"}
+    role: {value: origin}
+    latitude: {value: 27.81, unit: degrees north, source: Port location, checked: 2026-11-15, estimate: false}
+    longitude: {value: -97.10, unit: degrees east, source: Port location (Gulf entrance at Port Aransas), checked: 2026-11-15, estimate: false}
+    port_cost_usd:
+      value: 78000
+      unit: USD per call (Suezmax)
+      source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax port cost Corpus Christi
+      url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+      checked: 2026-11-15
+      estimate: false
+      note: A modelling input Platts uses in its own freight calculations, not an invoice.
+  houston:
+    name: {value: "Houston, USA"}
+    role: {value: origin}
+    latitude: {value: 29.34, unit: degrees north, source: Port location (Galveston Bay entrance), checked: 2026-11-15, estimate: false}
+    longitude: {value: -94.70, unit: degrees east, source: Port location (Galveston Bay entrance), checked: 2026-11-15, estimate: false}
+    port_cost_usd:
+      value: 90000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-15
+      estimate: true
+      note: >
+        No free published figure found. Set a little above Corpus Christi ($78,000, Platts)
+        because the Houston Ship Channel is a longer pilotage and tug job.
+  sikka:
+    name: {value: "Sikka (Jamnagar), India"}
+    role: {value: destination}
+    latitude: {value: 22.45, unit: degrees north, source: Port location, checked: 2026-11-15, estimate: false}
+    longitude: {value: 69.60, unit: degrees east, source: Port location (Gulf of Kutch approach), checked: 2026-11-15, estimate: false}
+    port_cost_usd:
+      value: 150000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-15
+      estimate: true
+      note: >
+        No free published figure found. Indian port and light dues are generally higher than US
+        Gulf ones, so we use roughly double the Corpus Christi figure. At under $0.20 a barrel either
+        way, this is not a number that changes the answer.
+  mumbai:
+    name: {value: "Mumbai, India"}
+    role: {value: destination}
+    latitude: {value: 18.90, unit: degrees north, source: Port location, checked: 2026-11-15, estimate: false}
+    longitude: {value: 72.75, unit: degrees east, source: Port location (harbour approach), checked: 2026-11-15, estimate: false}
+    port_cost_usd:
+      value: 150000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-15
+      estimate: true
+      note: Same reasoning as Sikka.
+
+port_time:
+  load_days:
+    value: 2.0
+    unit: days
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Crude charters typically allow 72 hours in total for loading and discharging. We allow two
+      days at each end to include berthing, paperwork and waiting for a tide or a pilot.
+  discharge_days:
+    value: 2.0
+    unit: days
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: Same reasoning as load days.
+
+suez_canal:
+  # Tolls are charged per Suez Canal Net Ton (SCNT) on a sliding scale, in
+  # SDR (the IMF's currency basket), then converted to dollars.
+  band_sizes_scnt:
+    value: [5000, 5000, 10000, 20000, 30000, 50000]
+    unit: SCNT per band (anything above the last band is "the rest")
+    source: Suez Canal Authority, Transit Dues Rates applicable from 15 January 2024 (Circular 7/2023)
+    url: https://www.kanooshipping.com/storage/uploads/circulars/1697703461_SUEZ CANAL - REVISED TOLL FEE - Circular 7 2023 - 1.pdf
+    checked: 2026-11-15
+    estimate: false
+  laden_rates_sdr_per_scnt:
+    value: [11.04, 7.82, 5.91, 2.93, 2.53, 2.17, 2.13]
+    unit: SDR per SCNT, crude oil tankers, laden
+    source: Suez Canal Authority, Transit Dues Rates applicable from 15 January 2024 (Circular 7/2023)
+    url: https://www.kanooshipping.com/storage/uploads/circulars/1697703461_SUEZ CANAL - REVISED TOLL FEE - Circular 7 2023 - 1.pdf
+    checked: 2026-11-15
+    estimate: false
+  ballast_rates_sdr_per_scnt:
+    value: [9.40, 6.64, 5.04, 2.50, 2.14, 1.85, 1.82]
+    unit: SDR per SCNT, crude oil tankers, in ballast
+    source: Suez Canal Authority, Transit Dues Rates applicable from 15 January 2024 (Circular 7/2023)
+    url: https://www.kanooshipping.com/storage/uploads/circulars/1697703461_SUEZ CANAL - REVISED TOLL FEE - Circular 7 2023 - 1.pdf
+    checked: 2026-11-15
+    estimate: false
+  laden_surcharge_pct:
+    value: 37
+    unit: percent of normal dues
+    source: Suez Canal Authority surcharge on laden crude tankers from 15 July 2026, as reported by the International Chamber of Shipping
+    url: https://www.shippingaustralia.com.au/suez-canal-authority-announces-hike-in-surcharges
+    checked: 2026-11-15
+    estimate: false
+    note: Described by the canal authority as temporary. It was 25% before 15 July 2026.
+  ballast_surcharge_pct:
+    value: 27
+    unit: percent of normal dues
+    source: Suez Canal Authority surcharge on ballast crude tankers from 15 July 2026, as reported by the International Chamber of Shipping
+    url: https://www.shippingaustralia.com.au/suez-canal-authority-announces-hike-in-surcharges
+    checked: 2026-11-15
+    estimate: false
+  usd_per_sdr:
+    value: 1.36
+    unit: USD per SDR
+    source: IMF SDR valuation ($1.366 on 4 March 2026); Xe mid-market $1.354 on 4 November 2026
+    url: https://www.imf.org/external/np/fin/data/rms_sdrv.aspx
+    checked: 2026-11-15
+    estimate: false
+    note: Rounded between the two readings. Moves a little every day.
+  transit_delay_days:
+    value: 1.0
+    unit: days per transit
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Ships wait at anchor to join a convoy and pass the canal at about 8 knots, so a transit costs
+      roughly a day more than sailing the same distance at sea speed.
+
+reference_distances:
+  # Used only by the tests, to check the routing library gives sensible answers.
+  houston_mumbai_via_suez_nm:
+    value: 9700
+    unit: nautical miles
+    source: Built up from standard port-distance table legs (Houston-Gibraltar, Gibraltar-Port Said, canal, Suez-Mumbai)
+    url: https://sea-distances.org/
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Approximate, summed from legs as we remember them from published tables (about 4,800 + 1,900 +
+      90 + 2,950 nm). Good enough for a plus-or-minus 6% sanity check; verify on sea-distances.org
+      before quoting it.
+  houston_mumbai_via_cape_nm:
+    value: 11900
+    unit: nautical miles
+    source: Built up from standard port-distance table legs (Houston-Cape Town, Cape Town-Mumbai)
+    url: https://sea-distances.org/
+    checked: 2026-11-15
+    estimate: true
+    note: Approximate (about 7,300 + 4,600 nm). Same caveat as above.

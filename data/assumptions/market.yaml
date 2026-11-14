@@ -1,0 +1,132 @@
+# Freight-market settings: what it costs to hire a ship per day, and how we
+# estimate the price of ship fuel (bunkers).
+#
+# IMPORTANT: real traded freight rates are paywalled (Baltic Exchange, Platts,
+# Argus). The figures below are public broker and press reports, used as
+# documented estimates. They are not live market data.
+
+default_freight_market: {value: spot_nov_2026}
+
+freight_markets:
+  spot_nov_2026:
+    label: {value: "Spot market, Oct-Nov 2026 (Hormuz crisis)"}
+    description:
+      value: >
+        What a ship earns per day if hired for a single voyage today. The Strait of Hormuz has been
+        effectively closed to commercial traffic for most of 2026, which has pushed tanker earnings
+        to record levels.
+    hire_usd_per_day:
+      aframax:
+        value: 200000
+        unit: USD per day
+        source: Our estimate
+        checked: 2026-11-15
+        estimate: true
+        note: >
+          No free Aframax figure for this route. Set at about two-thirds of the Suezmax figure, in
+          line with the usual relationship between the two sizes.
+      suezmax:
+        value: 300000
+        unit: USD per day
+        source: Our estimate, anchored on press and Baltic Exchange reports from October 2026
+        url: https://discoveryalert.com/analysis/tanker-freight-rates-india-state-refiners-october-2026/
+        checked: 2026-11-15
+        estimate: true
+        note: >
+          Reported spot earnings in October 2026 ran from about $200,000 to over $400,000 a day
+          depending on route (Baltic TD20 West Africa-Europe Suezmax about $407,000). Press reports
+          put delivered freight for US crude to India at $20-25 a barrel (ET Bureau, via Discovery
+          Alert) against $3-3.50 before the crisis. Our model reproduces that range at roughly
+          $280,000-300,000 a day, so we use $300,000.
+      vlcc:
+        value: 450000
+        unit: USD per day
+        source: Baltic Exchange TD22 (US Gulf to China VLCC) round-trip earnings of about $451,905 a day, as reported in the press
+        url: https://nimatron.com/brief/us-gulf-to-china-vlcc-lump-sum-falls-11-4m-to-58-22m-while-asian-buyers-cut-us-crude-bookings-50-1808
+        checked: 2026-11-15
+        estimate: true
+        note: A published figure for a different route (US Gulf to China), used here as a proxy.
+  time_charter_1yr_jul_2026:
+    label: {value: "One-year time charter (Fearnleys, July 2026)"}
+    description:
+      value: >
+        What it costs per day to hire a modern ship for a whole year. Much lower than today's spot
+        market because a one-year deal averages out the crisis spike. A trader with ships already
+        on long-term hire faces this cost, not the spot one.
+    hire_usd_per_day:
+      aframax:
+        value: 52500
+        unit: USD per day
+        source: Fearnleys Weekly Report, week 30 (22 July 2026), one-year time charter, modern eco/scrubber Aframax
+        url: https://www.hellenicshippingnews.com/wp-content/uploads/2026/07/Fearnleys-Weekly-Report-_-Fearnpulse.pdf
+        checked: 2026-11-15
+        estimate: false
+        note: A broker assessment; Fearnleys notes its rates do not necessarily reflect actual deals.
+      suezmax:
+        value: 69500
+        unit: USD per day
+        source: Fearnleys Weekly Report, week 30 (22 July 2026), one-year time charter, modern eco/scrubber Suezmax
+        url: https://www.hellenicshippingnews.com/wp-content/uploads/2026/07/Fearnleys-Weekly-Report-_-Fearnpulse.pdf
+        checked: 2026-11-15
+        estimate: false
+        note: A broker assessment; Fearnleys notes its rates do not necessarily reflect actual deals.
+      vlcc:
+        value: 115000
+        unit: USD per day
+        source: Fearnleys Weekly Report, week 30 (22 July 2026), one-year time charter, modern eco/scrubber VLCC
+        url: https://www.hellenicshippingnews.com/wp-content/uploads/2026/07/Fearnleys-Weekly-Report-_-Fearnpulse.pdf
+        checked: 2026-11-15
+        estimate: false
+        note: A broker assessment; Fearnleys notes its rates do not necessarily reflect actual deals.
+  calm_2024:
+    label: {value: "Calm market (late 2024 reference)"}
+    description:
+      value: >
+        A quiet, pre-crisis market, for comparison. This is the world in which long-haul crude
+        freight costs "a few dollars a barrel".
+    hire_usd_per_day:
+      aframax:
+        value: 28000
+        unit: USD per day
+        source: Our estimate
+        checked: 2026-11-15
+        estimate: true
+        note: Set slightly below the Suezmax figure for the same period.
+      suezmax:
+        value: 30000
+        unit: USD per day
+        source: Baltic Exchange weekly tanker report, week 45 of 2024 (TD20 round-trip earnings about $29,866 a day)
+        url: https://ics.org.uk/media/806522/baltic%20freight%20report%20week%202024%2045.pdf
+        checked: 2026-11-15
+        estimate: false
+        note: Rounded. A West Africa-Europe route, used as a general Suezmax reference.
+      vlcc:
+        value: 35000
+        unit: USD per day
+        source: Our estimate
+        checked: 2026-11-15
+        estimate: true
+        note: Set slightly above the Suezmax figure for the same period.
+
+bunkers:
+  # Ship fuel. Real port-by-port bunker prices are published by paid services,
+  # so we estimate the price from the price of crude.
+  usd_per_tonne_per_brent_dollar:
+    value: 7.7
+    unit: USD per tonne of fuel, per USD per barrel of Brent
+    source: Our estimate, calibrated to Ship & Bunker's Houston VLSFO price of $737/tonne against Brent at $95.84/barrel on 13 November 2026
+    url: https://shipandbunker.com/
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      737 / 95.84 = 7.7. The logic: a tonne of fuel oil is about 6.4-6.7 barrels, and low-sulphur
+      fuel sells at a premium to crude, so the multiple is above 6.7. The ratio differs by port
+      (Singapore was $882/tonne the same day, a ratio of 9.2) and drifts over time.
+  reference_houston_vlsfo_usd_per_tonne:
+    value: 737
+    unit: USD per tonne
+    source: Ship & Bunker, Houston VLSFO, 13 November 2026
+    url: https://shipandbunker.com/
+    checked: 2026-11-15
+    estimate: false
+    note: Shown on the dashboard as a cross-check against our estimate. Not updated automatically.

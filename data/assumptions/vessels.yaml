@@ -1,0 +1,305 @@
+# Vessel classes used by the voyage calculator.
+#
+# Every entry has: value, unit, source, url (where one exists), checked (date we
+# looked it up), estimate (true = our reasoned guess, not a published figure)
+# and an optional note explaining the reasoning or the limits.
+#
+# Fuel consumption is in tonnes of fuel per day (tpd). Speeds are in knots
+# (nautical miles per hour).
+
+aframax:
+  name: {value: Aframax}
+  deadweight_tonnes:
+    value: 115000
+    unit: tonnes
+    source: Baltic Exchange standard vessel for sale-and-purchase assessments (five-year-old Aframax)
+    url: https://www.balticexchange.com/en/who-we-are/guide-to-modern-shipping/main-vessel-types.html
+    checked: 2026-11-15
+    estimate: false
+  cargo_capacity_bbl:
+    value: 750000
+    unit: barrels
+    source: Derived from deadweight
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      115,000 t deadweight less roughly 15% for fuel, water, stores and safety margin leaves
+      about 98,000 t of cargo. Light crude is about 7.6 barrels per tonne, so about 750,000 barrels.
+  laden_speed_knots:
+    value: 13.0
+    unit: knots
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Aframax assessment speed
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: false
+  ballast_speed_knots:
+    value: 12.5
+    unit: knots
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Aframax assessment speed
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: false
+  laden_consumption_tpd:
+    value: 38
+    unit: tonnes per day
+    source: Our estimate, scaled down from the Platts Suezmax figure
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      A Suezmax burns about 44 t/day laden at 13 knots (Platts). An Aframax is roughly 70% of the
+      size; fuel use scales less than proportionally with size, so we use about 85% of the Suezmax figure.
+  ballast_consumption_tpd:
+    value: 30
+    unit: tonnes per day
+    source: Our estimate, scaled down from the Platts Suezmax figure
+    checked: 2026-11-15
+    estimate: true
+    note: Same reasoning as laden consumption (Suezmax 35 t/day in ballast).
+  load_port_consumption_tpd:
+    value: 10
+    unit: tonnes per day
+    source: Our estimate, scaled from the Platts Suezmax port figures
+    checked: 2026-11-15
+    estimate: true
+  discharge_port_consumption_tpd:
+    value: 55
+    unit: tonnes per day
+    source: Our estimate, scaled from the Platts Suezmax port figures
+    checked: 2026-11-15
+    estimate: true
+    note: Discharging burns far more than loading because the ship runs its own cargo pumps.
+  idle_consumption_tpd:
+    value: 6
+    unit: tonnes per day
+    source: Our estimate, scaled from the Platts Suezmax port figures
+    checked: 2026-11-15
+    estimate: true
+  suez_canal_net_tonnage:
+    value: 58000
+    unit: SCNT
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Suez Canal Net Tonnage is a volume measure the canal uses to set tolls. Agents list Suezmaxes
+      at 74,000-83,000 SCNT; we scale that by relative ship size for an Aframax.
+  can_transit_suez_laden:
+    value: true
+    source: Suez Canal Authority permitted draught of 66 ft (20.1 m); an Aframax draws about 15 m fully laden
+    url: https://en.wikipedia.org/wiki/Suezmax
+    checked: 2026-11-15
+    estimate: false
+  port_cost_factor:
+    value: 0.8
+    unit: multiple of the Suezmax port cost
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: Port dues are charged largely on ship size, so a smaller ship pays less.
+  hull_value_usd:
+    value: 65000000
+    unit: USD
+    source: Our estimate of a five-year-old Aframax value
+    checked: 2026-11-15
+    estimate: true
+    note: Only used to size the optional Red Sea war-risk premium. Broker value tables are paywalled.
+
+suezmax:
+  name: {value: Suezmax}
+  deadweight_tonnes:
+    value: 158000
+    unit: tonnes
+    source: Baltic Exchange standard vessel for sale-and-purchase assessments (five-year-old Suezmax)
+    url: https://www.balticexchange.com/en/who-we-are/guide-to-modern-shipping/main-vessel-types.html
+    checked: 2026-11-15
+    estimate: false
+  cargo_capacity_bbl:
+    value: 1000000
+    unit: barrels
+    source: US EIA, Today in Energy, 27 January 2026 ("Suezmax ... about 1 million barrels")
+    url: https://www.eia.gov/todayinenergy/detail.php?id=67064
+    checked: 2026-11-15
+    estimate: false
+  laden_speed_knots:
+    value: 13.0
+    unit: knots
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax assessment speed
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: false
+  ballast_speed_knots:
+    value: 12.5
+    unit: knots
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax assessment speed
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: false
+  laden_consumption_tpd:
+    value: 44
+    unit: tonnes per day
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), non-scrubber non-eco Suezmax
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: false
+    note: >
+      Read from a search-engine extract of the guide (the PDF blocks automated download), so worth
+      re-checking by eye. A modern "eco" ship with a scrubber is listed at about 37 t/day.
+  ballast_consumption_tpd:
+    value: 35
+    unit: tonnes per day
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), non-scrubber non-eco Suezmax
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: false
+    note: Same caveat as laden consumption. Eco/scrubber ships are listed at about 25 t/day.
+  load_port_consumption_tpd:
+    value: 12
+    unit: tonnes per day
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026)
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: true
+    note: The extract of the port-consumption rows was fragmented, so we treat these as estimates.
+  discharge_port_consumption_tpd:
+    value: 71
+    unit: tonnes per day
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026)
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: true
+    note: Discharging burns far more than loading because the ship runs its own cargo pumps.
+  idle_consumption_tpd:
+    value: 7.5
+    unit: tonnes per day
+    source: S&P Global Platts, Specifications Guide Global Freight (September 2026)
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-15
+    estimate: true
+    note: Fuel burned while waiting at anchor or in the canal. Same caveat as the other port figures.
+  suez_canal_net_tonnage:
+    value: 81000
+    unit: SCNT
+    source: Leth Agencies Suez toll calculator lists Suezmax at 74,000-83,000 SCNT; we take a value near the top
+    url: https://lethagencies.com/suez-calculator
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Each ship has its own figure on its Suez tonnage certificate. A 158,000 t ship sits near
+      the top of the Suezmax range, so we use 81,000.
+  can_transit_suez_laden:
+    value: true
+    source: A Suezmax is by definition the largest tanker that can pass the canal fully laden (permitted draught 20.1 m)
+    url: https://en.wikipedia.org/wiki/Suezmax
+    checked: 2026-11-15
+    estimate: false
+  port_cost_factor:
+    value: 1.0
+    unit: multiple of the Suezmax port cost
+    source: Definition (port costs in ports.yaml are quoted for a Suezmax)
+    checked: 2026-11-15
+    estimate: false
+  hull_value_usd:
+    value: 80000000
+    unit: USD
+    source: Our estimate of a five-year-old Suezmax value
+    checked: 2026-11-15
+    estimate: true
+    note: Only used to size the optional Red Sea war-risk premium. Broker value tables are paywalled.
+
+vlcc:
+  name: {value: VLCC}
+  deadweight_tonnes:
+    value: 305000
+    unit: tonnes
+    source: Baltic Exchange standard vessel for sale-and-purchase assessments (five-year-old VLCC)
+    url: https://www.balticexchange.com/en/who-we-are/guide-to-modern-shipping/main-vessel-types.html
+    checked: 2026-11-15
+    estimate: false
+  cargo_capacity_bbl:
+    value: 2000000
+    unit: barrels
+    source: US EIA, Today in Energy, 27 January 2026 ("VLCC ... about 1.9 to 2.2 million barrels")
+    url: https://www.eia.gov/todayinenergy/detail.php?id=67064
+    checked: 2026-11-15
+    estimate: false
+  laden_speed_knots:
+    value: 12.0
+    unit: knots
+    source: Baltic Exchange tanker emissions white paper, VLCC "eco" speed
+    url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
+    checked: 2026-11-15
+    estimate: false
+    note: Read from a search-engine extract of the page. Full speed is listed as 14 knots at 93 t/day.
+  ballast_speed_knots:
+    value: 12.0
+    unit: knots
+    source: Baltic Exchange tanker emissions white paper, VLCC "eco" speed
+    url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
+    checked: 2026-11-15
+    estimate: true
+    note: The extract gives the eco ballast consumption but not its speed; we assume the same 12 knots.
+  laden_consumption_tpd:
+    value: 58.5
+    unit: tonnes per day
+    source: Baltic Exchange tanker emissions white paper, VLCC laden at eco speed
+    url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
+    checked: 2026-11-15
+    estimate: false
+  ballast_consumption_tpd:
+    value: 44
+    unit: tonnes per day
+    source: Baltic Exchange tanker emissions white paper, VLCC ballast at eco speed
+    url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
+    checked: 2026-11-15
+    estimate: false
+  load_port_consumption_tpd:
+    value: 15
+    unit: tonnes per day
+    source: Our estimate, scaled up from the Platts Suezmax port figures
+    checked: 2026-11-15
+    estimate: true
+  discharge_port_consumption_tpd:
+    value: 95
+    unit: tonnes per day
+    source: Our estimate, scaled up from the Platts Suezmax port figures
+    checked: 2026-11-15
+    estimate: true
+  idle_consumption_tpd:
+    value: 10
+    unit: tonnes per day
+    source: Our estimate, scaled up from the Platts Suezmax port figures
+    checked: 2026-11-15
+    estimate: true
+  suez_canal_net_tonnage:
+    value: 155000
+    unit: SCNT
+    source: Our estimate, scaled from the Suezmax figure by ship size
+    checked: 2026-11-15
+    estimate: true
+    note: Only used for the empty (ballast) return leg, because a VLCC cannot pass the canal fully laden.
+  can_transit_suez_laden:
+    value: false
+    source: Suez Canal Authority permitted draught is 66 ft (20.1 m); a fully laden VLCC draws about 22 m
+    url: https://en.wikipedia.org/wiki/Suezmax
+    checked: 2026-11-15
+    estimate: false
+    note: >
+      A laden VLCC must go round the Cape (or part-discharge into the SUMED pipeline, which we do
+      not model). It can pass the canal empty.
+  port_cost_factor:
+    value: 1.4
+    unit: multiple of the Suezmax port cost
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Port dues are charged largely on ship size. Also note most US Gulf docks cannot fully load a
+      VLCC; real cargoes are topped up offshore by smaller ships (reverse lightering), which adds
+      a cost we do not model.
+  hull_value_usd:
+    value: 120000000
+    unit: USD
+    source: Our estimate of a five-year-old VLCC value
+    checked: 2026-11-15
+    estimate: true
+    note: Only used to size the optional Red Sea war-risk premium. Broker value tables are paywalled.

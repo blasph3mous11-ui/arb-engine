@@ -1,0 +1,236 @@
+"""Voyage calculator: turns a route and a ship into days and dollars.
+
+The trading logic in one paragraph: a trader who ships a cargo pays for the
+whole ship for the whole trip. That means the daily hire of the vessel for
+every day it is tied up (including the empty trip back), all the fuel it
+burns, port charges at both ends, and canal tolls if it takes the canal.
+Divide that by the barrels on board and you have freight per barrel.
+"""
+
+from dataclasses import dataclass, field
+from functools import lru_cache
+
+from engine import assumptions as A
+from engine.units import sailing_days
+
+ROUTES = {"suez": "Via Suez Canal", "cape": "Via Cape of Good Hope"}
+
+
+@dataclass(frozen=True)
+class Vessel:
+    key: str
+    name: str
+    cargo_capacity_bbl: float
+    laden_speed_knots: float
+    ballast_speed_knots: float
+    laden_consumption_tpd: float
+    ballast_consumption_tpd: float
+    load_port_consumption_tpd: float
+    discharge_port_consumption_tpd: float
+    idle_consumption_tpd: float
+    suez_canal_net_tonnage: float
+    can_transit_suez_laden: bool
+    port_cost_factor: float
+    hull_value_usd: float
+
+
+def vessel_keys() -> list[str]:
+    return list(A.load("vessels").keys())
+
+
+def get_vessel(key: str) -> Vessel:
+    raw = A.load("vessels")[key]
+    fields = {name: A.val(raw[name]) for name in Vessel.__dataclass_fields__ if name != "key"}
+    return Vessel(key=key, **fields)
+
+
+def port_keys(role: str) -> list[str]:
+    ports = A.load("ports")["ports"]
+    return [k for k, p in ports.items() if A.val(p["role"]) == role]
+
+
+def get_port(key: str) -> dict:
+    raw = A.load("ports")["ports"][key]
+    return {
+        "key": key,
+        "name": A.val(raw["name"]),
+        "latitude": A.val(raw["latitude"]),
+        "longitude": A.val(raw["longitude"]),
+        "port_cost_usd": A.val(raw["port_cost_usd"]),
+        "port_cost_is_estimate": A.is_estimate(raw["port_cost_usd"]),
+    }
+
+
+@lru_cache(maxsize=None)
+def sea_route(origin_key: str, destination_key: str, via: str) -> tuple[float, tuple]:
+    """Sea distance in nautical miles and the path as (longitude, latitude) points.
+
+    Uses the open-source `searoute` library, which finds the shortest path over
+    a network of shipping lanes. For the Cape route we forbid the Suez Canal,
+    so the shortest remaining path goes round South Africa.
+    """
+    import searoute  # imported here so the rest of the engine works without it
+
+    origin, destination = get_port(origin_key), get_port(destination_key)
+    # "northwest" (the Arctic Northwest Passage) is always forbidden.
+    restrictions = ["northwest"] + (["suez"] if via == "cape" else [])
+    result = searoute.searoute(
+        [origin["longitude"], origin["latitude"]],
+        [destination["longitude"], destination["latitude"]],
+        units="naut",
+        restrictions=restrictions,
+    )
+    points = tuple(tuple(p) for p in result["geometry"]["coordinates"])
+    return float(result["properties"]["length"]), points
+
+
+def suez_toll_usd(net_tonnage: float, laden: bool) -> float:
+    """Suez Canal toll for one crude-tanker transit, in US dollars.
+
+    The canal charges per Suez Canal Net Ton on a sliding scale (the first
+    5,000 tons are dearest, later bands cheaper), priced in SDR. On top of
+    that sits a percentage surcharge. We convert to dollars at the end.
+    """
+    canal = A.load("ports")["suez_canal"]
+    band_sizes = A.val(canal["band_sizes_scnt"])
+    rates = A.val(canal["laden_rates_sdr_per_scnt" if laden else "ballast_rates_sdr_per_scnt"])
+    surcharge_pct = A.val(canal["laden_surcharge_pct" if laden else "ballast_surcharge_pct"])
+
+    remaining, dues_sdr = net_tonnage, 0.0
+    for size, rate in zip(band_sizes, rates):
+        tons_in_band = min(remaining, size)
+        dues_sdr += tons_in_band * rate
+        remaining -= tons_in_band
+    dues_sdr += remaining * rates[-1]  # "the rest", above the last band
+
+    return dues_sdr * (1 + surcharge_pct / 100) * A.val(canal["usd_per_sdr"])
+
+
+@dataclass
+class VoyageResult:
+    via: str
+    distance_nm: float
+    cargo_bbl: float
+    days: dict = field(default_factory=dict)         # days by activity
+    fuel_tonnes: dict = field(default_factory=dict)  # fuel burned by activity
+    costs: dict = field(default_factory=dict)        # dollars by component
+
+    @property
+    def total_days(self) -> float:
+        return sum(self.days.values())
+
+    @property
+    def laden_days(self) -> float:
+        """Days the cargo is on the water: loading to end of discharge."""
+        d = self.days
+        return d["load_port"] + d["laden_sea"] + d["laden_canal"] + d["discharge_port"]
+
+    @property
+    def total_fuel_tonnes(self) -> float:
+        return sum(self.fuel_tonnes.values())
+
+    @property
+    def total_cost(self) -> float:
+        return sum(self.costs.values())
+
+    @property
+    def cost_per_bbl(self) -> float:
+        return self.total_cost / self.cargo_bbl
+
+    def per_bbl(self) -> dict:
+        return {name: cost / self.cargo_bbl for name, cost in self.costs.items()}
+
+
+def estimate_voyage(
+    vessel: Vessel,
+    distance_nm: float,
+    via: str,
+    cargo_bbl: float,
+    hire_usd_per_day: float,
+    bunker_usd_per_tonne: float,
+    load_port_cost_usd: float,
+    discharge_port_cost_usd: float,
+    load_days: float,
+    discharge_days: float,
+    charge_ballast_leg: bool = True,
+    canal_delay_days: float = 0.0,
+    canal_toll_laden_usd: float = 0.0,
+    canal_toll_ballast_usd: float = 0.0,
+    war_risk_usd_per_transit: float = 0.0,
+) -> VoyageResult:
+    """Work out days, fuel and cost for one voyage. Every input is explicit."""
+    if via == "suez" and not vessel.can_transit_suez_laden:
+        raise ValueError(f"A fully laden {vessel.name} is too deep for the Suez Canal.")
+    if cargo_bbl > vessel.cargo_capacity_bbl:
+        raise ValueError(f"A {vessel.name} cannot carry {cargo_bbl:,.0f} barrels.")
+
+    uses_canal = via == "suez"
+    # The empty return leg: the ship sails home by the same route.
+    ballast_factor = 1.0 if charge_ballast_leg else 0.0
+
+    days = {
+        "load_port": load_days,
+        "laden_sea": sailing_days(distance_nm, vessel.laden_speed_knots),
+        "laden_canal": canal_delay_days if uses_canal else 0.0,
+        "discharge_port": discharge_days,
+        "ballast_sea": sailing_days(distance_nm, vessel.ballast_speed_knots) * ballast_factor,
+        "ballast_canal": (canal_delay_days if uses_canal else 0.0) * ballast_factor,
+    }
+    fuel = {
+        "load_port": days["load_port"] * vessel.load_port_consumption_tpd,
+        "laden_sea": days["laden_sea"] * vessel.laden_consumption_tpd,
+        "laden_canal": days["laden_canal"] * vessel.idle_consumption_tpd,
+        "discharge_port": days["discharge_port"] * vessel.discharge_port_consumption_tpd,
+        "ballast_sea": days["ballast_sea"] * vessel.ballast_consumption_tpd,
+        "ballast_canal": days["ballast_canal"] * vessel.idle_consumption_tpd,
+    }
+    canal_transits = (1 + ballast_factor) if uses_canal else 0
+    costs = {
+        "Vessel hire": sum(days.values()) * hire_usd_per_day,
+        "Bunkers (fuel)": sum(fuel.values()) * bunker_usd_per_tonne,
+        "Port charges": (load_port_cost_usd + discharge_port_cost_usd) * vessel.port_cost_factor,
+        "Canal tolls": (canal_toll_laden_usd + canal_toll_ballast_usd * ballast_factor) if uses_canal else 0.0,
+        "War-risk premium": war_risk_usd_per_transit * canal_transits,
+    }
+    return VoyageResult(via=via, distance_nm=distance_nm, cargo_bbl=cargo_bbl,
+                        days=days, fuel_tonnes=fuel, costs=costs)
+
+
+def voyage_from_assumptions(
+    origin_key: str,
+    destination_key: str,
+    vessel_key: str,
+    via: str,
+    hire_usd_per_day: float,
+    bunker_usd_per_tonne: float,
+    cargo_bbl: float | None = None,
+    charge_ballast_leg: bool | None = None,
+    include_war_risk: bool = True,
+) -> VoyageResult:
+    """The same calculation, filling everything else in from the YAML files."""
+    vessel = get_vessel(vessel_key)
+    distance_nm, _ = sea_route(origin_key, destination_key, via)
+    ports = A.load("ports")
+    if charge_ballast_leg is None:
+        charge_ballast_leg = A.get("costs", "voyage_basis", "charge_ballast_leg")
+    war_risk = 0.0
+    if include_war_risk:
+        war_risk = vessel.hull_value_usd * A.get("costs", "insurance", "red_sea_war_risk_pct_of_hull") / 100
+
+    return estimate_voyage(
+        vessel=vessel,
+        distance_nm=distance_nm,
+        via=via,
+        cargo_bbl=cargo_bbl or vessel.cargo_capacity_bbl,
+        hire_usd_per_day=hire_usd_per_day,
+        bunker_usd_per_tonne=bunker_usd_per_tonne,
+        load_port_cost_usd=get_port(origin_key)["port_cost_usd"],
+        discharge_port_cost_usd=get_port(destination_key)["port_cost_usd"],
+        load_days=A.val(ports["port_time"]["load_days"]),
+        discharge_days=A.val(ports["port_time"]["discharge_days"]),
+        charge_ballast_leg=charge_ballast_leg,
+        canal_delay_days=A.val(ports["suez_canal"]["transit_delay_days"]),
+        canal_toll_laden_usd=suez_toll_usd(vessel.suez_canal_net_tonnage, laden=True),
+        canal_toll_ballast_usd=suez_toll_usd(vessel.suez_canal_net_tonnage, laden=False),
+        war_risk_usd_per_transit=war_risk,
+    )
