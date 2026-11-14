@@ -51,12 +51,19 @@ scenario_inputs = base_inputs.with_changes(
 scenario = arbitrage.run(scenario_inputs)
 breakeven = scenarios.breakeven_spread(scenario_inputs)
 
+
+
+def change(amount: float, suffix: str = "") -> str | None:
+    """Text for a metric's change arrow; nothing at all if the number has not moved."""
+    return f"{amount:+,.2f}{suffix}" if abs(amount) >= 0.005 else None
+
+
 ui.verdict_banner(scenario)
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Margin per barrel", ui.usd(scenario.margin_per_bbl),
-          delta=f"{scenario.margin_per_bbl - base.margin_per_bbl:+,.2f} vs today's base case")
+          delta=change(scenario.margin_per_bbl - base.margin_per_bbl, " vs today's base case"))
 c2.metric("Freight per barrel", ui.usd(scenario.cost_stack["Freight"]),
-          delta=f"{scenario.cost_stack['Freight'] - base.cost_stack['Freight']:+,.2f}", delta_color="inverse")
+          delta=change(scenario.cost_stack["Freight"] - base.cost_stack["Freight"]), delta_color="inverse")
 c3.metric("Break-even spread", ui.usd(breakeven),
           help=f"The {benchmark_name}-minus-WTI gap at which the margin is exactly zero, at these costs.")
 c4.metric("Spread in this scenario", ui.usd(spread),

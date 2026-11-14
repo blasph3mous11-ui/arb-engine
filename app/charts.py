@@ -41,7 +41,7 @@ def route_map(routes: dict, ports: list[dict]) -> go.Figure:
         textfont=dict(color=INK), showlegend=False, hoverinfo="text"))
     fig.update_geos(projection_type="natural earth", showland=True, landcolor="#f0efec",
                     showocean=True, oceancolor=SURFACE, showcountries=True, countrycolor=GRID,
-                    coastlinecolor=AXIS, lataxis_range=[-50, 60], lonaxis_range=[-110, 100])
+                    coastlinecolor=AXIS, lataxis_range=[-50, 60], lonaxis_range=[-135, 110])
     fig.update_layout(height=420, margin=dict(l=0, r=0, t=30, b=0), paper_bgcolor=SURFACE,
                       legend=dict(orientation="h", yanchor="bottom", y=1.0, x=0))
     return fig
@@ -54,8 +54,10 @@ def cost_bars(per_bbl: dict) -> go.Figure:
         x=[v for _, v in items], y=[k for k, _ in items], orientation="h", marker_color=BLUE,
         text=[f"${v:,.2f}" for _, v in items], textposition="outside", textfont=dict(color=INK),
         hovertemplate="%{y}: $%{x:,.2f} per barrel<extra></extra>", cliponaxis=False))
-    fig.update_layout(margin=dict(r=60))
-    return _style(fig, height=60 + 50 * len(items), x_title="USD per barrel")
+    fig = _style(fig, height=60 + 50 * len(items), x_title="USD per barrel")
+    # Leave room on the right for the value labels.
+    fig.update_xaxes(range=[0, max(v for _, v in items) * 1.3])
+    return fig
 
 
 def price_lines(prices, columns: dict) -> go.Figure:

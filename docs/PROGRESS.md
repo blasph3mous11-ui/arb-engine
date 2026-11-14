@@ -1,0 +1,88 @@
+# Progress
+
+Read this first at the start of every session.
+
+## Where things stand (15 November 2026)
+
+**All five phases are built and working for the starting case** (1 million barrels, US Gulf Coast
+to west coast India, Suez or Cape). 63 tests pass. The dashboard runs locally with six pages.
+
+Still to do, and both need the owner:
+1. **Publish**: put the code on GitHub and deploy on Streamlit Community Cloud. Step-by-step
+   instructions are in `docs/DEPLOY.md`. Not done yet because it needs the owner's accounts.
+2. **Move the project to a permanent folder** and create the Python environment there (see
+   "How to run" below).
+
+## What was built
+
+| Phase | Status | What it means in trading terms |
+|---|---|---|
+| 0 Setup | done | Project skeleton, Python packages, git. |
+| 1 Voyage calculator | done | The tool knows how far it is (9,803 nm via Suez, 12,370 nm via the Cape), how long a Suezmax takes (36 days loaded), what it burns (44 t/day loaded) and what the Suez Canal charges (about $0.58m loaded, from the official tariff). Freight per barrel is broken into hire, fuel, ports, tolls and war risk. |
+| 2 Prices | done | Daily Brent and WTI from the US EIA and monthly Dubai from the World Bank, no sign-up needed, cached locally. Bunker price is estimated from Brent (x 7.7) and labelled as an estimate. |
+| 3 Cost stack and arb | done | Purchase price + freight + financing + insurance + transit loss + demurrage = landed cost, compared with destination value after a quality adjustment. Waterfall chart and ARB OPEN / ARB CLOSED verdict. |
+| 4 Scenarios and history | done | Sliders for hire rate, bunker price, interest rate, spread and delay, plus a "Suez closed" switch. Tornado chart, break-even spread, and the model re-run over past prices with the caveats stated on the chart. |
+| 5 Polish and publish | docs done, publishing pending | Landing page, Methodology page, case study, README with screenshots, interview notes, deployment guide. |
+
+Phases 1 to 4 were written in one sitting and verified together at the end, then committed as
+separate phase commits.
+
+## Today's result (prices for 11 November 2026)
+
+WTI $89.62, Brent $92.14, so the gross spread is $2.52. Estimated freight in today's crisis
+tanker market is $25.02 a barrel. **ARB CLOSED by $23.64 a barrel.** Break-even spread: $26.20.
+At the one-year time-charter rate the arb is closed by $7.47; at calm-market rates by $4.70.
+
+## Decisions made along the way (and why)
+
+- **Three freight-market settings instead of one.** Research showed the tanker market in late
+  2026 is in crisis (Strait of Hormuz effectively closed; press reports of $20-25/bbl US-India
+  freight versus $3-3.50 before). The brief's sanity check ("a few dollars a barrel") holds in the
+  calm-market setting ($5-6 Suezmax, $3.44 VLCC); today's setting is deliberately much higher.
+- **Price source: EIA spreadsheet downloads, not the EIA API or FRED.** They need no API key, so
+  there is no `.env` to manage. FRED was unreachable from the build machine.
+- **Dubai is monthly only.** No free daily Dubai price exists. When Dubai is chosen as the sell
+  benchmark the tool compares monthly averages for the same month.
+- **Round-voyage freight.** The cargo pays for the empty leg home, as Worldscale does.
+- **Origin port default is Corpus Christi**, the one port with a published (Platts) port cost.
+- **Red Sea war-risk premium added** to the Suez route (estimate), because without it the Suez
+  versus Cape comparison is unrealistic.
+- **Dashboard smoke test added** (`tests/test_dashboard.py`): loads every page for four different
+  trade set-ups.
+- **Git author is a placeholder** ("Arb Engine Owner"). Set the real name before publishing; see
+  `docs/DEPLOY.md`.
+
+## Known gaps and things to verify by eye
+
+- Platts ship speeds and fuel figures and the Baltic VLCC figures were read from search-engine
+  extracts, because the PDFs block automated download. Worth opening the documents once to confirm.
+- The reference distances used in one test (9,700 and 11,900 nm Houston-Mumbai) are from memory of
+  published tables; verify on sea-distances.org.
+- The spot hire rate ($300,000 a day Suezmax) is an estimate anchored on press reports.
+- README has two screenshots (arbitrage, voyage). A scenarios screenshot would be a nice addition.
+- Not modelled: hedging and futures-curve structure, brokerage commission, VLCC reverse
+  lightering, slow steaming. Listed on the Methodology page.
+
+## How to run
+
+The Python environment is not stored with the project. In a terminal in the project folder:
+
+```
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run app/main.py
+```
+
+Tests: `pytest`. Regenerate the assumptions document after editing any YAML:
+`python -m engine.assumptions`.
+
+Note: keep the project in a folder with a short path (for example `Documents\arb-engine`).
+Windows fails to load one of the packages if the full path is very long.
+
+## What comes next
+
+1. Owner: follow `docs/DEPLOY.md` (GitHub, then Streamlit Community Cloud).
+2. Optional improvements, in order of value: futures-curve and hedging effect; a second route or
+   grade (add entries to `data/assumptions/ports.yaml` and `costs.yaml`); refresh the dated
+   assumptions before interviews.
