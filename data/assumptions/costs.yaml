@@ -1,0 +1,209 @@
+# Every cost between buying the cargo and selling it, other than freight.
+# Also the crude grades and the pricing conventions.
+
+pricing:
+  origin_differential_usd_per_bbl:
+    value: 1.00
+    unit: USD per barrel
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      The free WTI price is for oil at Cushing, Oklahoma, an inland pipeline hub. Oil loaded on a
+      ship at the Gulf Coast normally costs a little more, roughly the pipeline tariff to the
+      coast. Real Gulf Coast export prices (WTI at Houston, "MEH") are paywalled.
+  destination_differential_usd_per_bbl:
+    value: 0.00
+    unit: USD per barrel
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      A premium or discount to the benchmark that a buyer in India pays on delivery. Real delivered
+      premiums are negotiated cargo by cargo and are paywalled, so the default is zero and the
+      user can change it.
+
+financing:
+  benchmark_rate_pct:
+    value: 3.90
+    unit: percent per year
+    source: Federal Reserve Bank of New York, Secured Overnight Financing Rate (SOFR), 12 November 2026
+    url: https://www.newyorkfed.org/markets/reference-rates/sofr
+    checked: 2026-11-15
+    estimate: false
+  margin_pct:
+    value: 2.00
+    unit: percent per year
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      What a bank adds on top of the benchmark to lend against a cargo. Depends on the trader's
+      credit; one to three percentage points is a commonly quoted range.
+  day_count:
+    value: 360
+    unit: days per year
+    source: Market convention for US dollar money-market interest
+    checked: 2026-11-15
+    estimate: false
+  extra_days:
+    value: 0
+    unit: days
+    source: Our assumption
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Crude is usually paid for 30 days after loading, and the buyer pays 30 days after delivery,
+      so the two delays cancel and the money is tied up for about the length of the laden voyage.
+      Raise this number if the buyer gets longer credit than the seller gives.
+
+insurance:
+  cargo_rate_pct:
+    value: 0.05
+    unit: percent of insured value
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Cargo insurance for bulk oil on a major route is cheap; a few hundredths of a percent is
+      typical. We found no free published rate.
+  insured_value_uplift_pct:
+    value: 110
+    unit: percent of cargo value plus freight
+    source: Standard practice is to insure invoice value plus freight plus 10%
+    url: https://www.handybulk.com/marine-cargo-insurance-and-institute-cargo-clauses-coverage-exclusions-transit-claims-and-commodity-forms/
+    checked: 2026-11-15
+    estimate: false
+  red_sea_war_risk_pct_of_hull:
+    value: 0.5
+    unit: percent of ship value per transit
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Extra premium insurers charge on the ship itself for passing the southern Red Sea, where
+      commercial ships have been attacked since late 2023. Press reports during 2024 quoted 0.5% to
+      1% of hull value per transit. Charged once per Red Sea passage on the Suez route; zero via the Cape.
+
+transit_loss:
+  loss_pct:
+    value: 0.2
+    unit: percent of volume
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Slightly less oil is measured out at discharge than was measured in at loading (evaporation,
+      oil clinging to tanks, measurement differences). Contracts often tolerate up to about 0.5%;
+      0.1-0.3% is a common rule of thumb.
+
+demurrage:
+  default_delay_days:
+    value: 0
+    unit: days
+    source: Our assumption
+    checked: 2026-11-15
+    estimate: true
+    note: The base case assumes no delay. The Scenarios page lets the user add delay days.
+  rate_as_share_of_hire:
+    value: 1.0
+    unit: multiple of the daily hire rate
+    source: Our assumption
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Demurrage is the daily penalty paid to the shipowner when the ship is held up beyond the
+      agreed time. It is negotiated per charter but tracks what the ship could earn elsewhere, so
+      we set it equal to the daily hire rate, plus fuel burned while waiting.
+
+voyage_basis:
+  charge_ballast_leg:
+    value: true
+    source: Tanker freight convention (Worldscale rates assume a round voyage)
+    url: https://www.worldscale.co.uk/
+    checked: 2026-11-15
+    estimate: false
+    note: >
+      The cargo pays for the ship's empty trip back as well as the loaded trip out, because the
+      owner earns nothing on the way back. This is how tanker freight is normally priced.
+
+quality:
+  # Simple, transparent rule for how much more or less a grade is worth than
+  # the benchmark it is priced against.
+  usd_per_api_degree:
+    value: 0.40
+    unit: USD per barrel, per degree of API gravity
+    source: Our estimate, in line with gravity escalators in producer price formulas (for example Iraq's Basrah grades)
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Lighter crude (higher API) yields more petrol and diesel, so it is normally worth more.
+      A straight line is a simplification: refiners value crude by the products it actually yields.
+  usd_per_sulphur_pct:
+    value: 1.00
+    unit: USD per barrel, per percentage point of sulphur
+    source: Our estimate
+    checked: 2026-11-15
+    estimate: true
+    note: >
+      Sulphur must be removed in refining, so higher-sulphur ("sour") crude is worth less. The
+      sweet-sour gap moves a lot with the market; this is a mid-range figure.
+
+grades:
+  wti:
+    name: {value: "WTI (US light sweet)"}
+    api_gravity:
+      value: 39.6
+      unit: degrees API
+      source: US EIA, Today in Energy, 16 July 2012, "Crude oils have different quality characteristics"
+      url: https://www.eia.gov/todayinenergy/detail.php?id=7110
+      checked: 2026-11-15
+      estimate: false
+    sulphur_pct:
+      value: 0.24
+      unit: percent by weight
+      source: US EIA, Today in Energy, 16 July 2012, "Crude oils have different quality characteristics"
+      url: https://www.eia.gov/todayinenergy/detail.php?id=7110
+      checked: 2026-11-15
+      estimate: false
+  brent:
+    name: {value: "Brent (North Sea light sweet)"}
+    api_gravity:
+      value: 38.3
+      unit: degrees API
+      source: US EIA, Today in Energy, 16 July 2012, "Crude oils have different quality characteristics"
+      url: https://www.eia.gov/todayinenergy/detail.php?id=7110
+      checked: 2026-11-15
+      estimate: false
+    sulphur_pct:
+      value: 0.37
+      unit: percent by weight
+      source: US EIA, Today in Energy, 16 July 2012, "Crude oils have different quality characteristics"
+      url: https://www.eia.gov/todayinenergy/detail.php?id=7110
+      checked: 2026-11-15
+      estimate: false
+  dubai:
+    name: {value: "Dubai (Middle East medium sour)"}
+    api_gravity:
+      value: 31.0
+      unit: degrees API
+      source: US EIA, Today in Energy, 16 July 2012, "Crude oils have different quality characteristics"
+      url: https://www.eia.gov/todayinenergy/detail.php?id=7110
+      checked: 2026-11-15
+      estimate: false
+    sulphur_pct:
+      value: 2.0
+      unit: percent by weight
+      source: US EIA, Today in Energy, 16 July 2012, "Crude oils have different quality characteristics"
+      url: https://www.eia.gov/todayinenergy/detail.php?id=7110
+      checked: 2026-11-15
+      estimate: false
+
+scenario_ranges:
+  # How far the tornado chart flexes each input, up and down.
+  hire_rate_pct: {value: 25, unit: percent, source: Our choice, checked: 2026-11-15, estimate: true}
+  bunker_price_pct: {value: 25, unit: percent, source: Our choice, checked: 2026-11-15, estimate: true}
+  interest_rate_points: {value: 2.0, unit: percentage points, source: Our choice, checked: 2026-11-15, estimate: true}
+  price_spread_usd: {value: 2.0, unit: USD per barrel, source: Our choice, checked: 2026-11-15, estimate: true}
+  delay_days: {value: 5, unit: days, source: Our choice, checked: 2026-11-15, estimate: true}
+  transit_loss_points: {value: 0.2, unit: percentage points, source: Our choice, checked: 2026-11-15, estimate: true}
