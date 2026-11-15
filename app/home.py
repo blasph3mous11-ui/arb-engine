@@ -7,7 +7,7 @@ from engine import arbitrage
 from engine import voyage as V
 
 setup = st.session_state["setup"]
-prices, _ = ui.get_prices(st.session_state.get("refresh_count", 0))
+prices, _ = ui.get_prices()
 inputs, dates = ui.base_inputs(setup, prices)
 result = arbitrage.run(inputs)
 
@@ -21,8 +21,9 @@ st.subheader("Today's answer")
 ui.verdict_banner(result)
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Buy at origin", ui.usd(result.purchase_price), help="WTI plus an estimated Gulf Coast differential.")
-c2.metric("Cost to deliver", ui.usd(sum(result.cost_stack.values())),
-          help="Freight, financing, insurance, transit loss and demurrage, per barrel.")
+c2.metric("Cost to deliver (estimated)", ui.usd(sum(result.cost_stack.values())),
+          help="Freight, financing, insurance, transit loss and demurrage, per barrel. "
+               "Built largely from estimates, above all the ship's daily hire rate.")
 c3.metric("Sell at destination", ui.usd(result.sale_value),
           help=f"{dates['benchmark'].title()} plus an estimated quality adjustment.")
 c4.metric("Margin per barrel", ui.usd(result.margin_per_bbl))
@@ -57,9 +58,14 @@ b.markdown("""
 st.subheader("What is real and what is estimated")
 st.markdown(f"""
 - **Published data:** daily Brent and WTI prices (US Energy Information Administration), monthly
-  Dubai (World Bank), the Suez Canal toll tariff, the benchmark interest rate, ship speeds and fuel use.
-- **Estimates, always marked** {ui.ESTIMATED}: the ship's daily hire rate, the fuel price,
-  port costs, insurance, quality adjustment and the Gulf Coast price differential. Real freight
-  rates and physical price premiums are sold by subscription and are not used here.
+  Dubai (World Bank), the Suez Canal toll tariff and surcharges, the benchmark interest rate
+  (SOFR), ship sizes and the quality of each crude grade.
+- **Estimates, marked** {ui.ESTIMATED} **or "(estimated)":** the ship's daily hire rate (our own
+  figure, or a public broker or press figure for another route or contract used as a stand-in),
+  the fuel price, ship speeds and fuel use (reported from industry guides but not yet confirmed
+  against the documents, or scaled from those figures), the ship's canal tonnage, port costs and
+  port days, the bank's lending margin, insurance and war-risk cover, transit loss, the quality
+  adjustment and the Gulf Coast price differential. Real freight rates and physical price premiums
+  are sold by subscription and are not used here. The Methodology page lists every one.
 - **Not a forecast.** The tool explains today's economics. It does not predict prices or give trading signals.
 """)

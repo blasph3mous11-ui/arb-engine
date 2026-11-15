@@ -14,7 +14,8 @@ in the link employers will see.
 2. In **Repository name** type: `arb-engine`
 3. In **Description** type: `Physical crude arbitrage and voyage engine`
 4. Select **Public**.
-5. Leave "Add a README", ".gitignore" and "license" **unticked** (the project already has them).
+5. Leave "Add a README", ".gitignore" and "license" **unticked** (the project already has a README and a
+   .gitignore; a licence is optional and can be added later).
 6. Click **Create repository**.
 7. Leave the page open. You will need the address it shows, which looks like
    `https://github.com/YOUR-USERNAME/arb-engine.git`

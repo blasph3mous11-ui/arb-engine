@@ -15,31 +15,40 @@ st.markdown(
     "The gap between them has to pay for the whole voyage.")
 
 if st.button("Download the latest prices", icon=":material/refresh:"):
-    st.session_state["refresh_count"] = st.session_state.get("refresh_count", 0) + 1
-prices, note = ui.get_prices(st.session_state.get("refresh_count", 0))
+    # Download now, then empty the copy held in memory so every page reads the new file.
+    _, note = P.load_benchmarks(refresh=True)
+    ui.get_prices.clear()
+    prices, _ = ui.get_prices()
+else:
+    prices, note = ui.get_prices()
 st.caption(f"{note} Sources: {P.SOURCES['brent']}; {P.SOURCES['wti']}; {P.SOURCES['dubai']}.")
 
-benchmark = st.session_state["setup"]["benchmark"]
-if benchmark == "dubai" and not prices["dubai"].notna().any():
+# The same base case as the Arbitrage and Scenarios pages, so the spread and fuel price agree.
+inputs, dates = ui.base_inputs(st.session_state["setup"], prices)
+benchmark, monthly = dates["benchmark"], dates["monthly"]
+if st.session_state["setup"]["benchmark"] == "dubai" and not monthly:
     st.warning("Dubai prices could not be loaded, so Brent is used instead.")
-    benchmark = "brent"
 
 wti, wti_date = P.latest(prices, "wti")
 brent, brent_date = P.latest(prices, "brent")
-destination, destination_date = P.latest(prices, benchmark)
-bunker = P.bunker_price_estimate(brent)
+spread_today = inputs.destination_benchmark_price - inputs.origin_benchmark_price
 reference = A.record("market", "bunkers", "reference_houston_vlsfo_usd_per_tonne")
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("WTI (origin)", ui.usd(wti), help=f"{P.SOURCES['wti']}, {wti_date:%d %b %Y}")
 c2.metric("Brent", ui.usd(brent), help=f"{P.SOURCES['brent']}, {brent_date:%d %b %Y}")
-c3.metric(f"Spread: {benchmark.title()} minus WTI", ui.usd(destination - wti),
-          help="The gross price gap, before any costs.")
-c4.metric("Ship fuel, per tonne (estimated)", ui.usd(bunker, 0),
-          help=f"Brent x {A.get('market', 'bunkers', 'usd_per_tonne_per_brent_dollar')}. "
+c3.metric(f"Spread: {benchmark.title()} minus WTI"
+          + (f" ({dates['month_label']} averages)" if monthly else ""), ui.usd(spread_today),
+          help=f"The gross price gap, before any costs: {benchmark.title()} "
+               f"{ui.usd(inputs.destination_benchmark_price)} ({dates['destination_label']}) minus WTI "
+               f"{ui.usd(inputs.origin_benchmark_price)} ({dates['wti_label']}).")
+c4.metric("Ship fuel, per tonne (estimated)", ui.usd(inputs.bunker_usd_per_tonne, 0),
+          help=f"Latest daily Brent x {A.get('market', 'bunkers', 'usd_per_tonne_per_brent_dollar')}. "
                f"Cross-check: {reference['source']} was ${A.val(reference)}.")
 st.caption(f"Latest prices: WTI {wti_date:%d %b %Y}, Brent {brent_date:%d %b %Y}"
-           + (f", Dubai monthly average for {destination_date:%B %Y}" if benchmark == "dubai" else "")
+           + (f". Dubai is only published as a monthly average (latest: {dates['month_label']}), so the "
+              "spread above compares the Dubai and WTI averages for that month, not today's WTI"
+              if monthly else "")
            + ". These are spot prices published by the EIA a few days in arrears, so they can differ "
              "from futures prices quoted in the news.")
 
@@ -54,10 +63,14 @@ if window["dubai"].notna().any():
 st.plotly_chart(charts.price_lines(window, columns), width="stretch")
 
 st.subheader(f"The spread: {benchmark.title()} minus WTI")
-spread = (window[benchmark] - window["wti"]).dropna()
+# Daily prices for Brent; monthly averages for Dubai, so month is compared with month.
+spread_window = ui.history_window(prices, years, monthly)
+spread = (spread_window[benchmark] - spread_window["wti"]).dropna()
 st.plotly_chart(charts.single_line(spread, "Spread", zero_label="no price gap"), width="stretch")
-st.caption(f"Over this period the spread averaged {ui.usd(spread.mean())}, ranging from "
-           f"{ui.usd(spread.min())} to {ui.usd(spread.max())}. Compare that with the freight "
+st.caption(("Dubai is published only as a monthly average, so each point is one month: the "
+            "month's average Dubai price minus the month's average WTI price. " if monthly else "")
+           + f"Over this period the spread averaged {ui.usd(spread.mean())}, ranging from "
+           f"{ui.usd(spread.min())} to {ui.usd(spread.max())}. Compare that with the estimated freight "
            "cost per barrel on the Voyage page: the arb only opens when the spread, adjusted for "
            "quality, is bigger than all the costs.")
 

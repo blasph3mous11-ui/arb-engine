@@ -100,20 +100,27 @@ def _read(path: Path) -> pd.DataFrame:
     return pd.read_csv(path, parse_dates=["date"], index_col="date")
 
 
+def _download_time_note() -> str:
+    """When the saved price file was last written, so the claim can be checked."""
+    saved_at = pd.Timestamp(CACHE_FILE.stat().st_mtime, unit="s", tz="UTC")
+    return f"Prices last downloaded from EIA / World Bank on {saved_at:%d %b %Y at %H:%M} UTC."
+
+
 def load_benchmarks(refresh: bool = False) -> tuple[pd.DataFrame, str]:
     """Daily benchmark prices in USD per barrel, and a note on where they came from."""
     cache_is_fresh = (CACHE_FILE.exists()
                       and time.time() - CACHE_FILE.stat().st_mtime < MAX_CACHE_AGE_HOURS * 3600)
     if cache_is_fresh and not refresh:
-        return _read(CACHE_FILE), "Downloaded from EIA / World Bank within the last 24 hours (cached)."
+        return _read(CACHE_FILE), _download_time_note()
     try:
         table = download_benchmarks()
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         table.to_csv(CACHE_FILE)
-        return table, "Freshly downloaded from EIA / World Bank."
+        return table, _download_time_note()
     except Exception as error:
         if CACHE_FILE.exists():
-            return _read(CACHE_FILE), f"Download failed ({type(error).__name__}); showing the last saved copy."
+            return _read(CACHE_FILE), (f"Download failed ({type(error).__name__}); showing the saved copy. "
+                                       + _download_time_note())
         return _read(SEED_FILE), ("Download failed and no saved copy exists; showing the snapshot "
                                   "shipped with the project, which may be out of date.")
 
@@ -122,6 +129,18 @@ def latest(prices: pd.DataFrame, column: str) -> tuple[float, pd.Timestamp]:
     """Most recent available price in a column, and its date."""
     series = prices[column].dropna()
     return float(series.iloc[-1]), series.index[-1]
+
+
+def monthly_averages(prices: pd.DataFrame, destination_column: str = "dubai") -> pd.DataFrame:
+    """One row per calendar month: the average of each price over that month.
+
+    Dubai is only published as a monthly average. Setting it against a single
+    day's WTI would mix a month with a day and invent price gaps that never
+    existed, so for Dubai we compare month with month. Months with no WTI or
+    no destination price are dropped. Rows are dated the first of the month.
+    """
+    monthly = prices.resample("MS").mean()
+    return monthly.dropna(subset=["wti", destination_column])
 
 
 def bunker_price_estimate(brent_usd_per_bbl: float) -> float:

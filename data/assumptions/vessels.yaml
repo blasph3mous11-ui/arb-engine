@@ -28,17 +28,23 @@ aframax:
   laden_speed_knots:
     value: 13.0
     unit: knots
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Aframax assessment speed
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), Aframax assessment speed
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
-    estimate: false
+    estimate: true
+    note: >
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself.
   ballast_speed_knots:
     value: 12.5
     unit: knots
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Aframax assessment speed
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), Aframax assessment speed
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
-    estimate: false
+    estimate: true
+    note: >
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself.
   laden_consumption_tpd:
     value: 38
     unit: tonnes per day
@@ -123,39 +129,49 @@ suezmax:
   laden_speed_knots:
     value: 13.0
     unit: knots
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax assessment speed
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax assessment speed
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
-    estimate: false
+    estimate: true
+    note: >
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself.
   ballast_speed_knots:
     value: 12.5
     unit: knots
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax assessment speed
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax assessment speed
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
-    estimate: false
+    estimate: true
+    note: >
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself.
   laden_consumption_tpd:
     value: 44
     unit: tonnes per day
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), non-scrubber non-eco Suezmax
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), non-scrubber non-eco Suezmax
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
-    estimate: false
+    estimate: true
     note: >
-      Read from a search-engine extract of the guide (the PDF blocks automated download), so worth
-      re-checking by eye. A modern "eco" ship with a scrubber is listed at about 37 t/day.
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself. A modern
+      "eco" ship with a scrubber is listed at about 37 t/day.
   ballast_consumption_tpd:
     value: 35
     unit: tonnes per day
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026), non-scrubber non-eco Suezmax
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), non-scrubber non-eco Suezmax
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
-    estimate: false
-    note: Same caveat as laden consumption. Eco/scrubber ships are listed at about 25 t/day.
+    estimate: true
+    note: >
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself.
+      Eco/scrubber ships are listed at about 25 t/day.
   load_port_consumption_tpd:
     value: 12
     unit: tonnes per day
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026)
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026)
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
     estimate: true
@@ -163,7 +179,7 @@ suezmax:
   discharge_port_consumption_tpd:
     value: 71
     unit: tonnes per day
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026)
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026)
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
     estimate: true
@@ -171,7 +187,7 @@ suezmax:
   idle_consumption_tpd:
     value: 7.5
     unit: tonnes per day
-    source: S&P Global Platts, Specifications Guide Global Freight (September 2026)
+    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026)
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
     checked: 2026-11-15
     estimate: true
@@ -225,15 +241,18 @@ vlcc:
   laden_speed_knots:
     value: 12.0
     unit: knots
-    source: Baltic Exchange tanker emissions white paper, VLCC "eco" speed
+    source: As reported in a search-engine extract (not yet confirmed against the document) of Baltic Exchange tanker emissions white paper, VLCC "eco" speed
     url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
     checked: 2026-11-15
-    estimate: false
-    note: Read from a search-engine extract of the page. Full speed is listed as 14 knots at 93 t/day.
+    estimate: true
+    note: >
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself. Full
+      speed is listed as 14 knots at 93 t/day.
   ballast_speed_knots:
     value: 12.0
     unit: knots
-    source: Baltic Exchange tanker emissions white paper, VLCC "eco" speed
+    source: As reported in a search-engine extract (not yet confirmed against the document) of Baltic Exchange tanker emissions white paper, VLCC "eco" speed
     url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
     checked: 2026-11-15
     estimate: true
@@ -241,17 +260,23 @@ vlcc:
   laden_consumption_tpd:
     value: 58.5
     unit: tonnes per day
-    source: Baltic Exchange tanker emissions white paper, VLCC laden at eco speed
+    source: As reported in a search-engine extract (not yet confirmed against the document) of Baltic Exchange tanker emissions white paper, VLCC laden at eco speed
     url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
     checked: 2026-11-15
-    estimate: false
+    estimate: true
+    note: >
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself.
   ballast_consumption_tpd:
     value: 44
     unit: tonnes per day
-    source: Baltic Exchange tanker emissions white paper, VLCC ballast at eco speed
+    source: As reported in a search-engine extract (not yet confirmed against the document) of Baltic Exchange tanker emissions white paper, VLCC ballast at eco speed
     url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
     checked: 2026-11-15
-    estimate: false
+    estimate: true
+    note: >
+      Read from a search-engine extract because the document blocks automated download. Flagged as
+      an estimate until the figure has been confirmed by eye against the document itself.
   load_port_consumption_tpd:
     value: 15
     unit: tonnes per day
@@ -276,7 +301,10 @@ vlcc:
     source: Our estimate, scaled from the Suezmax figure by ship size
     checked: 2026-11-15
     estimate: true
-    note: Only used for the empty (ballast) return leg, because a VLCC cannot pass the canal fully laden.
+    note: >
+      Not used at present: the model sends a VLCC out and back round the Cape, so no canal toll is
+      charged. A real VLCC could return empty through the canal, which we do not model; the figure
+      is kept in case that option is added later.
   can_transit_suez_laden:
     value: false
     source: Suez Canal Authority permitted draught is 66 ft (20.1 m); a fully laden VLCC draws about 22 m
@@ -285,7 +313,8 @@ vlcc:
     estimate: false
     note: >
       A laden VLCC must go round the Cape (or part-discharge into the SUMED pipeline, which we do
-      not model). It can pass the canal empty.
+      not model). It can pass the canal empty, but the model does not use that option: the empty
+      return leg also goes round the Cape.
   port_cost_factor:
     value: 1.4
     unit: multiple of the Suezmax port cost

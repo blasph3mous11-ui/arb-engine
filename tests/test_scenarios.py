@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from engine import arbitrage, scenarios
+from engine import arbitrage, prices, scenarios
 from tests.test_arbitrage import hand_inputs
 
 
@@ -64,3 +64,57 @@ def test_historical_run_can_move_bunkers_with_brent(fixed_distance):
     history = scenarios.historical_run(prices, hand_inputs(bunker_usd_per_tonne=999), "wti",
                                        "brent", bunker_ratio=600 / 90)
     assert history["margin"].iloc[0] == pytest.approx(3.92758086)
+
+
+def test_tornado_interest_label_matches_the_cut_actually_made(fixed_distance):
+    def interest_row(rate_pct):
+        rows = scenarios.tornado(hand_inputs(interest_rate_pct=rate_pct))
+        return next(r for r in rows if r["driver"].startswith("Interest rate"))
+
+    # The tornado flexes interest by 2 points. From 6% that is a full cut to 4%.
+    assert interest_row(6.0)["low_label"] == "-2 pts"
+    # From 1% the rate can only fall 1 point, to zero, and the label must say so.
+    row = interest_row(1.0)
+    assert row["low_label"] == "-1.00 pts (cannot go below 0%)"
+    # Financing is in proportion to the rate, so cutting 1% to 0% gains exactly
+    # half of what raising 1% to 3% loses.
+    gain, loss = row["low_margin"] - row["base"], row["base"] - row["high_margin"]
+    assert gain == pytest.approx(loss / 2)
+    # From 0% nothing can be cut at all.
+    row = interest_row(0.0)
+    assert row["low_label"] == "no change (already 0%)"
+    assert row["low_margin"] == pytest.approx(row["base"])
+
+
+def test_tornado_has_no_use_suez_row_when_the_canal_is_closed(fixed_distance):
+    # The hand-worked trade goes via the Cape on a Suezmax, which could use the canal.
+    drivers = [r["driver"] for r in scenarios.tornado(hand_inputs())]
+    assert "Use Suez instead of Cape" in drivers
+    drivers = [r["driver"] for r in scenarios.tornado(hand_inputs(), suez_open=False)]
+    assert "Use Suez instead of Cape" not in drivers
+
+
+def test_historical_run_on_monthly_averages_for_dubai(fixed_distance):
+    # Dubai is published as one average per month. Here it is $90.00 all month
+    # while daily WTI is 70, 80 and 90: an average of $80.00.
+    daily = pd.DataFrame(
+        {"wti": [70.0, 80.0, 90.0], "brent": [85.0, 90.0, 95.0], "dubai": [90.0, 90.0, 90.0]},
+        index=pd.to_datetime(["2025-01-02", "2025-01-03", "2025-01-06"]),
+    )
+    monthly = prices.monthly_averages(daily)
+    inputs = hand_inputs(destination_benchmark="dubai")
+    history = scenarios.historical_run(monthly, inputs, "wti", "dubai")
+    # One row for the month, not three daily rows with gaps of 20, 10 and 0.
+    assert len(history) == 1
+    assert history.index[0] == pd.Timestamp("2025-01-01")
+    # Spread = month-average Dubai 90 minus month-average WTI 80 = $10.00.
+    assert history["spread"].iloc[0] == pytest.approx(10.0)
+    # And it is the same answer as a single run at those two averages.
+    single = arbitrage.run(inputs.with_changes(origin_benchmark_price=80.0,
+                                               destination_benchmark_price=90.0))
+    assert history["margin"].iloc[0] == pytest.approx(single.margin_per_bbl)
+    # With fuel following Brent, the month-average Brent (90) is used:
+    # 90 x 6.6667 = $600 a tonne, the hand-worked fuel price, so the margin is unchanged.
+    moving = scenarios.historical_run(monthly, inputs.with_changes(bunker_usd_per_tonne=999),
+                                      "wti", "dubai", bunker_ratio=600 / 90)
+    assert moving["margin"].iloc[0] == pytest.approx(single.margin_per_bbl)

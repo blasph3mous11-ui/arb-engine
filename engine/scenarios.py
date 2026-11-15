@@ -11,16 +11,34 @@ from engine.arbitrage import ArbInputs, run
 from engine.voyage import get_vessel
 
 
-def tornado(inputs: ArbInputs) -> list[dict]:
+def _cut_label(start: float, cut: float, decimals: int) -> str:
+    """Label for a "set lower" case, true to the change actually applied.
+
+    A rate cannot go below zero. If the starting value is smaller than the
+    planned cut, the bar only shows a cut down to zero, and the label says so.
+    """
+    if start >= cut:
+        return f"-{cut:.{decimals}f} pts"
+    if start > 0:
+        return f"-{start:.2f} pts (cannot go below 0%)"
+    return "no change (already 0%)"
+
+
+def tornado(inputs: ArbInputs, suez_open: bool = True) -> list[dict]:
     """Flex each driver down and up, one at a time, and record the margin.
 
     Returns one row per driver, sorted so the biggest mover comes first.
+    Set suez_open to False when the canal is taken to be closed: the
+    "use Suez instead" row is then left out.
     """
     ranges = {k: A.val(v) for k, v in A.load("costs")["scenario_ranges"].items()}
     base = run(inputs).margin_per_bbl
     hire, bunker = ranges["hire_rate_pct"] / 100, ranges["bunker_price_pct"] / 100
     rate, spread = ranges["interest_rate_points"], ranges["price_spread_usd"]
     loss, delay = ranges["transit_loss_points"], ranges["delay_days"]
+    # Interest and transit loss cannot be flexed below zero.
+    low_rate = max(inputs.interest_rate_pct - rate, 0)
+    low_loss = max(inputs.transit_loss_pct - loss, 0)
 
     # (name, label for low case, inputs for low case, label for high case, inputs for high case)
     cases = [
@@ -34,10 +52,12 @@ def tornado(inputs: ArbInputs) -> list[dict]:
          f"-{bunker:.0%}", inputs.with_changes(bunker_usd_per_tonne=inputs.bunker_usd_per_tonne * (1 - bunker)),
          f"+{bunker:.0%}", inputs.with_changes(bunker_usd_per_tonne=inputs.bunker_usd_per_tonne * (1 + bunker))),
         (f"Interest rate (+/- {rate:.0f} pts)",
-         f"-{rate:.0f} pts", inputs.with_changes(interest_rate_pct=max(inputs.interest_rate_pct - rate, 0)),
+         _cut_label(inputs.interest_rate_pct, rate, 0),
+         inputs.with_changes(interest_rate_pct=low_rate),
          f"+{rate:.0f} pts", inputs.with_changes(interest_rate_pct=inputs.interest_rate_pct + rate)),
         (f"Transit loss (+/- {loss:.1f} pts)",
-         f"-{loss:.1f} pts", inputs.with_changes(transit_loss_pct=max(inputs.transit_loss_pct - loss, 0)),
+         _cut_label(inputs.transit_loss_pct, loss, 1),
+         inputs.with_changes(transit_loss_pct=low_loss),
          f"+{loss:.1f} pts", inputs.with_changes(transit_loss_pct=inputs.transit_loss_pct + loss)),
         (f"Delay at port (+{delay:.0f} days)",
          "no change", inputs,
@@ -45,7 +65,7 @@ def tornado(inputs: ArbInputs) -> list[dict]:
     ]
     # Switching route is a yes/no change, shown as a one-sided bar.
     other = "cape" if inputs.via == "suez" else "suez"
-    if other == "cape" or get_vessel(inputs.vessel_key).can_transit_suez_laden:
+    if other == "cape" or (suez_open and get_vessel(inputs.vessel_key).can_transit_suez_laden):
         label = "Suez closed: go via Cape" if other == "cape" else "Use Suez instead of Cape"
         cases.append((label, "no change", inputs, "switch route", inputs.with_changes(via=other)))
 
@@ -76,10 +96,14 @@ def breakeven_spread(inputs: ArbInputs) -> float:
 
 def historical_run(prices: pd.DataFrame, inputs: ArbInputs, origin_column: str,
                    destination_column: str, bunker_ratio: float | None = None) -> pd.DataFrame:
-    """Re-run today's model on each past day's prices.
+    """Re-run today's model on each row of a table of past prices.
+
+    The table has one row per day, or one row per month when monthly averages
+    are passed in (see prices.monthly_averages; needed for Dubai, which is
+    only published as a monthly average).
 
     Only the crude prices (and, if a ratio is given, the bunker price derived
-    from Brent) change day by day. The hire rate, canal tolls, interest rate
+    from Brent) change from row to row. The hire rate, canal tolls, interest rate
     and every other input are held at today's values, which is a big
     simplification: in reality freight moves a lot. Read the result as "what
     would past price gaps have earned at today's costs", not as history.

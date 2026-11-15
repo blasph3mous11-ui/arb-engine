@@ -6,15 +6,15 @@ import streamlit as st
 import charts
 import ui
 from engine import assumptions as A
-from engine import prices as P
 from engine import voyage as V
 
 setup = st.session_state["setup"]
-prices, _ = ui.get_prices(st.session_state.get("refresh_count", 0))
+prices, _ = ui.get_prices()
 vessel = V.get_vessel(setup["vessel_key"])
 origin, destination = V.get_port(setup["origin"]), V.get_port(setup["destination"])
-brent, _ = P.latest(prices, "brent")
-bunker_default = P.bunker_price_estimate(brent)
+# The same base case as the Arbitrage page, so the two show the same freight.
+base_inputs, _ = ui.base_inputs(setup, prices)
+bunker_default = base_inputs.bunker_usd_per_tonne
 
 st.title("Voyage calculator")
 st.markdown(
@@ -28,7 +28,13 @@ hire = left.number_input("Ship hire, USD per day" + (" (estimated)" if setup["hi
                          help="Set by the Freight market choice in the sidebar. Change it here to test other levels.")
 bunker = right.number_input("Fuel (bunker) price, USD per tonne (estimated)",
                             value=round(bunker_default), step=10, min_value=0,
-                            help="Estimated as the Brent price times a fixed ratio. Real bunker prices are paywalled.")
+                            help="Estimated as the latest Brent price times a fixed ratio. Real bunker prices are paywalled.")
+# The box works in whole dollars; if it has not been changed, keep the exact estimate,
+# so this page gives the same freight as the Arbitrage page to the cent.
+if bunker == round(bunker_default):
+    bunker = bunker_default
+st.caption("Changes made in these two boxes apply to this page only. The Arbitrage and Scenarios "
+           "pages use the sidebar hire rate and the estimated fuel price.")
 cargo = vessel.cargo_capacity_bbl
 
 
@@ -46,8 +52,10 @@ c1, c2, c3, c4 = st.columns(4)
 c1.metric("Distance, one way", f"{chosen.distance_nm:,.0f} nm")
 c2.metric("Days loaded (port to port)", f"{chosen.laden_days:,.1f}")
 c3.metric("Days ship is tied up", f"{chosen.total_days:,.1f}", help="Round trip, including the empty leg home.")
-c4.metric("Freight per barrel", ui.usd(chosen.cost_per_bbl),
-          help=f"Total voyage cost {ui.usd(chosen.total_cost / 1e6, 2)} million over {cargo:,.0f} barrels.")
+c4.metric("Freight per barrel (estimated)", ui.usd(chosen.cost_per_bbl),
+          help=f"Total voyage cost {ui.usd(chosen.total_cost / 1e6, 2)} million over {cargo:,.0f} barrels. "
+               "An estimate: the hire rate, fuel price and several ship figures behind it are "
+               "estimates (listed at the bottom of this page).")
 
 map_col, cost_col = st.columns([3, 2])
 with map_col:

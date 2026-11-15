@@ -2,8 +2,9 @@
 # estimate the price of ship fuel (bunkers).
 #
 # IMPORTANT: real traded freight rates are paywalled (Baltic Exchange, Platts,
-# Argus). The figures below are public broker and press reports, used as
-# documented estimates. They are not live market data.
+# Argus). The figures below are either our own estimates or public broker and
+# press figures for another route or contract, used as a proxy for this route.
+# Every hire rate is therefore flagged estimate: true. They are not live market data.
 
 default_freight_market: {value: spot_nov_2026}
 
@@ -36,8 +37,12 @@ freight_markets:
           Reported spot earnings in October 2026 ran from about $200,000 to over $400,000 a day
           depending on route (Baltic TD20 West Africa-Europe Suezmax about $407,000). Press reports
           put delivered freight for US crude to India at $20-25 a barrel (ET Bureau, via Discovery
-          Alert) against $3-3.50 before the crisis. Our model reproduces that range at roughly
-          $280,000-300,000 a day, so we use $300,000.
+          Alert) against $3-3.50 before the crisis. In our model (Corpus Christi to Sikka via Suez,
+          fuel at about $710 a tonne) $20-25 a barrel corresponds to roughly $230,000-300,000 a day.
+          We use $300,000, the top of that range, which gives about $25 a barrel and sits mid-way in
+          the reported $200,000-400,000 earnings range. The model does not reproduce the pre-crisis
+          press figure: in the calm-market setting it gives about $5-6 a barrel against $3-3.50,
+          because it charges the whole empty return leg, canal tolls and war-risk cover to the cargo.
       vlcc:
         value: 450000
         unit: USD per day
@@ -52,7 +57,10 @@ freight_markets:
       value: >
         What it costs per day to hire a modern ship for a whole year. Much lower than today's spot
         market because a one-year deal averages out the crisis spike. A trader with ships already
-        on long-term hire faces this cost, not the spot one.
+        on long-term hire faces this cost, not the spot one. These are broker assessments for
+        modern fuel-efficient ("eco") ships with scrubbers, while our fuel figures are for an
+        older, thirstier ship burning low-sulphur fuel, so freight under this setting is overstated
+        by roughly $0.40 to $0.50 a barrel on a Suezmax.
     hire_usd_per_day:
       aframax:
         value: 52500
@@ -60,24 +68,33 @@ freight_markets:
         source: Fearnleys Weekly Report, week 30 (22 July 2026), one-year time charter, modern eco/scrubber Aframax
         url: https://www.hellenicshippingnews.com/wp-content/uploads/2026/07/Fearnleys-Weekly-Report-_-Fearnpulse.pdf
         checked: 2026-11-15
-        estimate: false
-        note: A broker assessment; Fearnleys notes its rates do not necessarily reflect actual deals.
+        estimate: true
+        note: >
+          A published broker assessment for a one-year hire, used here as a proxy for the cost of
+          a ship on this route, so flagged as an estimate. Fearnleys notes its rates do not
+          necessarily reflect actual deals.
       suezmax:
         value: 69500
         unit: USD per day
         source: Fearnleys Weekly Report, week 30 (22 July 2026), one-year time charter, modern eco/scrubber Suezmax
         url: https://www.hellenicshippingnews.com/wp-content/uploads/2026/07/Fearnleys-Weekly-Report-_-Fearnpulse.pdf
         checked: 2026-11-15
-        estimate: false
-        note: A broker assessment; Fearnleys notes its rates do not necessarily reflect actual deals.
+        estimate: true
+        note: >
+          A published broker assessment for a one-year hire, used here as a proxy for the cost of
+          a ship on this route, so flagged as an estimate. Fearnleys notes its rates do not
+          necessarily reflect actual deals.
       vlcc:
         value: 115000
         unit: USD per day
         source: Fearnleys Weekly Report, week 30 (22 July 2026), one-year time charter, modern eco/scrubber VLCC
         url: https://www.hellenicshippingnews.com/wp-content/uploads/2026/07/Fearnleys-Weekly-Report-_-Fearnpulse.pdf
         checked: 2026-11-15
-        estimate: false
-        note: A broker assessment; Fearnleys notes its rates do not necessarily reflect actual deals.
+        estimate: true
+        note: >
+          A published broker assessment for a one-year hire, used here as a proxy for the cost of
+          a ship on this route, so flagged as an estimate. Fearnleys notes its rates do not
+          necessarily reflect actual deals.
   calm_2024:
     label: {value: "Calm market (late 2024 reference)"}
     description:
@@ -98,8 +115,10 @@ freight_markets:
         source: Baltic Exchange weekly tanker report, week 45 of 2024 (TD20 round-trip earnings about $29,866 a day)
         url: https://ics.org.uk/media/806522/baltic%20freight%20report%20week%202024%2045.pdf
         checked: 2026-11-15
-        estimate: false
-        note: Rounded. A West Africa-Europe route, used as a general Suezmax reference.
+        estimate: true
+        note: >
+          A published figure for a different route (West Africa-Europe), rounded and used here as
+          a proxy for this route, so flagged as an estimate.
       vlcc:
         value: 35000
         unit: USD per day
@@ -114,14 +133,19 @@ bunkers:
   usd_per_tonne_per_brent_dollar:
     value: 7.7
     unit: USD per tonne of fuel, per USD per barrel of Brent
-    source: Our estimate, calibrated to Ship & Bunker's Houston VLSFO price of $737/tonne against Brent at $95.84/barrel on 13 November 2026
+    source: Our estimate, calibrated to Ship & Bunker's Houston VLSFO price of $737/tonne against a Brent quote of $95.84/barrel noted on 13 November 2026
     url: https://shipandbunker.com/
     checked: 2026-11-15
     estimate: true
     note: >
       737 / 95.84 = 7.7. The logic: a tonne of fuel oil is about 6.4-6.7 barrels, and low-sulphur
       fuel sells at a premium to crude, so the multiple is above 6.7. The ratio differs by port
-      (Singapore was $882/tonne the same day, a ratio of 9.2) and drifts over time.
+      (Singapore was $882/tonne the same day, a ratio of 9.2) and drifts over time. Where the
+      $95.84 Brent quote came from (futures or spot) was not recorded when the ratio was set and
+      we have not been able to re-confirm it; it is not in the EIA spot series the dashboard uses,
+      which ended at $92.14 on 11 November 2026. The dashboard applies the ratio to that EIA spot
+      series, which runs a few days behind and can differ by a few dollars from prices quoted in
+      the news, so the estimate will not match the $737 reference exactly.
   reference_houston_vlsfo_usd_per_tonne:
     value: 737
     unit: USD per tonne

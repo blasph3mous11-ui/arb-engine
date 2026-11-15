@@ -11,11 +11,14 @@ ports:
     port_cost_usd:
       value: 78000
       unit: USD per call (Suezmax)
-      source: S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax port cost Corpus Christi
+      source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), Suezmax port cost Corpus Christi
       url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
       checked: 2026-11-15
-      estimate: false
-      note: A modelling input Platts uses in its own freight calculations, not an invoice.
+      estimate: true
+      note: >
+        Read from a search-engine extract because the document blocks automated download. Flagged as
+        an estimate until the figure has been confirmed by eye against the document itself. A
+        modelling input Platts uses in its own freight calculations, not an invoice.
   houston:
     name: {value: "Houston, USA"}
     role: {value: origin}
@@ -28,7 +31,7 @@ ports:
       checked: 2026-11-15
       estimate: true
       note: >
-        No free published figure found. Set a little above Corpus Christi ($78,000, Platts)
+        No free published figure found. Set a little above Corpus Christi ($78,000, a Platts figure)
         because the Houston Ship Channel is a longer pilotage and tug job.
   sikka:
     name: {value: "Sikka (Jamnagar), India"}
@@ -118,11 +121,14 @@ suez_canal:
   usd_per_sdr:
     value: 1.36
     unit: USD per SDR
-    source: IMF SDR valuation ($1.366 on 4 March 2026); Xe mid-market $1.354 on 4 November 2026
+    source: Our rounding between two published readings, the IMF SDR valuation ($1.366 on 4 March 2026) and Xe mid-market ($1.354 on 4 November 2026)
     url: https://www.imf.org/external/np/fin/data/rms_sdrv.aspx
     checked: 2026-11-15
-    estimate: false
-    note: Rounded between the two readings. Moves a little every day.
+    estimate: true
+    note: >
+      Not a single published reading but a round figure between two, so flagged as an estimate.
+      The rate moves a little every day. Using $1.354 instead would change the round-trip Suezmax
+      toll by under half a cent a barrel.
   transit_delay_days:
     value: 1.0
     unit: days per transit

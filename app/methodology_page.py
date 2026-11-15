@@ -22,8 +22,8 @@ st.markdown("""
 | **Distance** | Shortest sea path between the two ports from the open-source `searoute` library. For the Cape route the Suez Canal is forbidden, so the path goes round South Africa. |
 | **Voyage days** | Distance divided by speed, loaded and empty, plus days in port and a day for each canal transit. |
 | **Vessel hire** | Days the ship is tied up (the full round trip) times the daily hire rate. |
-| **Bunkers (fuel)** | Tonnes burned each day (at sea, in port, in the canal) times the fuel price. The fuel price is estimated from Brent. |
-| **Canal tolls** | The Suez Canal Authority's published sliding-scale tariff applied to the ship's canal tonnage, plus the current surcharge, converted from SDR to dollars. Charged loaded on the way out and empty on the way back. |
+| **Bunkers (fuel)** | Tonnes burned each day (at sea, in port, in the canal) times the fuel price. The fuel price is estimated from the latest daily Brent price. |
+| **Canal tolls** | The Suez Canal Authority's published sliding-scale tariff applied to the ship's canal tonnage (an estimate), plus the current surcharge, converted from SDR to dollars. Charged loaded on the way out and empty on the way back. |
 | **War-risk premium** | A percentage of the ship's value for each passage through the Red Sea. Suez route only. |
 | **Freight per barrel** | All of the above plus port charges, divided by the barrels on board. |
 | **Financing** | Cargo value x (benchmark interest rate + bank margin) x days financed / 360. |
@@ -52,6 +52,9 @@ st.markdown("""
 - **Simplified logistics.** No ship-to-ship transfers to load a VLCC, no brokerage commissions,
   no port congestion beyond the delay slider, no slow steaming to save fuel.
 - **The historical view holds costs constant**, as explained on that chart.
+- **Dubai is monthly only.** No free daily Dubai price exists, so with Dubai as the sell benchmark
+  the tool compares monthly averages of Dubai and WTI, today and in the historical view. The fuel
+  price still uses the latest daily Brent.
 - **It does not forecast.** It explains today's economics.
 """)
 
@@ -64,7 +67,7 @@ if only_estimates:
     view = view[view["estimate"]]
 view = view.assign(value=view["value"].astype(str),
                    estimate=view["estimate"].map({True: "estimated", False: "published"}))
-st.caption(f"{len(view)} assumptions shown; {int((table['estimate']).sum())} of {len(table)} in total are our estimates.")
+st.caption(f"{len(view)} assumptions shown; {int((table['estimate']).sum())} of {len(table)} in total are marked as estimates.")
 st.dataframe(
     view.rename(columns={"file": "File", "assumption": "Assumption", "value": "Value", "unit": "Unit",
                          "estimate": "Status", "source": "Source", "url": "Link",

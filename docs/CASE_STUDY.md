@@ -45,18 +45,21 @@ One million barrels, Corpus Christi to Sikka on a Suezmax, round-voyage basis.
 | Days loaded | 36.4 | 43.6 | +7.2 |
 | Days ship is tied up (round trip) | 70.1 | 84.9 | +14.8 |
 | Fuel burned | 2,707 t | 3,354 t | +647 t |
-| Canal tolls (loaded out, empty back) | $1.04m | none | |
+| Canal tolls (published tariff, estimated tonnage; loaded out, empty back) | $1.04m | none | |
 | War-risk premium (estimated, two passages) | $0.80m | none | |
 
-The canal tolls come straight from the Suez Canal Authority's published tariff: 311,770 SDR for a
-loaded 81,000-ton Suezmax, plus the 37% surcharge, at $1.36 per SDR, is about $581,000 one way.
+The canal tolls apply the Suez Canal Authority's published tariff to an estimated canal tonnage of
+81,000 tons (real Suezmaxes range from about 74,000 to 83,000): 311,770 SDR loaded, plus the 37%
+surcharge, at about $1.36 per SDR, is about $581,000 one way. The ship's speeds and fuel use are
+figures reported from the Platts freight guide that have not yet been confirmed against the
+document itself, so the days and fuel above are treated as estimates too.
 
 Now the same voyage under three freight markets (fuel estimated at $709 a tonne):
 
-| Freight market | Ship hire per day | Landed cost via Suez | Landed cost via Cape | Cheaper route |
+| Freight market | Ship hire per day (estimated) | Landed cost via Suez | Landed cost via Cape | Cheaper route |
 |---|---|---|---|---|
 | Calm market (late 2024 reference) | $30,000 | $97.49 | $96.66 | **Cape** by $0.83/bbl |
-| One-year time charter (July 2026) | $69,500 | $100.26 | $100.02 | **Cape** by $0.24/bbl |
+| One-year time charter (broker assessment, July 2026) | $69,500 | $100.26 | $100.02 | **Cape** by $0.24/bbl |
 | Spot market, crisis (Oct-Nov 2026, estimated) | $300,000 | $116.43 | $119.59 | **Suez** by $3.16/bbl |
 
 Landed cost includes financing, so the extra week at sea via the Cape also costs about $0.11 a
@@ -73,8 +76,11 @@ Below the break-even, time is cheap and it pays to avoid the tolls and sail roun
 day saved is worth more than the tolls. Three things follow:
 
 1. **In a calm market the canal is not obviously worth it for this route.** With ships at $30,000
-   a day, the 37% toll surcharge alone almost cancels the time saved. The Suez Canal Authority's
-   surcharges make more sense when ships are expensive, as they are now.
+   a day, the canal tolls (about $1.04 a barrel round trip, of which the surcharges are about
+   $0.25) roughly cancel the value of the time saved (about $1.01 a barrel), before any war-risk
+   premium. Without the surcharges Suez would be about $0.22 a barrel cheaper than the Cape; with
+   them it is break-even. The surcharges (37% loaded, 27% empty) make more sense when ships are
+   expensive, as they are now.
 2. **The security premium moves the answer a lot.** War risk nearly triples the break-even hire
    rate. A fall in the premium would pull cargoes back to the canal long before the route was
    "safe" in any absolute sense. That fits the 2026 pattern of tankers returning while risk
@@ -84,13 +90,14 @@ day saved is worth more than the tolls. Three things follow:
    $2.52. The binding constraint is the cost of the ship, not the route. Press reports say US
    crude arrivals into India fell to zero in the autumn of 2026
    ([ETI weekly tanker report](https://etint.substack.com/p/eti-tmwo-week-44-2026-delayed-report)),
-   which is what the model would predict.
+   which is consistent with an arb this far shut on the model's estimated costs.
 
 ## What this analysis leaves out
 
 - The war-risk premium (0.5% of an estimated $80 million hull value per passage) is our estimate.
   Real quotes are private and can move daily; some insurers would decline cover.
-- Hire rates are public broker and press figures, not the rate for this route on this day.
+- Hire rates are estimates: public broker and press figures for other routes or contracts, or
+  our own figures, not the rate for this route on this day.
 - Risk is priced only through the premium. A trader would also weigh crew safety, the chance of
   delay or damage, and whether the shipowner will accept the routing at all.
 - The longer Cape voyage exposes the cargo to price moves for an extra week. With hedging and a

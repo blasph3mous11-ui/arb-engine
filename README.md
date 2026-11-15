@@ -14,7 +14,7 @@ on a Suezmax tanker, via the Suez Canal or around the Cape of Good Hope.
 | Page | What you see |
 |---|---|
 | **Voyage calculator** | Sea distance, voyage days and freight cost per barrel, broken down into ship hire, fuel, port charges, canal tolls and war-risk premium. Suez and Cape side by side, with a route map. |
-| **Prices** | Daily Brent and WTI history (US EIA), monthly Dubai (World Bank), and the spread between origin and destination benchmarks. |
+| **Prices** | Daily Brent and WTI history (US EIA), monthly Dubai (World Bank), and the spread between origin and destination benchmarks (monthly averages when Dubai is chosen). |
 | **Arbitrage result** | The full cost stack from purchase price to landed cost to margin as a waterfall, with an **ARB OPEN** or **ARB CLOSED** verdict and every line explained. |
 | **Scenarios & history** | Sliders for the main drivers, a tornado chart of what moves the margin most, the break-even spread, and the model re-run over past prices. |
 | **Methodology** | Every assumption with its value, source, date checked and whether it is an estimate, plus what the model leaves out. |
@@ -28,10 +28,14 @@ traded freight rates or physical price premiums, which are sold by subscription 
 Platts, Argus).
 
 - **Published data:** Brent and WTI daily spot prices, Dubai monthly average, the Suez Canal
-  Authority toll tariff and surcharges, SOFR, ship speeds and fuel consumption.
-- **Documented estimates:** the daily ship hire rate, bunker (fuel) price, port costs, insurance,
-  quality adjustment and the Gulf Coast price differential. Each is flagged `estimate: true` in
-  the assumption files and labelled "estimated" on screen.
+  Authority toll tariff and surcharges, SOFR, ship sizes and crude grade qualities.
+- **Documented estimates:** the daily ship hire rate (our own figure, or a published broker or
+  press figure for another route or contract used as a proxy), bunker (fuel) price, ship speeds
+  and fuel consumption (reported from the Platts and Baltic Exchange guides via search extracts
+  and not yet confirmed against the documents, or scaled from those figures), canal tonnage, port
+  costs and port days, the bank margin, insurance and war-risk cover, transit loss, quality
+  adjustment, the Gulf Coast price differential and the dollar-per-SDR rate used for canal tolls.
+  Each is flagged `estimate: true` in the assumption files and labelled "estimated" on screen.
 - **No forecasting.** The tool explains today's economics. It does not predict prices or
   generate trading signals.
 
@@ -90,5 +94,6 @@ All calculation logic is in `engine/` with no dashboard code in it, so it is tes
 
 US Energy Information Administration (Brent, WTI); World Bank Commodity Price Data (Dubai);
 Suez Canal Authority Circular 7/2023 (tolls); Federal Reserve Bank of New York (SOFR);
-S&P Global Platts freight specifications guide and Baltic Exchange (ship parameters);
-Fearnleys weekly report and press reports (hire rates); `searoute` (sea distances).
+S&P Global Platts freight specifications guide and Baltic Exchange (ship parameters, as reported
+in search extracts and treated as estimates until confirmed); Fearnleys weekly report and press
+reports (hire rates, used as proxies and treated as estimates); `searoute` (sea distances).

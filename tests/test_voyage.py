@@ -122,3 +122,12 @@ def test_calm_market_freight_is_a_few_dollars_a_barrel():
         v = voyage.voyage_from_assumptions("corpus_christi", "sikka", "suezmax", via,
                                            hire_usd_per_day=hire, bunker_usd_per_tonne=600)
         assert 2.0 < v.cost_per_bbl < 8.0, f"{via}: ${v.cost_per_bbl:.2f}/bbl looks wrong"
+
+
+def test_mistyped_route_is_rejected():
+    # "Cape" with a capital C used to slip through: it was costed over the short
+    # Suez distance but with no canal tolls or war risk, cheaper than either real route.
+    with pytest.raises(ValueError):
+        estimate_voyage(via="Cape", **COMMON)
+    with pytest.raises(ValueError):
+        voyage.sea_route("houston", "mumbai", "Cape")

@@ -16,6 +16,13 @@ from engine.units import sailing_days
 ROUTES = {"suez": "Via Suez Canal", "cape": "Via Cape of Good Hope"}
 
 
+def check_route(via: str) -> None:
+    """Stop on a mistyped route. Without this, "Cape" would quietly be costed
+    as the short Suez distance with no canal tolls: cheaper than either real route."""
+    if via not in ROUTES:
+        raise ValueError(f"Unknown route '{via}'; use 'suez' or 'cape'.")
+
+
 @dataclass(frozen=True)
 class Vessel:
     key: str
@@ -71,6 +78,7 @@ def sea_route(origin_key: str, destination_key: str, via: str) -> tuple[float, t
     """
     import searoute  # imported here so the rest of the engine works without it
 
+    check_route(via)
     origin, destination = get_port(origin_key), get_port(destination_key)
     # "northwest" (the Arctic Northwest Passage) is always forbidden.
     restrictions = ["northwest"] + (["suez"] if via == "cape" else [])
@@ -159,6 +167,7 @@ def estimate_voyage(
     war_risk_usd_per_transit: float = 0.0,
 ) -> VoyageResult:
     """Work out days, fuel and cost for one voyage. Every input is explicit."""
+    check_route(via)
     if via == "suez" and not vessel.can_transit_suez_laden:
         raise ValueError(f"A fully laden {vessel.name} is too deep for the Suez Canal.")
     if cargo_bbl > vessel.cargo_capacity_bbl:

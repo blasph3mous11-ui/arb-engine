@@ -46,7 +46,10 @@ can be lower. The model has a switch for it, and I would call the round-trip fig
 No. A trader would use a broker quote or a Baltic/Platts assessment in Worldscale or lump sum for
 the actual route. Those are paywalled. I use public figures: Fearnleys' one-year time charter
 rates and Baltic TCE numbers reported in the press, and for today's spot market an estimate
-anchored on press reports of $20-25 a barrel for US crude to India. It is flagged as an estimate.
+anchored on press reports of $20-25 a barrel for US crude to India. In my model that range
+corresponds to roughly $230,000 to $300,000 a day, and I set it at the top of that range. Every
+hire rate in the tool is flagged as an estimate, including the published ones, because none of
+them is for this route.
 The value of my approach is not the level, it is that you can see which driver moves the answer.
 
 **4. Your origin price is WTI Cushing. That is not a Gulf Coast export price.**

@@ -10,7 +10,7 @@ from engine import assumptions as A
 from engine import voyage as V
 
 setup = st.session_state["setup"]
-prices, _ = ui.get_prices(st.session_state.get("refresh_count", 0))
+prices, _ = ui.get_prices()
 inputs, dates = ui.base_inputs(setup, prices)
 result = arbitrage.run(inputs)
 vessel = V.get_vessel(inputs.vessel_key)
@@ -33,6 +33,10 @@ c3.metric("Sale value", ui.usd(result.sale_value),
           help=f"{benchmark_name} {ui.usd(inputs.destination_benchmark_price)} "
                f"plus {ui.usd(result.quality_differential)} quality adjustment (estimated).")
 c4.metric("Margin per barrel", ui.usd(result.margin_per_bbl))
+if dates["monthly"]:
+    st.caption(f"Dubai is only published as a monthly average, so the crude prices here are "
+               f"{dates['month_label']} averages for both Dubai and WTI. The fuel price uses the "
+               f"latest daily Brent ({dates['fuel_label']}).")
 
 st.subheader("From purchase price to margin")
 st.plotly_chart(charts.waterfall(result), width="stretch")
@@ -43,24 +47,29 @@ st.caption("Blue bars are price levels, orange bars are costs added on the way, 
 st.subheader("Every line, explained")
 financed_days = result.voyage.laden_days + inputs.delay_days + inputs.financing_extra_days
 E = " (estimated)"
+sofr, bank_margin = A.get("costs", "financing", "benchmark_rate_pct"), A.get("costs", "financing", "margin_pct")
 lines = [
     ("WTI benchmark price", inputs.origin_benchmark_price,
      f"EIA spot price for WTI at Cushing, {dates['wti_label']}."),
     ("+ Gulf Coast differential" + E, inputs.origin_differential,
      "Oil on a ship at the coast costs a little more than oil at the inland hub."),
     ("= Purchase price", result.purchase_price, "What we pay per barrel at the load port."),
-    ("+ Freight" + (E if setup["hire_is_estimate"] else ""), result.cost_stack["Freight"],
-     f"{result.voyage.total_days:.1f} days of ship hire at {ui.usd(inputs.hire_usd_per_day, 0)} a day, "
+    # Freight always contains estimates (the fuel price at least), whatever the hire rate's status.
+    ("+ Freight" + (E if setup["hire_is_estimate"] else " (part estimated)"), result.cost_stack["Freight"],
+     f"{result.voyage.total_days:.1f} days of ship hire at {ui.usd(inputs.hire_usd_per_day, 0)} a day"
+     f"{E if setup['hire_is_estimate'] else ''}, "
      f"{result.voyage.total_fuel_tonnes:,.0f} tonnes of fuel at {ui.usd(inputs.bunker_usd_per_tonne, 0)} "
      "(estimated), port charges, canal tolls. See the Voyage page."),
-    ("+ Financing", result.cost_stack["Financing"],
-     f"Interest at {inputs.interest_rate_pct:.2f}% a year on the cargo value for {financed_days:.1f} days."),
+    ("+ Financing (part estimated)", result.cost_stack["Financing"],
+     f"SOFR {sofr:.2f}% plus an estimated {bank_margin:.2f}% bank margin = {inputs.interest_rate_pct:.2f}% "
+     f"a year on the cargo value for {financed_days:.1f} days."),
     ("+ Insurance" + E, result.cost_stack["Insurance"],
      f"{inputs.insurance_rate_pct}% of cargo value plus freight, plus 10%."),
     ("+ Transit loss" + E, result.cost_stack["Transit loss"],
      f"{inputs.transit_loss_pct}% of the oil loaded is not there to sell at discharge."),
-    ("+ Demurrage", result.cost_stack["Demurrage"],
-     f"{inputs.delay_days:.0f} days of delay. Add delay days on the Scenarios page."),
+    ("+ Demurrage" + E, result.cost_stack["Demurrage"],
+     f"{inputs.delay_days:.0f} days of delay, charged at the daily hire rate plus fuel burned while "
+     "waiting. Add delay days on the Scenarios page."),
     ("= Landed cost", result.landed_cost, "Total cost of a barrel delivered to the buyer."),
     (f"{benchmark_name} benchmark price", inputs.destination_benchmark_price,
      f"Latest available, {dates['destination_label']}."),
@@ -78,14 +87,24 @@ table["USD per barrel"] = table["USD per barrel"].map(ui.usd)
 st.dataframe(table[["Line", "USD per barrel", "USD on the cargo", "Where it comes from"]],
              hide_index=True, width="stretch", height=38 * (len(lines) + 1))
 
-freight_share = result.cost_stack["Freight"] / sum(result.cost_stack.values())
+costs = sum(result.cost_stack.values())
+freight_share = result.cost_stack["Freight"] / costs
+# The gap after the price adjustments. Adjusted gap minus costs is exactly the margin,
+# so this sentence can never disagree with the verdict at the top of the page.
+price_adjustments = (result.quality_differential + inputs.destination_differential
+                     - inputs.origin_differential)
+adjusted_gap = result.benchmark_spread + price_adjustments
 st.info(
     f"**How to read this.** The price gap between {benchmark_name} and WTI is "
-    f"{ui.usd(result.benchmark_spread)} a barrel. Getting the oil to India costs "
-    f"{ui.usd(sum(result.cost_stack.values()))} a barrel, of which freight is {freight_share:.0%}. "
-    + ("The gap is wide enough to cover it." if result.is_open else
-       "The gap is not wide enough to cover it, so nobody would ship this cargo on these terms: "
-       "either the US price must fall, the price in India must rise, or freight must get cheaper.")
+    f"{ui.usd(result.benchmark_spread)} a barrel. After the estimated quality adjustment "
+    f"({result.quality_differential:+.2f}), the estimated destination differential "
+    f"({inputs.destination_differential:+.2f}) and the estimated Gulf Coast differential "
+    f"({-inputs.origin_differential:+.2f}), the gap is worth {ui.usd(adjusted_gap)}. "
+    f"Getting the oil to India costs an estimated {ui.usd(costs)} a barrel, of which freight is "
+    f"{freight_share:.0%}. "
+    + ("The adjusted gap is wide enough to cover it." if result.is_open else
+       "The adjusted gap is not wide enough to cover it, so nobody would ship this cargo on these "
+       "terms: either the US price must fall, the price in India must rise, or freight must get cheaper.")
     + " Try the other freight markets in the sidebar to see how much the answer depends on the ship.")
 
 st.caption("Real delivered prices and freight rates are negotiated privately and published only by "

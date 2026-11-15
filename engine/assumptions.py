@@ -87,8 +87,12 @@ def to_markdown() -> str:
         "Generated from the YAML files in `data/assumptions/`. Do not edit by hand: change the",
         "YAML and run `python -m engine.assumptions`.",
         "",
-        f"{len(rows)} assumptions, of which {estimates} are our own estimates (marked **estimated**).",
-        "Real freight rates and physical price premiums are paywalled, so those are always estimates.",
+        f"{len(rows)} assumptions, of which {estimates} are marked **estimated**: our own figures,",
+        "published figures used as a proxy, or figures not yet confirmed against their source.",
+        "Real traded freight rates and physical price premiums are paywalled, so every ship hire rate",
+        "here is an estimate: either our own figure, or a published broker or press figure for another",
+        "route or contract used as a proxy (the source column says which). Ship figures read from a",
+        "search-engine extract are also marked estimated until confirmed against the document itself.",
     ]
     current_file = None
     for r in rows:

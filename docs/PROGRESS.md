@@ -5,7 +5,7 @@ Read this first at the start of every session.
 ## Where things stand (15 November 2026)
 
 **All five phases are built and working for the starting case** (1 million barrels, US Gulf Coast
-to west coast India, Suez or Cape). 63 tests pass. The dashboard runs locally with six pages.
+to west coast India, Suez or Cape). 80 tests pass. The dashboard runs locally with six pages.
 
 The project now lives in `Desktop\crude-arb-project\arb-engine`, with its Python environment
 set up there (`.venv`) and the tests and dashboard confirmed working from that folder.
@@ -28,6 +28,44 @@ Still to do, and it needs the owner:
 Phases 1 to 4 were written in one sitting and verified together at the end, then committed as
 separate phase commits.
 
+## Independent review, 15 November 2026: what it found and what was fixed
+
+A line-by-line review confirmed 25 defects (several overlapping). None changed the headline
+result for the starting case; most were about labels, wording and pages disagreeing. All fixed:
+
+- **Dubai benchmark, pages disagreed.** With Dubai chosen, the Prices page showed a $13.08 spread
+  (monthly Dubai against one day's WTI) while the Arbitrage page showed $0.63, and the fuel price
+  jumped to an October-average figure ($954 a tonne instead of $709). Now every page builds its
+  base case in one place: crude prices are same-month averages, the fuel price always uses the
+  latest daily Brent, and Prices, Voyage, Arbitrage and Scenarios show the same spread ($0.63),
+  fuel ($709) and freight ($25.02). A test checks this.
+- **Dubai history mixed a month with a day.** The spread and "would past gaps have paid" charts
+  set a flat monthly Dubai price against daily WTI, inventing gaps of -$22 to +$21 a barrel. They
+  now compare monthly averages (true range over two years: -$7.62 to +$4.36) and are labelled
+  "months", not "days".
+- **Estimate flags and labels.** The time-charter and calm-market hire rates (published figures,
+  but for another route or contract), the Platts and Baltic ship figures and Corpus Christi port
+  cost (read only from search extracts), and the dollar-per-SDR rate are now flagged
+  `estimate: true`: 67 of the 100 assumptions are estimates. README, the Start page, the
+  ASSUMPTIONS header and the on-screen labels (Freight, Financing, Demurrage, the Scenarios
+  sliders) now match the flags.
+- **"How to read this" on the Arbitrage page** compared the raw price gap with costs and could
+  have contradicted the verdict. It now uses the gap after the quality and differential
+  adjustments, which less costs is exactly the margin.
+- **Wrong or unsupported statements corrected:** the spot hire note ($20-25 a barrel corresponds
+  to about $230,000-300,000 a day in the model, not $280,000-300,000; $300,000 is the top of the
+  range); the case study's "37% surcharge alone almost cancels the time saved" (it is the whole
+  toll, $1.04 a barrel against $1.01 of time saved; the surcharges are $0.25); "what the model
+  would predict" (forecasting language, removed); the VLCC canal tonnage note (the figure is not
+  used: a VLCC goes both ways round the Cape); the licence line in `DEPLOY.md`; the calm-market
+  VLCC freight quoted here ($3.37, not $3.44); the time-charter setting now says it pairs an
+  eco-ship hire rate with older-ship fuel figures.
+- **Small engine and page fixes:** a mistyped route name (for example "Cape") is now rejected
+  instead of being costed as the cheapest of all; the tornado's interest-rate bar is labelled
+  with the cut actually made when the rate is below 2%; the "Suez closed" switch no longer leaves
+  a "use Suez instead" bar; the Voyage page's fuel box no longer rounds the fuel price; the
+  "Download the latest prices" button always downloads and the note gives the download time.
+
 ## Today's result (prices for 11 November 2026)
 
 WTI $89.62, Brent $92.14, so the gross spread is $2.52. Estimated freight in today's crisis
@@ -39,11 +77,12 @@ At the one-year time-charter rate the arb is closed by $7.47; at calm-market rat
 - **Three freight-market settings instead of one.** Research showed the tanker market in late
   2026 is in crisis (Strait of Hormuz effectively closed; press reports of $20-25/bbl US-India
   freight versus $3-3.50 before). The brief's sanity check ("a few dollars a barrel") holds in the
-  calm-market setting ($5-6 Suezmax, $3.44 VLCC); today's setting is deliberately much higher.
+  calm-market setting ($5-6 Suezmax, $3.37 VLCC); today's setting is deliberately much higher.
 - **Price source: EIA spreadsheet downloads, not the EIA API or FRED.** They need no API key, so
   there is no `.env` to manage. FRED was unreachable from the build machine.
 - **Dubai is monthly only.** No free daily Dubai price exists. When Dubai is chosen as the sell
-  benchmark the tool compares monthly averages for the same month.
+  benchmark the tool compares monthly averages for the same month, on every page and in the
+  historical view (one point per month). The fuel price always uses the latest daily Brent.
 - **Round-voyage freight.** The cargo pays for the empty leg home, as Worldscale does.
 - **Origin port default is Corpus Christi**, the one port with a published (Platts) port cost.
 - **Red Sea war-risk premium added** to the Suez route (estimate), because without it the Suez
@@ -55,8 +94,14 @@ At the one-year time-charter rate the arb is closed by $7.47; at calm-market rat
 
 ## Known gaps and things to verify by eye
 
-- Platts ship speeds and fuel figures and the Baltic VLCC figures were read from search-engine
-  extracts, because the PDFs block automated download. Worth opening the documents once to confirm.
+- Platts ship speeds, fuel figures and the Corpus Christi port cost, and the Baltic VLCC figures,
+  were read from search-engine extracts, because the PDFs block automated download. They are now
+  flagged `estimate: true` and shown as estimated. **Owner to do:** open the Platts Specifications
+  Guide (Global Freight) and the Baltic tanker white paper and confirm 13.0 / 12.5 knots, 44 / 35
+  t/day, $78,000 (Suezmax) and 12 knots, 58.5 / 44 t/day (VLCC). Once confirmed, set those records
+  back to `estimate: false` and remove the "search-engine extract" wording.
+- The bunker ratio (7.7) was calibrated against a Brent quote of $95.84 on 13 November 2026 whose
+  source was not recorded and could not be re-confirmed. The note in `market.yaml` says so.
 - The reference distances used in one test (9,700 and 11,900 nm Houston-Mumbai) are from memory of
   published tables; verify on sea-distances.org.
 - The spot hire rate ($300,000 a day Suezmax) is an estimate anchored on press reports.
