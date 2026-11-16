@@ -82,6 +82,36 @@ def tornado(inputs: ArbInputs, suez_open: bool = True) -> list[dict]:
     return sorted(rows, key=lambda r: r["swing"], reverse=True)
 
 
+def grid_axes() -> tuple[list[float], list[float]]:
+    """The hire rates and price spreads the grid covers, evenly spaced, from the YAML settings."""
+    r = {k: A.val(v) for k, v in A.load("costs")["scenario_ranges"].items()}
+    steps = int(r["grid_steps"])
+
+    def spaced(low, high):
+        return [low + (high - low) * i / (steps - 1) for i in range(steps)]
+
+    return (spaced(r["grid_hire_min_usd_per_day"], r["grid_hire_max_usd_per_day"]),
+            spaced(r["grid_spread_min_usd"], r["grid_spread_max_usd"]))
+
+
+def margin_grid(inputs: ArbInputs, hire_values: list[float], spread_values: list[float]) -> pd.DataFrame:
+    """Margin per barrel for every pairing of ship hire rate and price spread.
+
+    Rows are price spreads (destination benchmark minus origin benchmark), columns
+    are daily hire rates. Everything else is held at the values in `inputs`. The
+    spread is changed by moving the destination price, exactly as the break-even
+    calculation does, so the two agree.
+    """
+    grid = pd.DataFrame(index=spread_values, columns=hire_values, dtype=float)
+    for spread in spread_values:
+        for hire in hire_values:
+            changed = inputs.with_changes(
+                hire_usd_per_day=hire,
+                destination_benchmark_price=inputs.origin_benchmark_price + spread)
+            grid.loc[spread, hire] = run(changed).margin_per_bbl
+    return grid
+
+
 def breakeven_spread(inputs: ArbInputs) -> float:
     """The price gap (destination benchmark minus origin benchmark) at which the margin is zero.
 

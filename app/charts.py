@@ -166,3 +166,35 @@ def ranking_bars(rows: list[dict]) -> go.Figure:
     fig.update_xaxes(range=[min(min(margins), 0) - span * 0.2, max(max(margins), 0) + span * 0.2])
     fig.update_layout(margin=dict(l=10, r=40, t=20, b=10))
     return fig
+
+
+def margin_heatmap(grid, today_hire: float, today_spread: float) -> go.Figure:
+    """Margin for each pairing of hire rate (across) and price spread (up).
+
+    Red loses, green pays, with a pale neutral where the margin is zero. The black
+    line is break-even and the dot is where today's inputs sit.
+    """
+    limit = max(abs(float(grid.values.min())), abs(float(grid.values.max())), 1.0)
+    hires, spreads = list(grid.columns), list(grid.index)
+    fig = go.Figure(go.Heatmap(
+        x=hires, y=spreads, z=grid.values, zmid=0, zmin=-limit, zmax=limit,
+        colorscale=[[0.0, CRITICAL], [0.5, "#f0efec"], [1.0, GOOD]],
+        colorbar=dict(title="Margin<br>USD/bbl", tickfont=dict(color=MUTED)),
+        hovertemplate="Hire $%{x:,.0f} a day<br>Spread $%{y:,.2f}<br>Margin $%{z:,.2f} per barrel<extra></extra>"))
+    # The break-even line: where the margin is exactly zero.
+    fig.add_trace(go.Contour(
+        x=hires, y=spreads, z=grid.values, showscale=False, hoverinfo="skip",
+        contours=dict(start=0, end=0, size=1, coloring="none"), line=dict(color=INK, width=2),
+        name="Break-even"))
+    inside = hires[0] <= today_hire <= hires[-1] and spreads[0] <= today_spread <= spreads[-1]
+    if inside:
+        fig.add_trace(go.Scatter(
+            x=[today_hire], y=[today_spread], mode="markers+text", text=["These inputs"],
+            textposition="top center", textfont=dict(color=INK),
+            marker=dict(size=12, color=INK, line=dict(width=2, color=SURFACE)),
+            hovertemplate="These inputs<extra></extra>", showlegend=False))
+    fig = _style(fig, height=460, x_title="Ship hire, USD per day",
+                 y_title="Price spread, USD per barrel")
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=False)
+    return fig

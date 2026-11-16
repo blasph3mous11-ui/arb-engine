@@ -118,3 +118,28 @@ def test_historical_run_on_monthly_averages_for_dubai(fixed_distance):
     moving = scenarios.historical_run(monthly, inputs.with_changes(bunker_usd_per_tonne=999),
                                       "wti", "dubai", bunker_ratio=600 / 90)
     assert moving["margin"].iloc[0] == pytest.approx(single.margin_per_bbl)
+
+
+def test_margin_grid_cell_is_the_hand_worked_trade(fixed_distance):
+    # Hire $50,000 a day and a $10 spread is exactly the hand-worked trade: $3.9276 a barrel.
+    grid = scenarios.margin_grid(hand_inputs(), [25_000, 50_000], [5.0, 10.0])
+    assert grid.loc[10.0, 50_000] == pytest.approx(3.92758086)
+    # A $5 narrower gap costs $5 less the 0.2% transit loss on it: 5 x 0.998 = $4.99.
+    assert grid.loc[5.0, 50_000] == pytest.approx(3.92758086 - 4.99)
+    # Halving hire saves 65.2 days x $25,000 = $1.63 a barrel, plus the insurance on it
+    # (x 110% x 0.05%).
+    assert grid.loc[10.0, 25_000] == pytest.approx(3.92758086 + 1.63 * (1 + 1.10 * 0.0005))
+
+
+def test_margin_grid_agrees_with_breakeven(fixed_distance):
+    inputs = hand_inputs()
+    breakeven = scenarios.breakeven_spread(inputs)
+    grid = scenarios.margin_grid(inputs, [inputs.hire_usd_per_day], [breakeven])
+    assert grid.iloc[0, 0] == pytest.approx(0, abs=1e-6)
+
+
+def test_grid_axes_come_from_the_yaml_settings():
+    hires, spreads = scenarios.grid_axes()
+    assert len(hires) == len(spreads) == 16
+    assert hires[0] == 10_000 and hires[-1] == 500_000
+    assert spreads[0] == -5 and spreads[-1] == 40

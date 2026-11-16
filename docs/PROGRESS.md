@@ -21,6 +21,10 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   voyage only; real per-market premiums are paywalled and the page says so. Today (spot market,
   Suezmax from Corpus Christi): Rotterdam is least bad at -$10.82 a barrel, Ulsan worst at
   -$33.67. 127 tests pass.
+- **Stage 2, done 17 Nov 2026: freight-versus-spread grid** on the Scenarios page.
+  `scenarios.margin_grid` re-runs the trade for every pairing of ship hire rate and price gap;
+  `charts.margin_heatmap` draws it with the break-even line and a dot for the current inputs.
+  Axis ranges are our choice (`costs.yaml`, `scenario_ranges`, `grid_*`). 130 tests pass.
 - **Stage 0, in progress:** licence added; independent review of the expansion running.
 
 ## Expansion, 17 November 2026: more ports, ships and proper route handling

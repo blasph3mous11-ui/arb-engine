@@ -89,6 +89,25 @@ st.caption("Each row changes one input and leaves the rest alone. The longer the
            "of the changes are our choice (listed on the Methodology page), so compare the rows "
            "with that in mind.")
 
+# ---------------------------------------------------------------- grid
+st.subheader("When does the arb open? Ship cost against price gap")
+
+
+@st.cache_data(show_spinner="Working out the grid...")
+def run_grid(inputs: arbitrage.ArbInputs) -> pd.DataFrame:
+    hire_values, spread_values = scenarios.grid_axes()
+    return scenarios.margin_grid(inputs, hire_values, spread_values)
+
+
+st.plotly_chart(charts.margin_heatmap(run_grid(scenario_inputs), scenario_inputs.hire_usd_per_day,
+                                      scenario.benchmark_spread), width="stretch")
+st.caption(f"Each square is the margin for one pairing of ship hire rate (across) and "
+           f"{benchmark_name}-minus-WTI price gap (up), with everything else held at the values "
+           "set above. Green pays, red loses, and the black line is break-even: above it the arb "
+           "is open. The dot is where the inputs above sit. The dearer the ship, the wider the "
+           "price gap has to be. The ranges shown are our choice, and the hire rate itself is an "
+           "estimate.")
+
 # ---------------------------------------------------------------- history
 st.subheader("Would past price gaps have paid, at these costs?")
 years = st.radio("Period", [1, 2, 5], index=1, horizontal=True,

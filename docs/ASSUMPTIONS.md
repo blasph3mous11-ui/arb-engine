@@ -3,7 +3,7 @@
 Generated from the YAML files in `data/assumptions/`. Do not edit by hand: change the
 YAML and run `python -m engine.assumptions`.
 
-156 assumptions, of which 103 are marked **estimated**: our own figures,
+161 assumptions, of which 108 are marked **estimated**: our own figures,
 published figures used as a proxy, or figures not yet confirmed against their source.
 Real traded freight rates and physical price premiums are paywalled, so every ship hire rate
 here is an estimate: either our own figure, or a published broker or press figure for another
@@ -185,3 +185,8 @@ search-engine extract are also marked estimated until confirmed against the docu
 | scenario_ranges / price_spread_usd | 2.0 | USD per barrel | **estimated** | Our choice | 2026-11-15 |  |
 | scenario_ranges / delay_days | 5 | days | **estimated** | Our choice | 2026-11-15 |  |
 | scenario_ranges / transit_loss_points | 0.2 | percentage points | **estimated** | Our choice | 2026-11-15 |  |
+| scenario_ranges / grid_hire_min_usd_per_day | 10000 | USD per day | **estimated** | Our choice | 2026-11-17 |  |
+| scenario_ranges / grid_hire_max_usd_per_day | 500000 | USD per day | **estimated** | Our choice | 2026-11-17 |  |
+| scenario_ranges / grid_spread_min_usd | -5 | USD per barrel | **estimated** | Our choice | 2026-11-17 |  |
+| scenario_ranges / grid_spread_max_usd | 40 | USD per barrel | **estimated** | Our choice | 2026-11-17 |  |
+| scenario_ranges / grid_steps | 16 | points per axis | **estimated** | Our choice | 2026-11-17 |  |

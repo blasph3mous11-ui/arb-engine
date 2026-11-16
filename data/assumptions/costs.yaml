@@ -207,3 +207,9 @@ scenario_ranges:
   price_spread_usd: {value: 2.0, unit: USD per barrel, source: Our choice, checked: 2026-11-15, estimate: true}
   delay_days: {value: 5, unit: days, source: Our choice, checked: 2026-11-15, estimate: true}
   transit_loss_points: {value: 0.2, unit: percentage points, source: Our choice, checked: 2026-11-15, estimate: true}
+  # The freight-versus-spread grid on the Scenarios page: the range each axis covers.
+  grid_hire_min_usd_per_day: {value: 10000, unit: USD per day, source: Our choice, checked: 2026-11-17, estimate: true}
+  grid_hire_max_usd_per_day: {value: 500000, unit: USD per day, source: Our choice, checked: 2026-11-17, estimate: true}
+  grid_spread_min_usd: {value: -5, unit: USD per barrel, source: Our choice, checked: 2026-11-17, estimate: true}
+  grid_spread_max_usd: {value: 40, unit: USD per barrel, source: Our choice, checked: 2026-11-17, estimate: true}
+  grid_steps: {value: 16, unit: points per axis, source: Our choice, checked: 2026-11-17, estimate: true}
