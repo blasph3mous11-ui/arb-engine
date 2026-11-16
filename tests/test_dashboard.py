@@ -12,7 +12,7 @@ from streamlit.testing.v1 import AppTest
 from engine import prices
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ["home.py", "voyage_page.py", "prices_page.py", "arbitrage_page.py",
+PAGES = ["home.py", "voyage_page.py", "prices_page.py", "arbitrage_page.py", "ranking_page.py",
          "scenarios_page.py", "methodology_page.py"]
 SETUPS = [
     {},                                                    # the starting case

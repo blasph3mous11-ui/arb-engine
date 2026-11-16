@@ -25,6 +25,7 @@ PAGES = [
     ("voyage_page.py", "Voyage calculator", ":material/sailing:"),
     ("prices_page.py", "Prices", ":material/show_chart:"),
     ("arbitrage_page.py", "Arbitrage result", ":material/paid:"),
+    ("ranking_page.py", "Where to send it", ":material/leaderboard:"),
     ("scenarios_page.py", "Scenarios & history", ":material/tune:"),
     ("methodology_page.py", "Methodology", ":material/menu_book:"),
 ]

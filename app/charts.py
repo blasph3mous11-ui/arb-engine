@@ -147,3 +147,22 @@ def history(margin) -> go.Figure:
                              hovertemplate="%{x|%d %b %Y}: $%{y:,.2f} per barrel<extra></extra>"))
     fig.add_hline(y=0, line=dict(color=INK, width=1))
     return _style(fig, height=400, y_title="Margin, USD per barrel")
+
+
+def ranking_bars(rows: list[dict]) -> go.Figure:
+    """Margin per barrel for each discharge port, best at the top. Green pays, red loses."""
+    rows = rows[::-1]  # plotly draws the first row at the bottom
+    margins = [r["margin"] for r in rows]
+    fig = go.Figure(go.Bar(
+        x=margins, y=[r["port"] for r in rows], orientation="h",
+        marker_color=[GOOD if m > 0 else CRITICAL for m in margins],
+        text=[f"{'-' if m < 0 else '+'}${abs(m):,.2f}" for m in margins],
+        textposition="outside", textfont=dict(color=INK), cliponaxis=False,
+        hovertemplate="%{y}<br>Margin: %{text} per barrel<extra></extra>"))
+    fig.add_vline(x=0, line=dict(color=INK, width=1))
+    fig = _style(fig, height=90 + 46 * len(rows), x_title="Margin, USD per barrel")
+    # Leave room on both sides for the value labels.
+    span = max(abs(min(margins)), abs(max(margins)), 1)
+    fig.update_xaxes(range=[min(min(margins), 0) - span * 0.2, max(max(margins), 0) + span * 0.2])
+    fig.update_layout(margin=dict(l=10, r=40, t=20, b=10))
+    return fig

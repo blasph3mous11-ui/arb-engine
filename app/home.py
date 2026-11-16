@@ -52,6 +52,7 @@ b.markdown("""
 - **Voyage calculator** - how long the trip takes and what the ship costs, Suez versus Cape.
 - **Prices** - benchmark crude prices and the gap between them.
 - **Arbitrage result** - every cost from purchase to sale, and the verdict.
+- **Where to send it** - the same cargo costed to every discharge port and ranked by margin.
 - **Scenarios & history** - sliders, what matters most, the break-even gap, and a look back.
 - **Methodology** - every assumption, where it came from, and what the model leaves out.
 """)

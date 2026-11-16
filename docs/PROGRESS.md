@@ -8,6 +8,21 @@ Read this first at the start of every session.
 discharge ports (India, Europe, East Asia) and 5 ship types. 115 tests pass. The dashboard runs
 locally with six pages. The code is on GitHub: https://github.com/blasph3mous11-ui/arb-engine
 
+## Upgrade plan in progress (see `docs/UPGRADE_PLAN.md`)
+
+Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker freight quote,
+4 commission / lightering / EU carbon, 5 futures curve, 6 more grades, 7 other load regions
+(needs the owner's go-ahead). Resume from the first stage not marked done below.
+
+- **Stage 1, done 17 Nov 2026: "Where to send it" page.** `engine/ranking.py` costs the same
+  cargo to every discharge port by its cheapest available route and ranks by margin
+  (`app/ranking_page.py`, `charts.ranking_bars`, `tests/test_ranking.py`). Decision: every port
+  is valued against the one sell benchmark chosen in the sidebar, so the ranking reflects the
+  voyage only; real per-market premiums are paywalled and the page says so. Today (spot market,
+  Suezmax from Corpus Christi): Rotterdam is least bad at -$10.82 a barrel, Ulsan worst at
+  -$33.67. 127 tests pass.
+- **Stage 0, in progress:** licence added; independent review of the expansion running.
+
 ## Expansion, 17 November 2026: more ports, ships and proper route handling
 
 The owner asked for more load and discharge ports and more ship types.

@@ -31,6 +31,7 @@ It is a US crude export tool: the grade shipped is always WTI. The Panama Canal 
 | **Voyage calculator** | Sea distance, voyage days and freight cost per barrel, broken down into ship hire, fuel, port charges, canal tolls and war-risk premium. Suez and Cape side by side, with a route map. |
 | **Prices** | Daily Brent and WTI history (US EIA), monthly Dubai (World Bank), and the spread between origin and destination benchmarks (monthly averages when Dubai is chosen). |
 | **Arbitrage result** | The full cost stack from purchase price to landed cost to margin as a waterfall, with an **ARB OPEN** or **ARB CLOSED** verdict and every line explained. |
+| **Where to send it** | The same cargo costed to every discharge port by its cheapest route, ranked by margin: the netback view a trader uses to place a cargo. |
 | **Scenarios & history** | Sliders for the main drivers, a tornado chart of what moves the margin most, the break-even spread, and the model re-run over past prices. |
 | **Methodology** | Every assumption with its value, source, date checked and whether it is an estimate, plus what the model leaves out. |
 
