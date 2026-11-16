@@ -7,7 +7,8 @@ A dashboard that answers the question a physical oil trader asks every day:
 The starting case is 1 million barrels of US Gulf Coast crude shipped to the west coast of India
 on a Suezmax tanker, via the Suez Canal or around the Cape of Good Hope.
 
-Live repository: https://github.com/blasph3mous11-ui/arb-engine
+**Live dashboard:** https://crude-arb-engine.streamlit.app  
+Code: https://github.com/blasph3mous11-ui/arb-engine
 
 **What you can choose**
 

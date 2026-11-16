@@ -35,9 +35,9 @@ The owner asked for more load and discharge ports and more ship types.
 The project now lives in `Desktop\crude-arb-project\arb-engine`, with its Python environment
 set up there (`.venv`) and the tests and dashboard confirmed working from that folder.
 
-Still to do:
-1. **Deploy on Streamlit Community Cloud** (the GitHub upload is done). Steps are in
-   `docs/DEPLOY.md`, Part 2. The owner has to approve Streamlit's access to GitHub in the browser.
+Published: the code is on GitHub and the dashboard is deployed on Streamlit Community Cloud at
+https://crude-arb-engine.streamlit.app (Python 3.13, main file `app/main.py`). It redeploys
+itself whenever new code is pushed to GitHub.
 
 ## What was built
 
