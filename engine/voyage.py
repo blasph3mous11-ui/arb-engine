@@ -13,14 +13,17 @@ from functools import lru_cache
 from engine import assumptions as A
 from engine.units import sailing_days
 
-ROUTES = {"suez": "Via Suez Canal", "cape": "Via Cape of Good Hope"}
+ROUTES = {"suez": "Via Suez Canal", "cape": "Via Cape of Good Hope", "direct": "Direct (no canal)"}
+# Sea lanes the model never uses. "northwest" is the Arctic Northwest Passage.
+# The Panama Canal is left out on purpose: see data/assumptions/ports.yaml (routing).
+ALWAYS_FORBIDDEN = ["northwest", "panama"]
 
 
 def check_route(via: str) -> None:
     """Stop on a mistyped route. Without this, "Cape" would quietly be costed
     as the short Suez distance with no canal tolls: cheaper than either real route."""
     if via not in ROUTES:
-        raise ValueError(f"Unknown route '{via}'; use 'suez' or 'cape'.")
+        raise ValueError(f"Unknown route '{via}'; use 'suez', 'cape' or 'direct'.")
 
 
 @dataclass(frozen=True)
@@ -65,7 +68,43 @@ def get_port(key: str) -> dict:
         "longitude": A.val(raw["longitude"]),
         "port_cost_usd": A.val(raw["port_cost_usd"]),
         "port_cost_is_estimate": A.is_estimate(raw["port_cost_usd"]),
+        "region": A.val(raw["region"]),
     }
+
+
+def _search(origin_key: str, destination_key: str, forbidden: list[str]) -> dict:
+    """Shortest sea path between two ports, avoiding the named canals and straits."""
+    import searoute  # imported here so the rest of the engine works without it
+
+    origin, destination = get_port(origin_key), get_port(destination_key)
+    return searoute.searoute(
+        [origin["longitude"], origin["latitude"]],
+        [destination["longitude"], destination["latitude"]],
+        units="naut", restrictions=forbidden, return_passages=True,
+    )
+
+
+@lru_cache(maxsize=None)
+def shortest_path_uses_suez(origin_key: str, destination_key: str) -> bool:
+    """Does the shortest path between these ports go through the Suez Canal?
+
+    US Gulf to India or Asia: yes. US Gulf to Europe: no, the ship just crosses
+    the Atlantic, so there is no canal to pay for and no Suez-or-Cape choice.
+    """
+    passages = _search(origin_key, destination_key, ALWAYS_FORBIDDEN)["properties"]["traversed_passages"]
+    return "suez" in passages
+
+
+def route_options(origin_key: str, destination_key: str, vessel_key: str) -> list[str]:
+    """The routes that really exist for this voyage and ship.
+
+    "direct" when the shortest path does not touch Suez. Otherwise the choice is
+    Suez or the Cape, except that a ship too deep to pass the canal fully laden
+    (a VLCC) can only go round the Cape.
+    """
+    if not shortest_path_uses_suez(origin_key, destination_key):
+        return ["direct"]
+    return (["suez"] if get_vessel(vessel_key).can_transit_suez_laden else []) + ["cape"]
 
 
 @lru_cache(maxsize=None)
@@ -76,18 +115,9 @@ def sea_route(origin_key: str, destination_key: str, via: str) -> tuple[float, t
     a network of shipping lanes. For the Cape route we forbid the Suez Canal,
     so the shortest remaining path goes round South Africa.
     """
-    import searoute  # imported here so the rest of the engine works without it
-
     check_route(via)
-    origin, destination = get_port(origin_key), get_port(destination_key)
-    # "northwest" (the Arctic Northwest Passage) is always forbidden.
-    restrictions = ["northwest"] + (["suez"] if via == "cape" else [])
-    result = searoute.searoute(
-        [origin["longitude"], origin["latitude"]],
-        [destination["longitude"], destination["latitude"]],
-        units="naut",
-        restrictions=restrictions,
-    )
+    result = _search(origin_key, destination_key,
+                     ALWAYS_FORBIDDEN + (["suez"] if via == "cape" else []))
     points = tuple(tuple(p) for p in result["geometry"]["coordinates"])
     return float(result["properties"]["length"]), points
 
@@ -173,6 +203,8 @@ def estimate_voyage(
     if cargo_bbl > vessel.cargo_capacity_bbl:
         raise ValueError(f"A {vessel.name} cannot carry {cargo_bbl:,.0f} barrels.")
 
+    # Only the Suez route passes the canal (and the Red Sea beyond it). "cape" and
+    # "direct" pay no toll, lose no canal day and need no Red Sea war-risk cover.
     uses_canal = via == "suez"
     # The empty return leg: the ship sails home by the same route.
     ballast_factor = 1.0 if charge_ballast_leg else 0.0
@@ -218,6 +250,9 @@ def voyage_from_assumptions(
 ) -> VoyageResult:
     """The same calculation, filling everything else in from the YAML files."""
     vessel = get_vessel(vessel_key)
+    options = route_options(origin_key, destination_key, vessel_key)
+    if via not in options:
+        raise ValueError(f"Route '{via}' does not exist for this voyage and ship; choose from {options}.")
     distance_nm, _ = sea_route(origin_key, destination_key, via)
     ports = A.load("ports")
     if charge_ballast_leg is None:

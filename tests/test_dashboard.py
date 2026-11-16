@@ -19,6 +19,10 @@ SETUPS = [
     {"vessel": "vlcc"},                                    # too deep for Suez: forced via the Cape
     {"vessel": "aframax", "via": "cape", "market": "calm_2024"},
     {"benchmark": "dubai", "destination": "mumbai", "origin": "houston"},
+    {"destination": "rotterdam", "vessel": "aframax"},     # Atlantic crossing: direct, no canal
+    {"origin": "loop", "destination": "ningbo", "vessel": "vlcc"},
+    {"vessel": "panamax", "destination": "singapore", "market": "time_charter_1yr_jul_2026"},
+    {"vessel": "suezmax_eco", "destination": "paradip", "origin": "beaumont", "via": "cape"},
 ]
 
 
@@ -29,7 +33,8 @@ def offline_prices(monkeypatch):
 
 
 @pytest.mark.parametrize("page", PAGES)
-@pytest.mark.parametrize("setup", SETUPS, ids=["base", "vlcc", "aframax-cape-calm", "dubai-mumbai"])
+@pytest.mark.parametrize("setup", SETUPS, ids=["base", "vlcc", "aframax-cape-calm", "dubai-mumbai", "rotterdam-direct",
+                                              "loop-ningbo-vlcc", "panamax-singapore", "eco-paradip-cape"])
 def test_page_loads(page, setup):
     app = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=120).run()
     for key, value in setup.items():

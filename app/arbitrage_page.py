@@ -19,8 +19,8 @@ benchmark_name = dates["benchmark"].title()
 
 st.title("Arbitrage result")
 st.markdown(
-    f"Buy **{inputs.cargo_bbl / 1e6:.2f} million barrels** of WTI at {origin['name']}, ship it on a "
-    f"{vessel.name} {V.ROUTES[inputs.via].replace('Via', 'via')} to {destination['name']}, and sell it against "
+    f"Buy **{inputs.cargo_bbl / 1e6:.2f} million barrels** of WTI at {origin['name']}, ship it on "
+    f"{ui.a_or_an(vessel.name)} {ui.route_phrase(inputs.via)} to {destination['name']}, and sell it against "
     f"{benchmark_name}. Does it pay today?")
 ui.verdict_banner(result)
 
@@ -100,11 +100,11 @@ st.info(
     f"({result.quality_differential:+.2f}), the estimated destination differential "
     f"({inputs.destination_differential:+.2f}) and the estimated Gulf Coast differential "
     f"({-inputs.origin_differential:+.2f}), the gap is worth {ui.usd(adjusted_gap)}. "
-    f"Getting the oil to India costs an estimated {ui.usd(costs)} a barrel, of which freight is "
+    f"Getting the oil to {destination['name']} costs an estimated {ui.usd(costs)} a barrel, of which freight is "
     f"{freight_share:.0%}. "
     + ("The adjusted gap is wide enough to cover it." if result.is_open else
        "The adjusted gap is not wide enough to cover it, so nobody would ship this cargo on these "
-       "terms: either the US price must fall, the price in India must rise, or freight must get cheaper.")
+       "terms: either the US price must fall, the price at destination must rise, or freight must get cheaper.")
     + " Try the other freight markets in the sidebar to see how much the answer depends on the ship.")
 
 st.caption("Real delivered prices and freight rates are negotiated privately and published only by "

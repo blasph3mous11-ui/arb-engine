@@ -7,6 +7,20 @@ A dashboard that answers the question a physical oil trader asks every day:
 The starting case is 1 million barrels of US Gulf Coast crude shipped to the west coast of India
 on a Suezmax tanker, via the Suez Canal or around the Cape of Good Hope.
 
+Live repository: https://github.com/blasph3mous11-ui/arb-engine
+
+**What you can choose**
+
+| | Options |
+|---|---|
+| Load port (US Gulf Coast) | Corpus Christi, Houston, LOOP (offshore Louisiana), Beaumont / Nederland |
+| Discharge port | India: Sikka, Mumbai, Paradip. Europe: Rotterdam. East Asia: Singapore, Ningbo-Zhoushan, Ulsan |
+| Ship | Panamax (0.5m bbl), Aframax (0.75m), Suezmax (1m), modern eco Suezmax (1m), VLCC (2m) |
+| Route | Worked out for each voyage: Suez or Cape where the shortest path passes Suez; one direct route across the Atlantic to Europe. A VLCC, too deep for Suez when full, goes via the Cape. |
+| Freight market | Today's spot market, a one-year time charter, or a calm-market reference |
+
+It is a US crude export tool: the grade shipped is always WTI. The Panama Canal is not offered as a route.
+
 ![Arbitrage result](docs/screenshots/arbitrage.jpg)
 
 ## What it does

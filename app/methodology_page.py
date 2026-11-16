@@ -19,7 +19,7 @@ st.subheader("How each number is calculated")
 st.markdown("""
 | Step | How it is worked out |
 |---|---|
-| **Distance** | Shortest sea path between the two ports from the open-source `searoute` library. For the Cape route the Suez Canal is forbidden, so the path goes round South Africa. |
+| **Distance and route** | Shortest sea path between the two ports from the open-source `searoute` library. If that path passes the Suez Canal the tool offers two routes: Suez, or the Cape (the same search with the canal forbidden, so the path goes round South Africa). If it does not (US Gulf to Europe) there is one direct route and no canal cost. The Panama Canal is never used. |
 | **Voyage days** | Distance divided by speed, loaded and empty, plus days in port and a day for each canal transit. |
 | **Vessel hire** | Days the ship is tied up (the full round trip) times the daily hire rate. |
 | **Bunkers (fuel)** | Tonnes burned each day (at sea, in port, in the canal) times the fuel price. The fuel price is estimated from the latest daily Brent price. |
@@ -49,6 +49,10 @@ st.markdown("""
 - **No hedging, no price movement during the voyage.** The cargo is bought and sold at today's
   prices. A real trader would hedge the weeks at sea with futures, and the shape of the futures
   curve (contango or backwardation) would add or subtract value.
+- **No Panama Canal.** It is the shortest way from the US Gulf to China or Korea, but a VLCC
+  cannot use it, a full Suezmax is at or beyond its draught limit, and we have no free source
+  for the tanker toll. Cargoes to Asia are offered via Suez or the Cape only.
+- **US crude only.** Every load port is on the US Gulf Coast and the grade is always WTI.
 - **Simplified logistics.** No ship-to-ship transfers to load a VLCC, no brokerage commissions,
   no port congestion beyond the delay slider, no slow steaming to save fuel.
 - **The historical view holds costs constant**, as explained on that chart.

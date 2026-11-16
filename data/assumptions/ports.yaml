@@ -6,6 +6,7 @@ ports:
   corpus_christi:
     name: {value: "Corpus Christi, USA"}
     role: {value: origin}
+    region: {value: us_gulf}
     latitude: {value: 27.81, unit: degrees north, source: Port location, checked: 2026-11-15, estimate: false}
     longitude: {value: -97.10, unit: degrees east, source: Port location (Gulf entrance at Port Aransas), checked: 2026-11-15, estimate: false}
     port_cost_usd:
@@ -22,6 +23,7 @@ ports:
   houston:
     name: {value: "Houston, USA"}
     role: {value: origin}
+    region: {value: us_gulf}
     latitude: {value: 29.34, unit: degrees north, source: Port location (Galveston Bay entrance), checked: 2026-11-15, estimate: false}
     longitude: {value: -94.70, unit: degrees east, source: Port location (Galveston Bay entrance), checked: 2026-11-15, estimate: false}
     port_cost_usd:
@@ -36,6 +38,7 @@ ports:
   sikka:
     name: {value: "Sikka (Jamnagar), India"}
     role: {value: destination}
+    region: {value: india}
     latitude: {value: 22.45, unit: degrees north, source: Port location, checked: 2026-11-15, estimate: false}
     longitude: {value: 69.60, unit: degrees east, source: Port location (Gulf of Kutch approach), checked: 2026-11-15, estimate: false}
     port_cost_usd:
@@ -51,6 +54,7 @@ ports:
   mumbai:
     name: {value: "Mumbai, India"}
     role: {value: destination}
+    region: {value: india}
     latitude: {value: 18.90, unit: degrees north, source: Port location, checked: 2026-11-15, estimate: false}
     longitude: {value: 72.75, unit: degrees east, source: Port location (harbour approach), checked: 2026-11-15, estimate: false}
     port_cost_usd:
@@ -60,6 +64,111 @@ ports:
       checked: 2026-11-15
       estimate: true
       note: Same reasoning as Sikka.
+
+  loop:
+    name: {value: "LOOP (Louisiana Offshore Oil Port), USA"}
+    role: {value: origin}
+    region: {value: us_gulf}
+    latitude: {value: 28.88, unit: degrees north, source: Port location (offshore terminal, 18 miles off Louisiana), checked: 2026-11-17, estimate: false}
+    longitude: {value: -90.03, unit: degrees east, source: Port location (offshore terminal, 18 miles off Louisiana), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 60000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found. An offshore mooring needs no channel pilotage or harbour tugs,
+        so we set it below Corpus Christi ($78,000, Platts). LOOP is the one US terminal that can fully
+        load a VLCC (US EIA, https://www.eia.gov/todayinenergy/detail.php?id=36232), so it is the natural
+        load port when the ship is a VLCC.
+  beaumont:
+    name: {value: "Beaumont / Nederland, USA"}
+    role: {value: origin}
+    region: {value: us_gulf}
+    latitude: {value: 29.6, unit: degrees north, source: Port location (Sabine Pass entrance), checked: 2026-11-17, estimate: false}
+    longitude: {value: -93.83, unit: degrees east, source: Port location (Sabine Pass entrance), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 90000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found. Like Houston, a long river and channel transit, so we use the
+        same figure as our Houston estimate.
+  paradip:
+    name: {value: "Paradip, India (east coast)"}
+    role: {value: destination}
+    region: {value: india}
+    latitude: {value: 20.2, unit: degrees north, source: Port location (port approach), checked: 2026-11-17, estimate: false}
+    longitude: {value: 86.75, unit: degrees east, source: Port location (port approach), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 150000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found. Same reasoning as Sikka.
+  rotterdam:
+    name: {value: "Rotterdam, Netherlands"}
+    role: {value: destination}
+    region: {value: europe}
+    latitude: {value: 52.0, unit: degrees north, source: Port location (Maasvlakte entrance), checked: 2026-11-17, estimate: false}
+    longitude: {value: 3.9, unit: degrees east, source: Port location (Maasvlakte entrance), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 130000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found. Rotterdam's harbour dues are charged on ship size and cargo and
+        are known to be high for a large tanker; we place it between the US Gulf and Indian figures.
+  singapore:
+    name: {value: "Singapore"}
+    role: {value: destination}
+    region: {value: east_asia}
+    latitude: {value: 1.2, unit: degrees north, source: Port location (western anchorage), checked: 2026-11-17, estimate: false}
+    longitude: {value: 103.75, unit: degrees east, source: Port location (western anchorage), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 100000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found. A competitive hub port; set a little above the US Gulf figures.
+  ningbo:
+    name: {value: "Ningbo-Zhoushan, China"}
+    role: {value: destination}
+    region: {value: east_asia}
+    latitude: {value: 29.9, unit: degrees north, source: Port location (port approach), checked: 2026-11-17, estimate: false}
+    longitude: {value: 122.3, unit: degrees east, source: Port location (port approach), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 140000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found. Chinese port and tonnage dues for a large tanker are comparable
+        to other major Asian discharge ports; set close to our Indian estimate.
+  ulsan:
+    name: {value: "Ulsan, South Korea"}
+    role: {value: destination}
+    region: {value: east_asia}
+    latitude: {value: 35.45, unit: degrees north, source: Port location (port approach), checked: 2026-11-17, estimate: false}
+    longitude: {value: 129.45, unit: degrees east, source: Port location (port approach), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 120000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found. Set between the Singapore and Ningbo estimates.
 
 port_time:
   load_days:
@@ -139,6 +248,31 @@ suez_canal:
       Ships wait at anchor to join a convoy and pass the canal at about 8 knots, so a transit costs
       roughly a day more than sailing the same distance at sea speed.
 
+routing:
+  panama_canal_offered:
+    value: false
+    source: Our modelling choice
+    url: https://www.spglobal.com/commodity-insights/en/news-research/latest-news/shipping/092520-neopanamax-locks-increase-draft-permits-fully-laden-suezmaxes
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      The model never routes a cargo through the Panama Canal, even though it is the shortest way
+      from the US Gulf to China or Korea. A VLCC cannot use it at all. A fully laden Suezmax needs
+      about 50 feet of draught, which is at or above the canal's limit (it has moved between 44 and
+      50 feet in recent years), so it would have to sail part-loaded. Smaller Aframax and Panamax
+      tankers can pass, but we have no free source for the tanker toll, so rather than guess we do
+      not offer the route. US crude to Asia is offered via Suez or via the Cape.
+  red_sea_on_suez_route:
+    value: true
+    source: Geography, confirmed by the routing library for every port pair in this file
+    checked: 2026-11-17
+    estimate: false
+    note: >
+      Every discharge port reached through the Suez Canal in this model (India, Singapore, China,
+      Korea) lies beyond the Red Sea, so a Suez routing always passes the Bab el-Mandeb strait.
+      That is why the Red Sea war-risk premium is charged on every Suez transit and never on a
+      Cape or direct routing.
+
 reference_distances:
   # Used only by the tests, to check the routing library gives sensible answers.
   houston_mumbai_via_suez_nm:
@@ -160,3 +294,13 @@ reference_distances:
     checked: 2026-11-15
     estimate: true
     note: Approximate (about 7,300 + 4,600 nm). Same caveat as above.
+  houston_rotterdam_nm:
+    value: 5000
+    unit: nautical miles
+    source: Standard port-distance tables give roughly 5,000 nm for Houston to Rotterdam
+    url: https://sea-distances.org/
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      Approximate, as we remember it from published tables; the routing library gives 5,002 nm.
+      Good enough for a plus-or-minus 6% sanity check; verify on sea-distances.org before quoting it.

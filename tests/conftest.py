@@ -11,4 +11,5 @@ HAND_DISTANCE_NM = 9360  # 30.0 days at 13 knots, 31.2 days at 12.5 knots
 def fixed_distance(monkeypatch):
     """Replace the routing library with a fixed 9,360 nm, whatever the route."""
     monkeypatch.setattr(voyage, "sea_route", lambda origin, destination, via: (HAND_DISTANCE_NM, ()))
+    monkeypatch.setattr(voyage, "shortest_path_uses_suez", lambda origin, destination: True)
     return HAND_DISTANCE_NM

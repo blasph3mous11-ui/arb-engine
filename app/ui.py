@@ -30,6 +30,18 @@ def usd(value: float, decimals: int = 2) -> str:
     return f"{sign}${abs(value):,.{decimals}f}"
 
 
+def route_phrase(via: str) -> str:
+    """The route as it reads in a sentence: 'via Suez Canal', 'by the direct route (no canal)'."""
+    if via == "direct":
+        return "by the direct route (no canal)"
+    return V.ROUTES[via].replace("Via", "via")
+
+
+def a_or_an(name: str) -> str:
+    """'an Aframax', 'a Suezmax'."""
+    return ("an " if name[0].upper() in "AEIOU" else "a ") + name
+
+
 def tag(is_estimate: bool) -> str:
     """Badge shown next to any figure that is our estimate rather than a published number."""
     return f" {ESTIMATED}" if is_estimate else ""
@@ -50,8 +62,14 @@ def sidebar_setup() -> dict:
                               f"({V.get_vessel(k).cargo_capacity_bbl / 1e6:.2f}m barrels)")
     vessel = V.get_vessel(vessel_key)
 
-    if vessel.can_transit_suez_laden:
-        via = sb.radio("Route", list(V.ROUTES), format_func=V.ROUTES.get, key="via")
+    # Only offer the routes that really exist for these ports and this ship.
+    options = V.route_options(origin, destination, vessel_key)
+    if len(options) > 1:
+        via = sb.radio("Route", options, format_func=V.ROUTES.get, key="via")
+    elif options == ["direct"]:
+        via = "direct"
+        sb.info("Route: straight across the Atlantic. This voyage does not go near the Suez Canal, "
+                "so there is no canal toll and no Suez-or-Cape choice.")
     else:
         via = "cape"
         sb.info(f"A fully laden {vessel.name} is too deep for the Suez Canal, so it goes via the Cape.")
@@ -71,7 +89,8 @@ def sidebar_setup() -> dict:
 
     benchmark = sb.selectbox("Sell price benchmark", list(BENCHMARK_LABELS),
                              format_func=BENCHMARK_LABELS.get, key="benchmark",
-                             help="The published price the cargo is valued against in India.")
+                             help="The published price the cargo is valued against at the discharge port. Brent is "
+                                  "the usual reference in Europe; India and East Asia use both Brent and Dubai.")
     return dict(origin=origin, destination=destination, vessel_key=vessel_key, via=via,
                 market=market, hire=A.val(hire_record), hire_is_estimate=A.is_estimate(hire_record),
                 benchmark=benchmark)

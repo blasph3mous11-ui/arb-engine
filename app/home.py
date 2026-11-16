@@ -15,7 +15,8 @@ st.title("Physical Crude Arbitrage & Voyage Engine")
 st.markdown(
     "A physical oil trader asks one question every day: **if I buy a cargo of crude at port A and "
     "ship it to port B, do I make money today, and what drives the answer?** This tool works "
-    "that out for US Gulf Coast crude shipped to the west coast of India, and shows every step.")
+    "that out for US Gulf Coast crude shipped to India, Europe or East Asia, and shows every step. "
+    "The starting case is a one-million-barrel cargo to the west coast of India.")
 
 st.subheader("Today's answer")
 ui.verdict_banner(result)
@@ -29,7 +30,7 @@ c3.metric("Sell at destination", ui.usd(result.sale_value),
 c4.metric("Margin per barrel", ui.usd(result.margin_per_bbl))
 st.caption(f"{inputs.cargo_bbl / 1e6:.2f} million barrels, {V.get_port(inputs.origin_key)['name']} to "
            f"{V.get_port(inputs.destination_key)['name']}, {V.get_vessel(inputs.vessel_key).name}, "
-           f"{V.ROUTES[inputs.via].replace('Via', 'via')}. Prices: WTI {dates['wti_label']}, "
+           f"{ui.route_phrase(inputs.via)}. Prices: WTI {dates['wti_label']}, "
            f"{dates['benchmark'].title()} {dates['destination_label']}. "
            "Change the trade in the sidebar on the left.")
 
@@ -38,7 +39,7 @@ a, b = st.columns(2)
 a.markdown("""
 **The idea in four lines**
 
-1. Crude costs one price in the US and another in India.
+1. Crude costs one price in the US and another at the discharge port.
 2. Moving it costs money: a ship, fuel, canal tolls, interest, insurance.
 3. If the price gap is bigger than the cost of moving it, the **arb is open** and the trade pays.
 4. If not, the **arb is closed** and the oil stays where it is.

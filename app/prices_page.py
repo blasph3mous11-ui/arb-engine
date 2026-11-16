@@ -11,7 +11,8 @@ from engine import prices as P
 st.title("Prices")
 st.markdown(
     "The trade starts with a price gap. We buy crude priced off **WTI** (the US benchmark) and "
-    "sell it priced off **Brent** or **Dubai** (the benchmarks used for oil delivered to India). "
+    "sell it priced off **Brent** or **Dubai** (the benchmarks used for oil delivered to Europe "
+    "and Asia). "
     "The gap between them has to pay for the whole voyage.")
 
 if st.button("Download the latest prices", icon=":material/refresh:"):

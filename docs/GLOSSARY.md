@@ -58,6 +58,27 @@ conversion depends on the oil's density: light crude is roughly 7.6 barrels to t
 
 ## Ships and voyages
 
+**Panamax**
+The smallest crude tanker in this tool, about 0.5 million barrels (60,000-80,000 tonnes
+deadweight). Named for the old Panama Canal locks it was built to fit. Its size class is also
+called LR1.
+
+**Eco ship and scrubber**
+An "eco" ship is a modern design that burns noticeably less fuel at the same speed: about 37
+tonnes a day for a Suezmax against 44 for an older one. A scrubber is equipment that cleans the
+exhaust so the ship may burn cheaper high-sulphur fuel. The tool models the lower fuel use but
+prices all fuel at the low-sulphur estimate, so it understates the scrubber's benefit.
+
+**LOOP and reverse lightering**
+LOOP, the Louisiana Offshore Oil Port, is a deep-water terminal 18 miles off Louisiana and the
+one US facility that can fully load a VLCC. Ports such as Houston and Corpus Christi are too
+shallow, so a VLCC loading there is topped up offshore from smaller ships. That ship-to-ship
+top-up is called reverse lightering and adds cost the tool does not model.
+
+**Direct route**
+A voyage with no canal choice to make, such as the US Gulf to Rotterdam straight across the
+Atlantic. No canal toll, no canal day, no Red Sea war-risk premium.
+
 **Aframax, Suezmax, VLCC**
 The three main crude tanker sizes. An Aframax carries about 0.75 million barrels, a Suezmax about
 1 million (the largest ship that can pass the Suez Canal fully loaded), and a VLCC ("very large

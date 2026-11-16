@@ -8,7 +8,7 @@ import pandas as pd
 
 from engine import assumptions as A
 from engine.arbitrage import ArbInputs, run
-from engine.voyage import get_vessel
+from engine.voyage import get_vessel, route_options
 
 
 def _cut_label(start: float, cut: float, decimals: int) -> str:
@@ -64,8 +64,11 @@ def tornado(inputs: ArbInputs, suez_open: bool = True) -> list[dict]:
          f"+{delay:.0f} days", inputs.with_changes(delay_days=inputs.delay_days + delay)),
     ]
     # Switching route is a yes/no change, shown as a one-sided bar.
+    # Only offered where both routes exist: not for a voyage that never goes near
+    # Suez (US Gulf to Europe), nor for a ship too deep for the canal.
+    options = route_options(inputs.origin_key, inputs.destination_key, inputs.vessel_key)
     other = "cape" if inputs.via == "suez" else "suez"
-    if other == "cape" or (suez_open and get_vessel(inputs.vessel_key).can_transit_suez_laden):
+    if inputs.via != "direct" and other in options and (other == "cape" or suez_open):
         label = "Suez closed: go via Cape" if other == "cape" else "Use Suez instead of Cape"
         cases.append((label, "no change", inputs, "switch route", inputs.with_changes(via=other)))
 

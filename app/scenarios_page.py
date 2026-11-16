@@ -38,13 +38,14 @@ spread = right.slider(f"Price spread, {benchmark_name} minus WTI, USD per barrel
                       help="Moves the destination price while holding WTI where it is.")
 delay = right.slider("Delay at port, days", 0, 30, int(base_inputs.delay_days),
                      help="Days the ship waits beyond the agreed time. Charged as demurrage.")
-can_use_suez = vessel.can_transit_suez_laden
-already_cape = base_inputs.via == "cape"
+# The switch only means something when the voyage is currently routed through Suez.
+on_suez = base_inputs.via == "suez"
 suez_closed = right.toggle("Suez Canal closed (force the Cape route)", value=False,
-                           disabled=already_cape,
-                           help="The route is already via the Cape, so this switch changes nothing."
-                                if already_cape else
-                                "Sends the ship round South Africa whatever the sidebar says.")
+                           disabled=not on_suez,
+                           help="Sends the ship round South Africa whatever the sidebar says."
+                                if on_suez else
+                                "This voyage is not routed through the Suez Canal, so the switch "
+                                "changes nothing.")
 
 # The sliders work in whole dollars; if one has not been moved, keep the exact base value.
 if bunker == int(round(base_inputs.bunker_usd_per_tonne)):
@@ -55,7 +56,7 @@ if spread == float(round(base.benchmark_spread, 2)):
 scenario_inputs = base_inputs.with_changes(
     hire_usd_per_day=float(hire), bunker_usd_per_tonne=float(bunker), interest_rate_pct=rate,
     destination_benchmark_price=base_inputs.origin_benchmark_price + spread, delay_days=float(delay),
-    via="cape" if (suez_closed or not can_use_suez) else base_inputs.via)
+    via="cape" if (suez_closed and on_suez) else base_inputs.via)
 scenario = arbitrage.run(scenario_inputs)
 breakeven = scenarios.breakeven_spread(scenario_inputs)
 

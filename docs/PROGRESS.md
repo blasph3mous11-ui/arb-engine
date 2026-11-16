@@ -2,17 +2,42 @@
 
 Read this first at the start of every session.
 
-## Where things stand (15 November 2026)
+## Where things stand (17 November 2026)
 
-**All five phases are built and working for the starting case** (1 million barrels, US Gulf Coast
-to west coast India, Suez or Cape). 80 tests pass. The dashboard runs locally with six pages.
+**All five phases are built and working**, and the tool now covers 4 US Gulf load ports, 7
+discharge ports (India, Europe, East Asia) and 5 ship types. 115 tests pass. The dashboard runs
+locally with six pages. The code is on GitHub: https://github.com/blasph3mous11-ui/arb-engine
+
+## Expansion, 17 November 2026: more ports, ships and proper route handling
+
+The owner asked for more load and discharge ports and more ship types.
+
+- **Load ports added:** LOOP (the one US terminal that can fully load a VLCC) and Beaumont /
+  Nederland. **Discharge ports added:** Paradip, Rotterdam, Singapore, Ningbo-Zhoushan, Ulsan.
+  All new port costs are estimates (no free published figures found) and are flagged as such.
+- **Ships added:** Panamax (0.5m barrels) and a modern eco, scrubber-fitted Suezmax that burns
+  about 37 t/day loaded against 44. Each has a hire rate in all three freight markets.
+- **Routes are now worked out per voyage.** The routing library reports whether the shortest
+  path passes the Suez Canal. If it does, the tool offers Suez and Cape (Cape only for a VLCC).
+  If it does not (US Gulf to Rotterdam), there is a single direct route with no toll, no canal
+  day and no war-risk premium. Asking for a route that does not exist is an error, not a silent
+  wrong answer.
+- **Decision: stay a US crude export tool.** Every load port is US Gulf and the grade is WTI.
+  Adding other load regions would need new grades and price sources; not done.
+- **Decision: no Panama Canal route.** A VLCC cannot use it, a full Suezmax is at or beyond the
+  draught limit, and there is no free source for the tanker toll, so the route is not offered
+  rather than guessed. Recorded in `ports.yaml` under `routing`.
+- **Sanity checks (calm market, fuel $600/t):** Houston-Rotterdam Aframax $2.60/bbl; LOOP-Ningbo
+  VLCC via Cape $3.66/bbl; Houston-Rotterdam is 5,002 nm against about 5,000 in published tables.
+- **Not yet done:** the case study and interview notes still discuss only the India route (by
+  design). The new port costs and the Panamax figures are the weakest numbers in the tool.
 
 The project now lives in `Desktop\crude-arb-project\arb-engine`, with its Python environment
 set up there (`.venv`) and the tests and dashboard confirmed working from that folder.
 
-Still to do, and it needs the owner:
-1. **Publish**: put the code on GitHub and deploy on Streamlit Community Cloud. Step-by-step
-   instructions are in `docs/DEPLOY.md`. Not done yet because it needs the owner's accounts.
+Still to do:
+1. **Deploy on Streamlit Community Cloud** (the GitHub upload is done). Steps are in
+   `docs/DEPLOY.md`, Part 2. The owner has to approve Streamlit's access to GitHub in the browser.
 
 ## What was built
 

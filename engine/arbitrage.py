@@ -21,7 +21,7 @@ class ArbInputs:
     origin_key: str
     destination_key: str
     vessel_key: str
-    via: str                              # "suez" or "cape"
+    via: str                              # "suez", "cape" or "direct"
     cargo_bbl: float
     grade: str                            # the crude being shipped, e.g. "wti"
     destination_benchmark: str            # what it is priced against, e.g. "brent"

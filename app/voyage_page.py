@@ -18,8 +18,8 @@ bunker_default = base_inputs.bunker_usd_per_tonne
 
 st.title("Voyage calculator")
 st.markdown(
-    f"What it costs to move a cargo from **{origin['name']}** to **{destination['name']}** on a "
-    f"**{vessel.name}**. The cargo pays for the ship for the whole round trip, including the "
+    f"What it costs to move a cargo from **{origin['name']}** to **{destination['name']}** on "
+    f"{ui.a_or_an(vessel.name).split()[0]} **{vessel.name}**. The cargo pays for the ship for the whole round trip, including the "
     "empty leg home, plus fuel, port charges and canal tolls.")
 
 left, right = st.columns(2)
@@ -44,8 +44,11 @@ def run(via: str) -> V.VoyageResult:
 
 
 chosen = run(setup["via"])
-other_via = "cape" if setup["via"] == "suez" else "suez"
-other = run(other_via) if (other_via == "cape" or vessel.can_transit_suez_laden) else None
+# The other route, where one exists (Suez against Cape). None for a direct Atlantic
+# crossing, or for a ship too deep for the canal.
+options = V.route_options(setup["origin"], setup["destination"], setup["vessel_key"])
+other_via = next((v for v in options if v != setup["via"]), None)
+other = run(other_via) if other_via else None
 
 st.subheader(f"{V.ROUTES[setup['via']]}: the headline numbers")
 c1, c2, c3, c4 = st.columns(4)
