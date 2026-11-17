@@ -27,7 +27,7 @@ def _refresh_code_if_updated() -> None:
     watched = [*(ROOT / "engine").glob("*.py"), *(ROOT / "data" / "assumptions").glob("*.yaml"),
                ROOT / "app" / "ui.py", ROOT / "app" / "charts.py"]
     newest = max(path.stat().st_mtime for path in watched)
-    if getattr(sys, "_arb_engine_code_time", None) != newest:
+    if getattr(sys, "_arb_engine_code_time", newest) != newest:
         for name in [m for m in sys.modules if m in ("ui", "charts", "engine") or m.startswith("engine.")]:
             del sys.modules[name]
         st.cache_data.clear()
