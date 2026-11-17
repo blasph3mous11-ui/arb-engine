@@ -55,10 +55,27 @@ c1, c2, c3, c4 = st.columns(4)
 c1.metric("Distance, one way", f"{chosen.distance_nm:,.0f} nm")
 c2.metric("Days loaded (port to port)", f"{chosen.laden_days:,.1f}")
 c3.metric("Days ship is tied up", f"{chosen.total_days:,.1f}", help="Round trip, including the empty leg home.")
-c4.metric("Freight per barrel (estimated)", ui.usd(chosen.cost_per_bbl),
+c4.metric("Freight per barrel (estimated)" if setup["freight_basis"] == "hire"
+          else "Voyage cost to the owner per barrel (estimated)", ui.usd(chosen.cost_per_bbl),
           help=f"Total voyage cost {ui.usd(chosen.total_cost / 1e6, 2)} million over {cargo:,.0f} barrels. "
                "An estimate: the hire rate, fuel price and several ship figures behind it are "
                "estimates (listed at the bottom of this page).")
+
+if setup["freight_basis"] != "hire":
+    quote = setup["freight_quote_usd"]
+    tce = V.implied_tce(chosen, quote)
+    st.subheader("The broker's quote")
+    q1, q2, q3 = st.columns(3)
+    q1.metric("Quoted freight per barrel", ui.usd(quote / cargo),
+              help=f"{ui.usd(quote / 1e6, 2)} million for {cargo:,.0f} barrels, from the sidebar.")
+    q2.metric("Owner's daily earnings (TCE)", ui.usd(tce, 0),
+              help="What the shipowner keeps per day: the quote minus fuel, ports, canal and war-risk "
+                   "cover, divided by the days the ship is tied up.")
+    q3.metric("Compared with the hire rate", ui.usd(tce - hire, 0),
+              help="Positive: the quote pays the owner more than the daily hire rate in the box above.")
+    st.caption("The quote sets the freight used on the Arbitrage, Scenarios and Start pages. The cost "
+               "breakdown below is what the voyage costs the owner (estimated), which the quote has "
+               "to cover. TCE stands for time charter equivalent.")
 
 map_col, cost_col = st.columns([3, 2])
 with map_col:

@@ -110,10 +110,22 @@ fuel and port costs. Tanker voyage rates are quoted in "Worldscale" points, a pe
 published reference rate for each route. Worldscale rates assume a round trip, which is why we
 charge the cargo for the empty leg home.
 
+**Flat rate (Worldscale)**
+The reference freight for one specific route, in dollars per tonne, published once a year by the
+Worldscale Association for a standard ship. Brokers quote a percentage of it: WS 100 is the flat
+rate, WS 150 is one and a half times it. Freight = points / 100 x flat rate x tonnes of cargo.
+Flat rates are sold by subscription, so the tool asks you to type the one for your route.
+
+**Lump sum**
+A single dollar figure for the whole voyage, used instead of Worldscale for some routes and
+cargoes, such as US Gulf exports to Asia.
+
 **Time charter equivalent (TCE)**
 A way to compare the two: take what a voyage charter pays, subtract fuel, port and canal costs,
 and divide by the days taken. The result is the daily earnings the owner actually keeps, directly
 comparable with a time charter hire rate. Published TCE figures are where our hire rates come from.
+When you type a broker's quote, the Voyage page works out the TCE it implies, so you can see
+whether a quote is generous or thin compared with the market hire rate.
 
 **Freight**
 The cost of shipping, usually quoted in dollars per barrel or per tonne of cargo.

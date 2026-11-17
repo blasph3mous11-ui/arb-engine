@@ -12,7 +12,8 @@ from dataclasses import dataclass, replace
 
 from engine import assumptions as A
 from engine import costs as C
-from engine.voyage import VoyageResult, get_vessel, voyage_from_assumptions
+from engine.units import barrels_to_tonnes
+from engine.voyage import VoyageResult, get_vessel, implied_tce, voyage_from_assumptions
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,9 @@ class ArbInputs:
     insurance_rate_pct: float
     transit_loss_pct: float
     delay_days: float
+    # A broker's freight quote for the whole cargo, in USD. None means freight is
+    # built from the daily hire rate, fuel, ports and canal instead.
+    freight_override_usd: float | None = None
 
     def with_changes(self, **changes) -> "ArbInputs":
         return replace(self, **changes)
@@ -117,6 +121,11 @@ class ArbResult:
         return self.margin_per_bbl > 0
 
     @property
+    def implied_tce(self) -> float:
+        """What the shipowner earns per day on this freight (time charter equivalent)."""
+        return implied_tce(self.voyage, self.cost_stack["Freight"] * self.inputs.cargo_bbl)
+
+    @property
     def benchmark_spread(self) -> float:
         """Destination benchmark minus origin benchmark, USD/bbl."""
         return self.inputs.destination_benchmark_price - self.inputs.origin_benchmark_price
@@ -141,7 +150,11 @@ def run(inputs: ArbInputs) -> ArbResult:
     sale_value = inputs.destination_benchmark_price + inputs.destination_differential + quality
 
     cargo_value = purchase_price * barrels
-    freight = voyage.total_cost
+    # A broker's quote, when given, replaces the freight built up from the daily hire rate.
+    freight = voyage.total_cost if inputs.freight_override_usd is None else inputs.freight_override_usd
+    # Demurrage tracks what the ship earns per day: the hire rate, or the quote's implied TCE.
+    daily_rate = (inputs.hire_usd_per_day if inputs.freight_override_usd is None
+                  else max(implied_tce(voyage, freight), 0.0))
 
     # Money is tied up from loading until the buyer pays.
     financed_days = voyage.laden_days + inputs.delay_days + inputs.financing_extra_days
@@ -150,7 +163,7 @@ def run(inputs: ArbInputs) -> ArbResult:
     insurance = C.insurance_cost(cargo_value, freight, inputs.insurance_rate_pct,
                                  A.get("costs", "insurance", "insured_value_uplift_pct"))
     loss = C.transit_loss_cost(sale_value * barrels, inputs.transit_loss_pct)
-    demurrage = C.demurrage_cost(inputs.delay_days, inputs.hire_usd_per_day,
+    demurrage = C.demurrage_cost(inputs.delay_days, daily_rate,
                                  A.get("costs", "demurrage", "rate_as_share_of_hire"),
                                  vessel.idle_consumption_tpd, inputs.bunker_usd_per_tonne)
 
@@ -163,3 +176,8 @@ def run(inputs: ArbInputs) -> ArbResult:
     }
     return ArbResult(inputs=inputs, voyage=voyage, purchase_price=purchase_price,
                      cost_stack=cost_stack, quality_differential=quality, sale_value=sale_value)
+
+
+def cargo_tonnes(cargo_bbl: float, grade: str) -> float:
+    """The cargo's weight in tonnes, from its volume and the grade's API gravity."""
+    return barrels_to_tonnes(cargo_bbl, A.get("costs", "grades", grade, "api_gravity"))

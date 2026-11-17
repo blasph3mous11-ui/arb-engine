@@ -39,8 +39,11 @@ st.markdown("""
 - **It does not use real traded freight or physical price data.** Actual freight rates (Baltic
   Exchange, Platts, Argus) and the premiums paid for physical cargoes are sold by subscription.
   This tool uses public benchmark prices and documented estimates, each labelled as such.
-- **Freight is built bottom-up from a daily hire rate**, not from a quoted Worldscale or lump-sum
-  rate. That makes the drivers visible, but the result depends heavily on the hire rate chosen.
+- **Freight is built bottom-up from a daily hire rate** unless you type a broker's quote
+  (Worldscale points and flat rate, or a lump sum) in the sidebar. The tool cannot supply real
+  quotes or Worldscale flat rates, which are paywalled; it only does the arithmetic on the ones you
+  enter, and shows what they pay the shipowner per day. Without a quote the result depends heavily
+  on the hire rate chosen.
 - **The origin price is WTI at an inland hub plus an estimated differential**, not an actual
   Gulf Coast export price. The sale price is a benchmark plus a rule-of-thumb quality adjustment,
   not a negotiated delivered price.

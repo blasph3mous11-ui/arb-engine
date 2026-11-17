@@ -24,6 +24,18 @@ def _cut_label(start: float, cut: float, decimals: int) -> str:
     return "no change (already 0%)"
 
 
+def _freight_case(inputs: ArbInputs, share: float) -> tuple:
+    """Tornado row for the cost of the ship: the daily hire rate, or the broker's quote if one is given."""
+    if inputs.freight_override_usd is None:
+        return (f"Vessel hire rate (+/- {share:.0%})",
+                f"-{share:.0%}", inputs.with_changes(hire_usd_per_day=inputs.hire_usd_per_day * (1 - share)),
+                f"+{share:.0%}", inputs.with_changes(hire_usd_per_day=inputs.hire_usd_per_day * (1 + share)))
+    quote = inputs.freight_override_usd
+    return (f"Freight quote (+/- {share:.0%})",
+            f"-{share:.0%}", inputs.with_changes(freight_override_usd=quote * (1 - share)),
+            f"+{share:.0%}", inputs.with_changes(freight_override_usd=quote * (1 + share)))
+
+
 def tornado(inputs: ArbInputs, suez_open: bool = True) -> list[dict]:
     """Flex each driver down and up, one at a time, and record the margin.
 
@@ -45,9 +57,7 @@ def tornado(inputs: ArbInputs, suez_open: bool = True) -> list[dict]:
         (f"Price spread (+/- ${spread:.0f}/bbl)",
          f"-${spread:.0f}", inputs.with_changes(destination_benchmark_price=inputs.destination_benchmark_price - spread),
          f"+${spread:.0f}", inputs.with_changes(destination_benchmark_price=inputs.destination_benchmark_price + spread)),
-        (f"Vessel hire rate (+/- {hire:.0%})",
-         f"-{hire:.0%}", inputs.with_changes(hire_usd_per_day=inputs.hire_usd_per_day * (1 - hire)),
-         f"+{hire:.0%}", inputs.with_changes(hire_usd_per_day=inputs.hire_usd_per_day * (1 + hire))),
+        _freight_case(inputs, hire),
         (f"Bunker price (+/- {bunker:.0%})",
          f"-{bunker:.0%}", inputs.with_changes(bunker_usd_per_tonne=inputs.bunker_usd_per_tonne * (1 - bunker)),
          f"+{bunker:.0%}", inputs.with_changes(bunker_usd_per_tonne=inputs.bunker_usd_per_tonne * (1 + bunker))),

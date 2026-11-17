@@ -56,10 +56,14 @@ lines = [
     ("= Purchase price", result.purchase_price, "What we pay per barrel at the load port."),
     # Freight always contains estimates (the fuel price at least), whatever the hire rate's status.
     ("+ Freight" + (E if setup["hire_is_estimate"] else " (part estimated)"), result.cost_stack["Freight"],
-     f"{result.voyage.total_days:.1f} days of ship hire at {ui.usd(inputs.hire_usd_per_day, 0)} a day"
-     f"{E if setup['hire_is_estimate'] else ''}, "
-     f"{result.voyage.total_fuel_tonnes:,.0f} tonnes of fuel at {ui.usd(inputs.bunker_usd_per_tonne, 0)} "
-     "(estimated), port charges, canal tolls. See the Voyage page."),
+     (f"{result.voyage.total_days:.1f} days of ship hire at {ui.usd(inputs.hire_usd_per_day, 0)} a day"
+      f"{E if setup['hire_is_estimate'] else ''}, "
+      f"{result.voyage.total_fuel_tonnes:,.0f} tonnes of fuel at {ui.usd(inputs.bunker_usd_per_tonne, 0)} "
+      "(estimated), port charges, canal tolls. See the Voyage page."
+      if inputs.freight_override_usd is None else
+      f"The broker's quote typed in the sidebar: {ui.usd(inputs.freight_override_usd / 1e6, 2)} million "
+      f"for the cargo. It pays the owner about {ui.usd(result.implied_tce, 0)} a day after fuel, ports "
+      "and canal costs (estimated). See the Voyage page.")),
     ("+ Financing (part estimated)", result.cost_stack["Financing"],
      f"SOFR {sofr:.2f}% plus an estimated {bank_margin:.2f}% bank margin = {inputs.interest_rate_pct:.2f}% "
      f"a year on the cargo value for {financed_days:.1f} days."),

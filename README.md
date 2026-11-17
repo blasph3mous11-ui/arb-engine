@@ -19,6 +19,7 @@ Code: https://github.com/blasph3mous11-ui/arb-engine
 | Ship | Panamax (0.5m bbl), Aframax (0.75m), Suezmax (1m), modern eco Suezmax (1m), VLCC (2m) |
 | Route | Worked out for each voyage: Suez or Cape where the shortest path passes Suez; one direct route across the Atlantic to Europe. A VLCC, too deep for Suez when full, goes via the Cape. |
 | Freight market | Today's spot market, a one-year time charter, or a calm-market reference |
+| Freight basis | The daily hire rate from the freight market, or a broker's quote you type in (Worldscale points and flat rate, or a lump sum), with the shipowner's implied daily earnings (TCE) |
 
 It is a US crude export tool: the grade shipped is always WTI. The Panama Canal is not offered as a route.
 

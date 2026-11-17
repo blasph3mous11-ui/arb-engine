@@ -22,6 +22,10 @@ st.markdown(
     f"**{origin['name']}** on {ui.a_or_an(vessel.name)} and works out the margin to each "
     f"discharge port, using the cheapest route available to that port.")
 
+if inputs.freight_override_usd is not None:
+    st.info("A broker's quote covers one voyage only, so this ranking costs every destination from "
+            "the daily hire rate in the freight market chosen in the sidebar.")
+    inputs = inputs.with_changes(freight_override_usd=None)
 rows = ranking.rank_destinations(inputs)
 best, worst = rows[0], rows[-1]
 

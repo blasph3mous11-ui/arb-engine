@@ -23,10 +23,17 @@ st.markdown("Move the main drivers and watch the margin respond. Nothing here is
 # ---------------------------------------------------------------- sliders
 st.subheader("What if?")
 left, right = st.columns(2)
-hire = left.slider("Ship hire, USD per day" + (" (estimated)" if setup["hire_is_estimate"] else ""),
-                   10_000, 600_000, int(base_inputs.hire_usd_per_day), 5_000,
-                   help="The daily cost of the ship. Usually the biggest part of freight when hire "
-                        "rates are high; in a calm market fuel can be bigger.")
+quote_mode = base_inputs.freight_override_usd is not None
+if quote_mode:
+    hire = base_inputs.hire_usd_per_day
+    quote_bbl = left.slider("Broker's freight quote, USD per barrel", 0.0, 60.0,
+                            float(round(base_inputs.freight_override_usd / base_inputs.cargo_bbl, 2)), 0.05,
+                            help="Starts at the quote typed in the sidebar.")
+else:
+    hire = left.slider("Ship hire, USD per day" + (" (estimated)" if setup["hire_is_estimate"] else ""),
+                       10_000, 600_000, int(base_inputs.hire_usd_per_day), 5_000,
+                       help="The daily cost of the ship. Usually the biggest part of freight when hire "
+                            "rates are high; in a calm market fuel can be bigger.")
 bunker = left.slider("Fuel (bunker) price, USD per tonne (estimated)", 200, 1_500,
                      int(round(base_inputs.bunker_usd_per_tonne)), 10,
                      help="Estimated as the latest Brent price times a fixed ratio.")
@@ -53,7 +60,14 @@ if bunker == int(round(base_inputs.bunker_usd_per_tonne)):
 if spread == float(round(base.benchmark_spread, 2)):
     spread = base.benchmark_spread
 
+# In quote mode the slider sets the quoted freight; keep the exact quote unless it was moved.
+freight_quote = None
+if quote_mode:
+    unmoved = quote_bbl == float(round(base_inputs.freight_override_usd / base_inputs.cargo_bbl, 2))
+    freight_quote = base_inputs.freight_override_usd if unmoved else quote_bbl * base_inputs.cargo_bbl
+
 scenario_inputs = base_inputs.with_changes(
+    freight_override_usd=freight_quote,
     hire_usd_per_day=float(hire), bunker_usd_per_tonne=float(bunker), interest_rate_pct=rate,
     destination_benchmark_price=base_inputs.origin_benchmark_price + spread, delay_days=float(delay),
     via="cape" if (suez_closed and on_suez) else base_inputs.via)
@@ -99,8 +113,12 @@ def run_grid(inputs: arbitrage.ArbInputs) -> pd.DataFrame:
     return scenarios.margin_grid(inputs, hire_values, spread_values)
 
 
-st.plotly_chart(charts.margin_heatmap(run_grid(scenario_inputs), scenario_inputs.hire_usd_per_day,
-                                      scenario.benchmark_spread), width="stretch")
+if quote_mode:
+    st.info("This grid varies the ship's daily hire rate, which a fixed broker's quote replaces. "
+            "Set \"How is freight set?\" in the sidebar back to the daily hire rate to use it.")
+else:
+    st.plotly_chart(charts.margin_heatmap(run_grid(scenario_inputs), scenario_inputs.hire_usd_per_day,
+                                          scenario.benchmark_spread), width="stretch")
 st.caption(f"Each square is the margin for one pairing of ship hire rate (across) and "
            f"{benchmark_name}-minus-WTI price gap (up), with everything else held at the values "
            "set above. Green pays, red loses, and the black line is break-even: above it the arb "

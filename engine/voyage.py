@@ -348,3 +348,25 @@ def voyage_from_assumptions(
         canal_toll_ballast_usd=suez_toll_usd(vessel.suez_canal_net_tonnage, laden=False),
         war_risk_usd_per_transit=war_risk,
     )
+
+
+def worldscale_freight_usd(points: float, flat_rate_usd_per_tonne: float, cargo_tonnes: float) -> float:
+    """Freight from a Worldscale quote.
+
+    Brokers quote tanker freight as a percentage ("points") of a published flat
+    rate in dollars per tonne for the route. WS 100 means the flat rate itself;
+    WS 150 means one and a half times it. Freight = points / 100 x flat rate x tonnes.
+    """
+    return points / 100 * flat_rate_usd_per_tonne * cargo_tonnes
+
+
+def implied_tce(voyage_result: "VoyageResult", freight_usd: float) -> float:
+    """The shipowner's daily earnings implied by a freight figure (time charter equivalent).
+
+    Take what the cargo pays for freight, subtract everything the owner pays on
+    the voyage other than the ship itself (fuel, ports, canal, war-risk cover),
+    and divide by the days the ship is tied up. If the freight was built from a
+    daily hire rate, this gives that hire rate back.
+    """
+    costs_other_than_hire = voyage_result.total_cost - voyage_result.costs["Vessel hire"]
+    return (freight_usd - costs_other_than_hire) / voyage_result.total_days

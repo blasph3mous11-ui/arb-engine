@@ -11,6 +11,11 @@ from engine import assumptions as A
 from engine import prices as P
 from engine import voyage as V
 
+FREIGHT_BASES = {
+    "hire": "Daily hire rate (from the freight market)",
+    "worldscale": "Broker quote: Worldscale",
+    "lump_sum": "Broker quote: lump sum",
+}
 BENCHMARK_LABELS = {"brent": "Brent (daily)", "dubai": "Dubai (monthly average)"}
 ESTIMATED = ":orange-badge[estimated]"
 
@@ -90,13 +95,51 @@ def sidebar_setup() -> dict:
     sb.caption(f"{A.val(markets[market]['description'])}  \n**Hire: {usd(A.val(hire_record), 0)} a day**"
                f"{tag(A.is_estimate(hire_record))}")
 
+    basis = sb.radio("How is freight set?", list(FREIGHT_BASES), format_func=FREIGHT_BASES.get,
+                     key="freight_basis",
+                     help="Brokers quote tanker freight either in Worldscale points or as a lump sum "
+                          "for the voyage. Type a quote here to use it instead of the daily hire rate.")
+    quote_usd = None
+    if basis != "hire":
+        quote_usd = _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, A.val(hire_record))
+
     benchmark = sb.selectbox("Sell price benchmark", list(BENCHMARK_LABELS),
                              format_func=BENCHMARK_LABELS.get, key="benchmark",
                              help="The published price the cargo is valued against at the discharge port. Brent is "
                                   "the usual reference in Europe; India and East Asia use both Brent and Dubai.")
     return dict(origin=origin, destination=destination, vessel_key=vessel_key, via=via,
                 market=market, hire=A.val(hire_record), hire_is_estimate=A.is_estimate(hire_record),
-                benchmark=benchmark)
+                benchmark=benchmark, freight_basis=basis, freight_quote_usd=quote_usd)
+
+
+def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire) -> float:
+    """Boxes for a broker's freight quote. Returns the quoted freight for the whole cargo, in USD.
+
+    The boxes start at the figure the daily hire rate gives for this exact voyage, so
+    switching on a quote changes nothing until a broker's numbers are typed in.
+    """
+    prices, _ = get_prices()
+    brent, _ = P.latest(prices, "brent")
+    built_up = V.voyage_from_assumptions(origin, destination, vessel_key, via, hire_usd_per_day=hire,
+                                         bunker_usd_per_tonne=P.bunker_price_estimate(brent)).total_cost
+    voyage_key = f"{origin}_{destination}_{vessel_key}_{via}"
+    if basis == "lump_sum":
+        millions = sb.number_input("Lump sum for the voyage, USD million", min_value=0.0, step=0.1,
+                                   value=round(built_up / 1e6, 2), key=f"lump_{voyage_key}",
+                                   help="The total freight the broker quotes for this voyage.")
+        sb.caption("Pre-filled with the daily-hire estimate for this voyage. Type the broker's figure.")
+        return millions * 1e6
+    tonnes = arbitrage.cargo_tonnes(V.get_vessel(vessel_key).cargo_capacity_bbl, "wti")
+    points = sb.number_input("Worldscale points", min_value=0.0, step=5.0, value=100.0,
+                             key=f"ws_points_{voyage_key}",
+                             help="The percentage of the flat rate the broker quotes: WS 150 means 1.5 x.")
+    flat = sb.number_input("Flat rate for the route, USD per tonne", min_value=0.0, step=0.5,
+                           value=round(built_up / tonnes, 2), key=f"ws_flat_{voyage_key}",
+                           help="Published each year by the Worldscale Association (subscription only).")
+    sb.caption(f"Pre-filled so that WS 100 matches the daily-hire estimate for this voyage "
+               f"({tonnes:,.0f} tonnes of WTI). Type the broker's points and the route's flat rate. "
+               "The real flat rates are paywalled, so the tool does not guess them.")
+    return V.worldscale_freight_usd(points, flat, tonnes)
 
 
 def base_inputs(setup: dict, prices) -> tuple[arbitrage.ArbInputs, dict]:
@@ -124,6 +167,7 @@ def base_inputs(setup: dict, prices) -> tuple[arbitrage.ArbInputs, dict]:
         origin_key=setup["origin"], destination_key=setup["destination"],
         vessel_key=setup["vessel_key"], via=setup["via"], destination_benchmark=benchmark,
         hire_usd_per_day=setup["hire"],
+        freight_override_usd=setup.get("freight_quote_usd"),
     )
     date_format = "%B %Y average" if monthly else "%d %b %Y"
     dates = dict(wti=wti_date, brent=brent_date, destination=destination_date,

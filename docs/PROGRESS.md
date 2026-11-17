@@ -21,6 +21,15 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   voyage only; real per-market premiums are paywalled and the page says so. Today (spot market,
   Suezmax from Corpus Christi): Rotterdam is least bad at -$10.82 a barrel, Ulsan worst at
   -$33.67. 127 tests pass.
+- **Stage 3, done 17 Nov 2026: broker freight quotes.** Sidebar "How is freight set?": daily
+  hire rate (default), Worldscale (points and flat rate) or lump sum. Engine:
+  `voyage.worldscale_freight_usd`, `voyage.implied_tce`, `arbitrage.cargo_tonnes`,
+  `ArbInputs.freight_override_usd` (replaces built-up freight; demurrage then uses the quote's
+  implied TCE), `ArbResult.implied_tce`; tornado flexes the quote instead of the hire rate.
+  Decisions: Worldscale flat rates are paywalled, so the user types them; the boxes are
+  pre-filled to reproduce the daily-hire freight for that exact voyage, so turning the option on
+  changes nothing until real figures are typed. The ranking page and the hire grid always use the
+  daily hire rate (a quote covers one voyage) and say so. 144 tests pass.
 - **Stage 2, done 17 Nov 2026: freight-versus-spread grid** on the Scenarios page.
   `scenarios.margin_grid` re-runs the trade for every pairing of ship hire rate and price gap;
   `charts.margin_heatmap` draws it with the break-even line and a dot for the current inputs.

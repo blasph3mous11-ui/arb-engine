@@ -51,12 +51,33 @@ def test_page_loads(page, setup):
 def load_page(page, setup):
     app = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=120).run()
     for key, value in setup.items():
-        widget = app.radio(key=key) if key == "via" else app.selectbox(key=key)
+        widget = app.radio(key=key) if key in ("via", "freight_basis") else app.selectbox(key=key)
         widget.set_value(value)
     app.run()
     app.switch_page(str(ROOT / "app" / page)).run()
     assert not app.exception, f"{page} raised: {[e.value for e in app.exception]}"
     return app
+
+
+@pytest.mark.parametrize("basis", ["worldscale", "lump_sum"])
+def test_pages_agree_on_a_broker_quote(basis):
+    """With a quote typed in, every page uses it, and every page still loads."""
+    setup = {"freight_basis": basis}
+    voyage_page = load_page("voyage_page.py", setup)
+    arbitrage_page = load_page("arbitrage_page.py", setup)
+    scenarios_page = load_page("scenarios_page.py", setup)
+    for page in ("home.py", "ranking_page.py", "prices_page.py", "methodology_page.py"):
+        load_page(page, setup)
+
+    lines = arbitrage_page.dataframe[0].value.set_index("Line")["USD per barrel"]
+    arbitrage_freight = next(value for line, value in lines.items() if line.startswith("+ Freight"))
+    assert metric(voyage_page, "Quoted freight per barrel") == arbitrage_freight
+    assert metric(scenarios_page, "Freight per barrel") == arbitrage_freight
+    # Pre-filled to match the daily-hire estimate, so the owner earns about the hire rate.
+    tce = float(metric(voyage_page, "Owner's daily earnings").replace("$", "").replace(",", ""))
+    assert tce == pytest.approx(300_000, rel=0.002)
+    # The grid needs a daily hire rate, so in quote mode it is replaced by an explanation.
+    assert any("broker's quote replaces" in i.value for i in scenarios_page.info)
 
 
 def metric(app, label_start):
