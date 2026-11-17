@@ -41,7 +41,7 @@ def route_map(routes: dict, ports: list[dict]) -> go.Figure:
         textfont=dict(color=INK), showlegend=False, hoverinfo="text"))
     fig.update_geos(projection_type="natural earth", showland=True, landcolor="#f0efec",
                     showocean=True, oceancolor=SURFACE, showcountries=True, countrycolor=GRID,
-                    coastlinecolor=AXIS, lataxis_range=[-50, 60], lonaxis_range=[-135, 110])
+                    coastlinecolor=AXIS, lataxis_range=[-50, 62], lonaxis_range=[-140, 150])
     fig.update_layout(height=420, margin=dict(l=0, r=0, t=30, b=0), paper_bgcolor=SURFACE,
                       legend=dict(orientation="h", yanchor="bottom", y=1.0, x=0))
     return fig

@@ -25,6 +25,17 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   `scenarios.margin_grid` re-runs the trade for every pairing of ship hire rate and price gap;
   `charts.margin_heatmap` draws it with the break-even line and a dot for the current inputs.
   Axis ranges are our choice (`costs.yaml`, `scenario_ranges`, `grid_*`). 130 tests pass.
+- **Live-site fix, 17 Nov 2026:** after an upload the hosting service kept old calculation code
+  in memory while showing the new pages (the grid chart errored). `app/main.py` now compares
+  file times on each run and reloads the engine code when they change. If a page ever errors
+  right after an upload, restart the app once from "Manage app" on the live site.
+- **Owner checklist (figures to confirm by eye, then set `estimate: false` in the YAML):**
+  1. Platts "Specifications Guide Global Freight": Suezmax/LR1 speeds 13 / 12.5 knots; Suezmax
+     fuel 44 / 35 t/day (older ship) and 37 / 25 (eco, scrubber); port fuel 12 / 56-71 / 7.5;
+     Corpus Christi Suezmax port cost $78,000.
+  2. Baltic Exchange tanker emissions white paper: VLCC 12 knots, 58.5 t/day laden, 44 ballast.
+  3. sea-distances.org: Houston-Mumbai via Suez (about 9,700 nm) and via the Cape (about
+     11,900 nm); Houston-Rotterdam (about 5,000 nm).
 - **Stage 0, in progress:** licence added; independent review of the expansion running.
 
 ## Expansion, 17 November 2026: more ports, ships and proper route handling
