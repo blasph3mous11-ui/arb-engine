@@ -71,7 +71,11 @@ def sidebar_setup() -> dict:
     # Each load region has its own grades and its own price benchmark (WTI or Brent).
     region = V.get_port(origin)["region"]
     benchmark_label = ORIGIN_BENCHMARK_LABELS[arbitrage.origin_benchmark(origin)]
-    grade = sb.selectbox("Crude grade shipped", arbitrage.shipped_grades(region), key=f"grade_{region}",
+    grade_options = arbitrage.shipped_grades(origin_key=origin)
+    # One remembered choice per region where every port offers the same grades (the US Gulf),
+    # otherwise one per terminal (each North Sea blend loads at its own terminal).
+    grade_key = f"grade_{region}" if grade_options == arbitrage.shipped_grades(region) else f"grade_{origin}"
+    grade = sb.selectbox("Crude grade shipped", grade_options, key=grade_key,
                          format_func=lambda k: A.val(grades[k]["name"]),
                          help=f"Grades loaded at this port, each bought against {benchmark_label} "
                               "plus a differential.")

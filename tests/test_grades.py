@@ -11,6 +11,10 @@ def test_shipped_grades():
     assert arbitrage.shipped_grades("us_gulf") == ["wti", "wti_midland", "mars"]
     assert arbitrage.shipped_grades("north_sea") == ["forties", "johan_sverdrup"]
     assert len(arbitrage.shipped_grades()) == 5
+    # Each North Sea blend loads at its own terminal; US grades load at any US Gulf port.
+    assert arbitrage.shipped_grades(origin_key="hound_point") == ["forties"]
+    assert arbitrage.shipped_grades(origin_key="mongstad") == ["johan_sverdrup"]
+    assert arbitrage.shipped_grades(origin_key="houston") == ["wti", "wti_midland", "mars"]
 
 
 def test_quality_by_hand_against_brent():

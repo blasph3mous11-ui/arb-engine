@@ -26,7 +26,7 @@ SETUPS = [
     {"grade_us_gulf": "mars", "benchmark": "dubai", "origin": "loop"},
     {"grade_us_gulf": "wti_midland", "destination": "rotterdam", "freight_basis": "lump_sum"},
     {"origin": "hound_point", "destination": "rotterdam", "vessel": "aframax"},
-    {"origin": "mongstad", "grade_north_sea": "johan_sverdrup", "benchmark": "dubai",
+    {"origin": "mongstad", "benchmark": "dubai",
      "destination": "ningbo", "vessel": "vlcc"},
 ]
 
@@ -208,7 +208,7 @@ def test_typed_in_curve_reaches_the_arbitrage_page():
 
 
 def test_north_sea_cargo_is_priced_off_brent():
-    app = load_page("arbitrage_page.py", {"origin": "mongstad", "grade_north_sea": "johan_sverdrup"})
+    app = load_page("arbitrage_page.py", {"origin": "mongstad"})
     lines = list(app.dataframe[0].value["Line"])
     assert "Brent benchmark price" in lines
     assert any(line.startswith("+ Differential to Dated Brent") for line in lines)

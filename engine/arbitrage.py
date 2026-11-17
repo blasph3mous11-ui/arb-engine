@@ -87,14 +87,24 @@ def default_inputs(origin_benchmark_price: float, destination_benchmark_price: f
     return ArbInputs(**base)
 
 
-def shipped_grades(region: str | None = None) -> list[str]:
-    """The crude grades that can be loaded, optionally only those of one load region.
+def shipped_grades(region: str | None = None, origin_key: str | None = None) -> list[str]:
+    """The crude grades that can be loaded: all, those of one load region, or those of one port.
 
-    Brent and Dubai are price benchmarks only and are never shipped.
+    A grade with a `load_ports` list (the North Sea blends) loads only there; the US
+    grades can load at any US Gulf port. Brent and Dubai are price benchmarks only.
     """
-    return [key for key, grade in A.load("costs")["grades"].items()
-            if A.val(grade.get("shipped", {"value": False}))
-            and (region is None or A.val(grade["origin_region"]) == region)]
+    if origin_key is not None:
+        region = get_port(origin_key)["region"]
+    keys = []
+    for key, grade in A.load("costs")["grades"].items():
+        if not A.val(grade.get("shipped", {"value": False})):
+            continue
+        if region is not None and A.val(grade["origin_region"]) != region:
+            continue
+        if origin_key is not None and "load_ports" in grade and origin_key not in A.val(grade["load_ports"]):
+            continue
+        keys.append(key)
+    return keys
 
 
 def origin_benchmark(origin_key: str) -> str:

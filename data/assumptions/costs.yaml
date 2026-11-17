@@ -253,6 +253,7 @@ grades:
     name: {value: "Forties (North Sea light sweet)"}
     shipped: {value: true}
     origin_region: {value: north_sea}
+    load_ports: {value: [hound_point]}
     api_gravity:
       value: 41.0
       unit: degrees API
@@ -284,6 +285,7 @@ grades:
     name: {value: "Johan Sverdrup (North Sea medium sour)"}
     shipped: {value: true}
     origin_region: {value: north_sea}
+    load_ports: {value: [mongstad]}
     api_gravity:
       value: 28.7
       unit: degrees API
