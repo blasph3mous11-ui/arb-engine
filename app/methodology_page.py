@@ -60,11 +60,14 @@ st.markdown("""
 - **No Panama Canal.** It is the shortest way from the US Gulf to China or Korea, but a VLCC
   cannot use it, a full Suezmax is at or beyond its draught limit, and we have no free source
   for the tanker toll. Cargoes to Asia are offered via Suez or the Cape only.
-- **US crude only.** Every load port is on the US Gulf Coast. Three US grades can be shipped (WTI,
-  WTI Midland, Mars), each bought at the free WTI Cushing price plus an estimated differential,
-  because real Gulf Coast export prices are paywalled. Crude is valued with a straight-line
-  gravity-and-sulphur rule, not by the products a refinery would make from it: product yields
-  per grade and product prices at destination are not available as free, consistent data.
+- **Two load regions.** US Gulf Coast cargoes (WTI, WTI Midland, Mars) are bought at the free WTI
+  Cushing price plus an estimated differential; North Sea cargoes (Forties from Hound Point, Johan
+  Sverdrup from Mongstad) at the free Brent price, standing in for Dated Brent, plus an estimated
+  differential. Real physical prices are paywalled. West African and Middle East origins are not
+  offered because they would rest entirely on estimated prices. Crude is valued with a
+  straight-line gravity-and-sulphur rule, not by the products a refinery would make from it:
+  product yields per grade and product prices at destination are not available as free,
+  consistent data.
 - **Simplified logistics.** Reverse lightering is a flat rule of thumb per barrel, not a model of
   the top-up ships and days; commissions apply only to typed-in quotes; EU carbon uses a dated
   allowance price and ignores methane; no port congestion beyond the delay slider, no slow

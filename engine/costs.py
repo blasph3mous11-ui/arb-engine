@@ -69,16 +69,26 @@ def lightering_cost(cargo_bbl: float, usd_per_bbl: float) -> float:
     return cargo_bbl * usd_per_bbl
 
 
-def eu_ets_covered_fuel(fuel_tonnes_by_activity: dict, share_outside_eu_pct: float) -> float:
-    """Tonnes of fuel whose CO2 must be paid for, on a voyage between a non-EU and an EU port.
+def eu_ets_covered_fuel(fuel_tonnes_by_activity: dict, origin_in_scheme: bool,
+                        destination_in_scheme: bool, share_outside_eu_pct: float) -> float:
+    """Tonnes of fuel whose CO2 must be paid for under the EU Emissions Trading System.
 
-    The load port is outside the EU, so its fuel is not covered. Fuel burned at sea
-    (and in canals) on the way there and back counts at the outside-EU share (half).
-    Fuel burned at berth in the EU port counts in full.
+    Fuel burned at berth counts in full at a port inside the scheme (the EU plus Norway
+    and Iceland) and not at all outside it. Fuel burned at sea, there and back, counts
+    in full between two ports inside the scheme, at the outside-EU share (half) when
+    one port is outside, and not at all when both are outside.
     """
+    if origin_in_scheme and destination_in_scheme:
+        sea_share = 100.0
+    elif origin_in_scheme or destination_in_scheme:
+        sea_share = share_outside_eu_pct
+    else:
+        sea_share = 0.0
     at_sea = sum(t for activity, t in fuel_tonnes_by_activity.items()
                  if activity not in ("load_port", "discharge_port"))
-    return at_sea * share_outside_eu_pct / 100 + fuel_tonnes_by_activity["discharge_port"]
+    return (at_sea * sea_share / 100
+            + (fuel_tonnes_by_activity["load_port"] if origin_in_scheme else 0.0)
+            + (fuel_tonnes_by_activity["discharge_port"] if destination_in_scheme else 0.0))
 
 
 def eu_ets_cost(covered_fuel_tonnes: float, co2_per_tonne_fuel: float, coverage_pct: float,

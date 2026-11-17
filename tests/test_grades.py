@@ -8,7 +8,9 @@ from tests.test_arbitrage import hand_inputs
 
 
 def test_shipped_grades():
-    assert arbitrage.shipped_grades() == ["wti", "wti_midland", "mars"]
+    assert arbitrage.shipped_grades("us_gulf") == ["wti", "wti_midland", "mars"]
+    assert arbitrage.shipped_grades("north_sea") == ["forties", "johan_sverdrup"]
+    assert len(arbitrage.shipped_grades()) == 5
 
 
 def test_quality_by_hand_against_brent():

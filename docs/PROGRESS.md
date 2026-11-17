@@ -30,7 +30,20 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   density. Decision: no gross-product-worth valuation, because consistent free product yields per
   grade and destination product prices do not exist; documented on the Methodology page. Sanity:
   Mars is worth $5.04 less than Brent and $0.49 less than Dubai on the quality rule. 177 tests pass.
-- **Stage 7 (other load regions): not started; waits for the owner's choice of region.**
+- **Stage 7, done 17 Nov 2026: North Sea load region** (owner's choice). Load terminals Hound
+  Point (UK, Forties) and Mongstad (Norway, Johan Sverdrup); each origin port carries a
+  `price_benchmark` (wti or brent) and `arbitrage.origin_benchmark` / `ArbInputs.origin_benchmark`
+  drive the purchase price, the Dubai monthly comparison, the Prices page and the historical
+  view. Grades carry `origin_region`; the sidebar grade list is per region (widget key
+  `grade_<region>`). Forties 41.0 API / 0.65% S (INEOS FPS), Johan Sverdrup 28.7 / 0.81
+  (TotalEnergies assay, Nov 2025); differentials to Dated Brent 0.00 and +6.00 (Platts, Oct-Nov
+  2026), both estimates. EU carbon generalised (`costs.eu_ets_covered_fuel`): Norway is inside
+  the scheme (100% of a Norway-Rotterdam voyage and of load-port fuel), the UK is not (UK ETS
+  covers domestic voyages only; international voyages proposed from 2028). No draught limit at
+  the two terminals (both load large tankers; depths not checked, noted in the YAML). Sanity:
+  Hound Point-Rotterdam 377 nm, Aframax freight $0.70/bbl in the calm market; North Sea-west
+  India about 6,600 nm via Suez. 193 tests pass. Not offered: West Africa and the Middle East,
+  which would rest entirely on estimated prices.
 - **Stage 5, done 17 Nov 2026: futures curve effect.** Found that the EIA stopped publishing its
   free NYMEX WTI futures series (RCLC1-4) in April 2024 and no other permitted free source exists,
   so today's curve is typed in (sidebar, "Hedging: the futures curve", default 0).

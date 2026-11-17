@@ -131,7 +131,8 @@ def latest(prices: pd.DataFrame, column: str) -> tuple[float, pd.Timestamp]:
     return float(series.iloc[-1]), series.index[-1]
 
 
-def monthly_averages(prices: pd.DataFrame, destination_column: str = "dubai") -> pd.DataFrame:
+def monthly_averages(prices: pd.DataFrame, destination_column: str = "dubai",
+                     origin_column: str = "wti") -> pd.DataFrame:
     """One row per calendar month: the average of each price over that month.
 
     Dubai is only published as a monthly average. Setting it against a single
@@ -140,7 +141,7 @@ def monthly_averages(prices: pd.DataFrame, destination_column: str = "dubai") ->
     no destination price are dropped. Rows are dated the first of the month.
     """
     monthly = prices.resample("MS").mean()
-    return monthly.dropna(subset=["wti", destination_column])
+    return monthly.dropna(subset=[origin_column, destination_column])
 
 
 def bunker_price_estimate(brent_usd_per_bbl: float) -> float:

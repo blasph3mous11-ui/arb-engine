@@ -7,6 +7,7 @@ ports:
     name: {value: "Corpus Christi, USA"}
     role: {value: origin}
     region: {value: us_gulf}
+    price_benchmark: {value: wti}
     channel_depth_ft:
       value: 54
       unit: feet
@@ -31,6 +32,7 @@ ports:
     name: {value: "Houston, USA"}
     role: {value: origin}
     region: {value: us_gulf}
+    price_benchmark: {value: wti}
     channel_depth_ft:
       value: 45
       unit: feet
@@ -84,6 +86,7 @@ ports:
     name: {value: "LOOP (Louisiana Offshore Oil Port), USA"}
     role: {value: origin}
     region: {value: us_gulf}
+    price_benchmark: {value: wti}
     channel_depth_ft:
       value: 85
       unit: feet
@@ -110,6 +113,7 @@ ports:
     name: {value: "Beaumont / Nederland, USA"}
     role: {value: origin}
     region: {value: us_gulf}
+    price_benchmark: {value: wti}
     channel_depth_ft:
       value: 40
       unit: feet
@@ -128,6 +132,45 @@ ports:
       note: >
         No free published figure found. Like Houston, a long river and channel transit, so we use the
         same figure as our Houston estimate.
+  hound_point:
+    name: {value: "Hound Point (Forties), UK"}
+    role: {value: origin}
+    region: {value: north_sea}
+    price_benchmark: {value: brent}
+    latitude: {value: 56.00, unit: degrees north, source: Port location (Firth of Forth), checked: 2026-11-17, estimate: false}
+    longitude: {value: -3.20, unit: degrees east, source: Port location (Firth of Forth), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 110000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found. UK port and light dues are charged on ship size; set between
+        the US Gulf and Indian estimates. The terminal loads tankers up to VLCC size from a jetty in
+        deep water, so no draught limit is applied; that was not checked against a published depth.
+  mongstad:
+    name: {value: "Mongstad (Johan Sverdrup), Norway"}
+    role: {value: origin}
+    region: {value: north_sea}
+    price_benchmark: {value: brent}
+    eu_ets:
+      value: true
+      source: "Norway is in the European Economic Area, which the EU Emissions Trading System covers in full"
+      url: https://www.thommessen.no/en/sustainability/database/regulation/eu-emission-trading-system-for-shipping
+      checked: 2026-11-17
+      estimate: false
+    latitude: {value: 60.81, unit: degrees north, source: Port location (Fensfjorden), checked: 2026-11-17, estimate: false}
+    longitude: {value: 5.00, unit: degrees east, source: Port location (Fensfjorden), checked: 2026-11-17, estimate: false}
+    port_cost_usd:
+      value: 110000
+      unit: USD per call (Suezmax)
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        No free published figure found; same reasoning as Hound Point. A deep fjord terminal that
+        loads large crude tankers, so no draught limit is applied; not checked against a published depth.
   paradip:
     name: {value: "Paradip, India (east coast)"}
     role: {value: destination}

@@ -17,7 +17,18 @@ def test_eu_ets_covered_fuel_by_hand():
             "discharge_port": 142, "ballast_sea": 1092, "ballast_canal": 0}
     # Half of the sea fuel (1,320 + 1,092 = 2,412 -> 1,206) plus all of the berth fuel (142) = 1,348 t.
     # The load port is outside the EU, so its 24 t do not count.
-    assert costs.eu_ets_covered_fuel(fuel, 50) == pytest.approx(1348)
+    assert costs.eu_ets_covered_fuel(fuel, False, True, 50) == pytest.approx(1348)
+
+
+def test_eu_ets_inside_the_scheme_and_outside_it():
+    fuel = {"load_port": 24, "laden_sea": 1320, "laden_canal": 0,
+            "discharge_port": 142, "ballast_sea": 1092, "ballast_canal": 0}
+    # Norway to Rotterdam, both inside: all sea fuel (2,412) + both ports (24 + 142) = 2,578 t.
+    assert costs.eu_ets_covered_fuel(fuel, True, True, 50) == pytest.approx(2578)
+    # Norway to India: half the sea fuel (1,206) + the Norwegian load port (24) = 1,230 t.
+    assert costs.eu_ets_covered_fuel(fuel, True, False, 50) == pytest.approx(1230)
+    # US to India: nothing.
+    assert costs.eu_ets_covered_fuel(fuel, False, False, 50) == 0
 
 
 def test_eu_ets_cost_by_hand():

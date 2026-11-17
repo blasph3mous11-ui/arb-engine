@@ -74,6 +74,8 @@ def get_port(key: str) -> dict:
         # Only load ports carry a channel depth; it decides whether a full ship can leave.
         "channel_depth_ft": A.val(raw["channel_depth_ft"]) if "channel_depth_ft" in raw else None,
         "eu_ets": bool(A.val(raw["eu_ets"])) if "eu_ets" in raw else False,
+        # Which free price series a cargo bought here is priced against (load ports only).
+        "price_benchmark": A.val(raw["price_benchmark"]) if "price_benchmark" in raw else None,
     }
 
 

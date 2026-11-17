@@ -35,7 +35,7 @@ ui.verdict_banner(result)
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Purchase price", ui.usd(result.purchase_price),
-          help=f"WTI {ui.usd(inputs.origin_benchmark_price)} ({dates['wti_label']}) "
+          help=f"{dates['origin_name']} {ui.usd(inputs.origin_benchmark_price)} ({dates['wti_label']}) "
                f"plus {ui.usd(inputs.origin_differential)} {grade_name} differential (estimated).")
 c2.metric("Landed cost", ui.usd(result.landed_cost), help="Purchase price plus every cost of delivery.")
 c3.metric("Sale value", ui.usd(result.sale_value),
@@ -44,7 +44,7 @@ c3.metric("Sale value", ui.usd(result.sale_value),
 c4.metric("Margin per barrel", ui.usd(result.margin_per_bbl))
 if dates["monthly"]:
     st.caption(f"Dubai is only published as a monthly average, so the crude prices here are "
-               f"{dates['month_label']} averages for both Dubai and WTI. The fuel price uses the "
+               f"{dates['month_label']} averages for both Dubai and {dates['origin_name']}. The fuel price uses the "
                f"latest daily Brent ({dates['fuel_label']}).")
 
 st.subheader("From purchase price to margin")
@@ -58,12 +58,16 @@ financed_days = result.voyage.laden_days + inputs.delay_days + inputs.financing_
 E = " (estimated)"
 sofr, bank_margin = A.get("costs", "financing", "benchmark_rate_pct"), A.get("costs", "financing", "margin_pct")
 lines = [
-    ("WTI benchmark price", inputs.origin_benchmark_price,
-     f"EIA spot price for WTI at Cushing, {dates['wti_label']}."),
-    ("+ Gulf Coast differential" + E, inputs.origin_differential,  # for the grade shipped
-     f"What {grade_name} costs on a ship at the Gulf Coast over WTI at the inland Cushing hub: "
-     "the pipeline to the coast plus the grade's own market. A dated estimate you can change in "
-     "the sidebar."),
+    (f"{dates['origin_name']} benchmark price", inputs.origin_benchmark_price,
+     f"EIA spot price for {'WTI at Cushing, Oklahoma' if dates['origin_column'] == 'wti' else 'Brent (Europe, FOB), standing in for Dated Brent'}, "
+     f"{dates['wti_label']}."),
+    (("+ Gulf Coast differential" if dates["origin_column"] == "wti" else "+ Differential to Dated Brent") + E,
+     inputs.origin_differential,
+     (f"What {grade_name} costs on a ship at the Gulf Coast over WTI at the inland Cushing hub: "
+      "the pipeline to the coast plus the grade's own market. A dated estimate you can change in "
+      "the sidebar." if dates["origin_column"] == "wti" else
+      f"What {grade_name} trades at over Dated Brent, loaded at the terminal. A dated estimate you "
+      "can change in the sidebar.")),
     ("= Purchase price", result.purchase_price, "What we pay per barrel at the load port."),
     # Freight always contains estimates (the fuel price at least), whatever the hire rate's status.
     ("+ Freight" + (E if setup["hire_is_estimate"] else " (part estimated)"), result.cost_stack["Freight"],
@@ -122,10 +126,10 @@ price_adjustments = (result.quality_differential + inputs.destination_differenti
                      - inputs.origin_differential)
 adjusted_gap = result.benchmark_spread + price_adjustments
 st.info(
-    f"**How to read this.** The price gap between {benchmark_name} and WTI Cushing is "
+    f"**How to read this.** The price gap between {benchmark_name} and {dates['origin_name']} is "
     f"{ui.usd(result.benchmark_spread)} a barrel. After the estimated quality adjustment "
     f"({result.quality_differential:+.2f}), the estimated destination differential "
-    f"({inputs.destination_differential:+.2f}) and the estimated Gulf Coast differential "
+    f"({inputs.destination_differential:+.2f}) and the estimated grade differential "
     f"({-inputs.origin_differential:+.2f}), the gap is worth {ui.usd(adjusted_gap)}. "
     f"Getting the oil to {destination['name']} costs an estimated {ui.usd(costs)} a barrel, of which freight is "
     f"{freight_share:.0%}. "

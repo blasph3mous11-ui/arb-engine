@@ -154,6 +154,7 @@ grades:
   wti:
     name: {value: "WTI (US light sweet)"}
     shipped: {value: true}
+    origin_region: {value: us_gulf}
     api_gravity:
       value: 39.6
       unit: degrees API
@@ -187,6 +188,7 @@ grades:
   wti_midland:
     name: {value: "WTI Midland (US export grade)"}
     shipped: {value: true}
+    origin_region: {value: us_gulf}
     api_gravity:
       value: 42.0
       unit: degrees API
@@ -218,6 +220,7 @@ grades:
   mars:
     name: {value: "Mars (US Gulf medium sour)"}
     shipped: {value: true}
+    origin_region: {value: us_gulf}
     api_gravity:
       value: 29.5
       unit: degrees API
@@ -246,6 +249,66 @@ grades:
         Sour crude normally trades below WTI, but with Middle East sour supply disrupted in 2026 Mars
         swung to large premiums (Argus reported nearly $13 on 9 March). The $1.50 figure is from a
         secondary report and is a dated snapshot; change it in the sidebar.
+  forties:
+    name: {value: "Forties (North Sea light sweet)"}
+    shipped: {value: true}
+    origin_region: {value: north_sea}
+    api_gravity:
+      value: 41.0
+      unit: degrees API
+      source: "INEOS FPS (operator of the Forties pipeline): Forties Blend expected to run at about 41.0 API and 0.65% sulphur"
+      url: https://www.ineos.com/businesses/ineos-fps/business/forties-blend-quality/
+      checked: 2026-11-17
+      estimate: false
+      note: >
+        The blend's quality depends on how much heavier, sourer Buzzard crude is in it: INEOS gives
+        about 44 API and 0.27% sulphur with none, falling to about 36 API and 1.05% at 60%.
+    sulphur_pct:
+      value: 0.65
+      unit: percent by weight
+      source: "INEOS FPS (operator of the Forties pipeline): Forties Blend expected to run at about 41.0 API and 0.65% sulphur"
+      url: https://www.ineos.com/businesses/ineos-fps/business/forties-blend-quality/
+      checked: 2026-11-17
+      estimate: false
+    export_differential_usd_per_bbl:
+      value: 0.0
+      unit: USD per barrel over Dated Brent
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        Forties is one of the grades that set the Dated Brent benchmark, so it trades close to it.
+        The free Brent price (EIA, Europe Brent Spot FOB) stands in for Dated Brent. Real daily
+        differentials are paywalled; change this in the sidebar.
+  johan_sverdrup:
+    name: {value: "Johan Sverdrup (North Sea medium sour)"}
+    shipped: {value: true}
+    origin_region: {value: north_sea}
+    api_gravity:
+      value: 28.7
+      unit: degrees API
+      source: "TotalEnergies crude assay, November 2025: Johan Sverdrup 28.7 API, 0.81% sulphur"
+      url: https://trading.totalenergies.com/wp-content/uploads/2025/11/JOHAN-SVERDRUP.pdf
+      checked: 2026-11-17
+      estimate: false
+    sulphur_pct:
+      value: 0.81
+      unit: percent by weight
+      source: "TotalEnergies crude assay, November 2025: Johan Sverdrup 28.7 API, 0.81% sulphur"
+      url: https://trading.totalenergies.com/wp-content/uploads/2025/11/JOHAN-SVERDRUP.pdf
+      checked: 2026-11-17
+      estimate: false
+    export_differential_usd_per_bbl:
+      value: 6.00
+      unit: USD per barrel over Dated Brent
+      source: "S&P Global Platts, October 2026: Johan Sverdrup FOB Mongstad at $5.685/b over Dated Brent on 15 October; early-November cargoes heard at about +$6"
+      url: https://www.spglobal.com/energy/en/news-research/latest-news/crude-oil/101526-northwest-european-sour-crude-outlook-constructive-amid-wide-sulfur-spread
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        Normally a discount (Wood Mackenzie cites a typical 3% below Brent), but with Middle East
+        sour supply to Europe disrupted in 2026 it swung to record premiums (Platts $19.55 on 15
+        September). A dated snapshot of a fast-moving price; change it in the sidebar.
   dubai:
     name: {value: "Dubai (Middle East medium sour)"}
     api_gravity:

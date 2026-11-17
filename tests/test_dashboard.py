@@ -23,8 +23,11 @@ SETUPS = [
     {"origin": "loop", "destination": "ningbo", "vessel": "vlcc"},
     {"vessel": "panamax", "destination": "singapore", "market": "time_charter_1yr_jul_2026"},
     {"vessel": "suezmax_eco", "destination": "paradip", "origin": "beaumont", "via": "cape"},
-    {"grade": "mars", "benchmark": "dubai", "origin": "loop"},
-    {"grade": "wti_midland", "destination": "rotterdam", "freight_basis": "lump_sum"},
+    {"grade_us_gulf": "mars", "benchmark": "dubai", "origin": "loop"},
+    {"grade_us_gulf": "wti_midland", "destination": "rotterdam", "freight_basis": "lump_sum"},
+    {"origin": "hound_point", "destination": "rotterdam", "vessel": "aframax"},
+    {"origin": "mongstad", "grade_north_sea": "johan_sverdrup", "benchmark": "dubai",
+     "destination": "ningbo", "vessel": "vlcc"},
 ]
 
 
@@ -37,12 +40,15 @@ def offline_prices(monkeypatch):
 @pytest.mark.parametrize("page", PAGES)
 @pytest.mark.parametrize("setup", SETUPS, ids=["base", "vlcc", "aframax-cape-calm", "dubai-mumbai", "rotterdam-direct",
                                               "loop-ningbo-vlcc", "panamax-singapore", "eco-paradip-cape",
-                                              "mars-dubai-loop", "midland-rotterdam-lump-sum"])
+                                              "mars-dubai-loop", "midland-rotterdam-lump-sum",
+                                              "forties-rotterdam", "sverdrup-dubai-ningbo-vlcc"])
 def test_page_loads(page, setup):
     app = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=120).run()
     for key, value in setup.items():
         widget = app.radio(key=key) if key in ("via", "freight_basis") else app.selectbox(key=key)
         widget.set_value(value)
+        if key == "origin":
+            app.run()  # the grade list depends on the load port, so apply it first
     app.run()
     app.switch_page(str(ROOT / "app" / page)).run()
     assert not app.exception, f"{page} raised: {[e.value for e in app.exception]}"
@@ -56,6 +62,8 @@ def load_page(page, setup):
     for key, value in setup.items():
         widget = app.radio(key=key) if key in ("via", "freight_basis") else app.selectbox(key=key)
         widget.set_value(value)
+        if key == "origin":
+            app.run()  # the grade list depends on the load port, so apply it first
     app.run()
     app.switch_page(str(ROOT / "app" / page)).run()
     assert not app.exception, f"{page} raised: {[e.value for e in app.exception]}"
@@ -197,3 +205,13 @@ def test_typed_in_curve_reaches_the_arbitrage_page():
     to_number = lambda text: float(text.replace("$", "").replace(",", ""))
     assert to_number(metric(app, "Margin per barrel")) == pytest.approx(
         to_number(metric(flat, "Margin per barrel")) + to_number(curve), abs=0.011)
+
+
+def test_north_sea_cargo_is_priced_off_brent():
+    app = load_page("arbitrage_page.py", {"origin": "mongstad", "grade_north_sea": "johan_sverdrup"})
+    lines = list(app.dataframe[0].value["Line"])
+    assert "Brent benchmark price" in lines
+    assert any(line.startswith("+ Differential to Dated Brent") for line in lines)
+    assert not any("Gulf Coast" in line for line in lines)
+    labels = [s.label for s in load_page("scenarios_page.py", {"origin": "mongstad"}).slider]
+    assert any("minus Brent" in label for label in labels)

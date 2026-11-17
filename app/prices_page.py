@@ -10,7 +10,8 @@ from engine import prices as P
 
 st.title("Prices")
 st.markdown(
-    "The trade starts with a price gap. We buy crude priced off **WTI** (the US benchmark) and "
+    "The trade starts with a price gap. We buy crude priced off **WTI** (US Gulf cargoes) or "
+    "**Brent** (North Sea cargoes) and "
     "sell it priced off **Brent** or **Dubai** (the benchmarks used for oil delivered to Europe "
     "and Asia). "
     "The gap between them has to pay for the whole voyage.")
@@ -30,25 +31,26 @@ benchmark, monthly = dates["benchmark"], dates["monthly"]
 if st.session_state["setup"]["benchmark"] == "dubai" and not monthly:
     st.warning("Dubai prices could not be loaded, so Brent is used instead.")
 
-wti, wti_date = P.latest(prices, "wti")
+origin_column = dates["origin_column"]
+wti, wti_date = P.latest(prices, origin_column)
 brent, brent_date = P.latest(prices, "brent")
 spread_today = inputs.destination_benchmark_price - inputs.origin_benchmark_price
 reference = A.record("market", "bunkers", "reference_houston_vlsfo_usd_per_tonne")
 
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("WTI (origin)", ui.usd(wti), help=f"{P.SOURCES['wti']}, {wti_date:%d %b %Y}")
+c1.metric(f"{dates['origin_name']} (origin)", ui.usd(wti), help=f"{P.SOURCES[origin_column]}, {wti_date:%d %b %Y}")
 c2.metric("Brent", ui.usd(brent), help=f"{P.SOURCES['brent']}, {brent_date:%d %b %Y}")
-c3.metric(f"Spread: {benchmark.title()} minus WTI"
+c3.metric(f"Spread: {benchmark.title()} minus {dates['origin_name']}"
           + (f" ({dates['month_label']} averages)" if monthly else ""), ui.usd(spread_today),
           help=f"The gross price gap, before any costs: {benchmark.title()} "
-               f"{ui.usd(inputs.destination_benchmark_price)} ({dates['destination_label']}) minus WTI "
+               f"{ui.usd(inputs.destination_benchmark_price)} ({dates['destination_label']}) minus {dates['origin_name']} "
                f"{ui.usd(inputs.origin_benchmark_price)} ({dates['wti_label']}).")
 c4.metric("Ship fuel, per tonne (estimated)", ui.usd(inputs.bunker_usd_per_tonne, 0),
           help=f"Latest daily Brent x {A.get('market', 'bunkers', 'usd_per_tonne_per_brent_dollar')}. "
                f"Cross-check: {reference['source']} was ${A.val(reference)}.")
 st.caption(f"Latest prices: WTI {wti_date:%d %b %Y}, Brent {brent_date:%d %b %Y}"
            + (f". Dubai is only published as a monthly average (latest: {dates['month_label']}), so the "
-              "spread above compares the Dubai and WTI averages for that month, not today's WTI"
+              f"spread above compares the Dubai and {dates['origin_name']} averages for that month, not today's {dates['origin_name']}"
               if monthly else "")
            + ". These are spot prices published by the EIA a few days in arrears, so they can differ "
              "from futures prices quoted in the news.")
@@ -63,13 +65,13 @@ if window["dubai"].notna().any():
     columns["dubai"] = "Dubai (monthly average)"
 st.plotly_chart(charts.price_lines(window, columns), width="stretch")
 
-st.subheader(f"The spread: {benchmark.title()} minus WTI")
+st.subheader(f"The spread: {benchmark.title()} minus {dates['origin_name']}")
 # Daily prices for Brent; monthly averages for Dubai, so month is compared with month.
 spread_window = ui.history_window(prices, years, monthly)
-spread = (spread_window[benchmark] - spread_window["wti"]).dropna()
+spread = (spread_window[benchmark] - spread_window[origin_column]).dropna()
 st.plotly_chart(charts.single_line(spread, "Spread", zero_label="no price gap"), width="stretch")
 st.caption(("Dubai is published only as a monthly average, so each point is one month: the "
-            "month's average Dubai price minus the month's average WTI price. " if monthly else "")
+            f"month's average Dubai price minus the month's average {dates['origin_name']} price. " if monthly else "")
            + f"Over this period the spread averaged {ui.usd(spread.mean())}, ranging from "
            f"{ui.usd(spread.min())} to {ui.usd(spread.max())}. Compare that with the estimated freight "
            "cost per barrel on the Voyage page: the arb only opens when the spread, adjusted for "

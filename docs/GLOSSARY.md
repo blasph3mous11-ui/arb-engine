@@ -10,6 +10,18 @@ Profiting from the same thing being priced differently in two places. In physica
 cargo where it is cheap, ship it to where it is dear, and keep the difference after costs. If the
 difference covers the costs the "arb is open"; if not it is "closed".
 
+**Dated Brent**
+The price of physical North Sea crude loading in the coming weeks, assessed daily by Platts from
+a basket of grades (Brent, Forties, Oseberg, Ekofisk, Troll and, since 2023, WTI Midland). North
+Sea cargoes are priced as Dated Brent plus or minus a differential. The tool uses the free EIA
+Brent spot price in its place.
+
+**Forties and Johan Sverdrup**
+Two North Sea crudes. Forties (about 41 API, 0.65% sulphur) is a light sweet grade piped to
+Scotland and loaded at Hound Point, and is part of the Dated Brent basket. Johan Sverdrup (about
+29 API, 0.8% sulphur) is a heavier Norwegian grade loaded at Mongstad, popular with refiners in
+Europe and Asia. In 2026 it traded at large premiums because Middle East sour crude was scarce.
+
 **Benchmark (Brent, WTI, Dubai)**
 A widely published reference price that other crudes are priced against. WTI is the US benchmark,
 Brent the North Sea / Atlantic one, Dubai the Middle East one used for most oil sold into Asia.

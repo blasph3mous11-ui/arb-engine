@@ -40,9 +40,9 @@ bunker = left.slider("Fuel (bunker) price, USD per tonne (estimated)", 200, 1_50
 rate = left.slider("Interest rate, % a year (part estimated)", 0.0, 15.0,
                    float(base_inputs.interest_rate_pct), 0.25,
                    help="Benchmark rate (SOFR) plus an estimated bank margin.")
-spread = right.slider(f"Price spread, {benchmark_name} minus WTI, USD per barrel", -10.0, 60.0,
+spread = right.slider(f"Price spread, {benchmark_name} minus {dates['origin_name']}, USD per barrel", -10.0, 60.0,
                       float(round(base.benchmark_spread, 2)), 0.25,
-                      help="Moves the destination price while holding WTI where it is.")
+                      help=f"Moves the destination price while holding {dates['origin_name']} where it is.")
 delay = right.slider("Delay at port, days", 0, 30, int(base_inputs.delay_days),
                      help="Days the ship waits beyond the agreed time. Charged as demurrage.")
 # The switch only means something when the voyage is currently routed through Suez.
@@ -87,11 +87,11 @@ c1.metric("Margin per barrel", ui.usd(scenario.margin_per_bbl),
 c2.metric("Freight per barrel (estimated)", ui.usd(scenario.cost_stack["Freight"]),
           delta=change(scenario.cost_stack["Freight"] - base.cost_stack["Freight"]), delta_color="inverse")
 c3.metric("Break-even spread", ui.usd(breakeven),
-          help=f"The {benchmark_name}-minus-WTI gap at which the margin is exactly zero, at these costs.")
+          help=f"The {benchmark_name}-minus-{dates['origin_name']} gap at which the margin is exactly zero, at these costs.")
 c4.metric("Spread in this scenario", ui.usd(spread),
           delta=f"{spread - breakeven:+,.2f} vs break-even")
 st.caption(f"Break-even: with these costs the arb opens once {benchmark_name} is more than "
-           f"{ui.usd(breakeven)} a barrel above WTI. Route: {V.ROUTES[scenario_inputs.via]}.")
+           f"{ui.usd(breakeven)} a barrel above {dates['origin_name']}. Route: {V.ROUTES[scenario_inputs.via]}.")
 
 # ---------------------------------------------------------------- tornado
 st.subheader("Which input matters most?")
@@ -120,7 +120,7 @@ else:
     st.plotly_chart(charts.margin_heatmap(run_grid(scenario_inputs), scenario_inputs.hire_usd_per_day,
                                           scenario.benchmark_spread), width="stretch")
 st.caption(f"Each square is the margin for one pairing of ship hire rate (across) and "
-           f"{benchmark_name}-minus-WTI price gap (up), with everything else held at the values "
+           f"{benchmark_name}-minus-{dates['origin_name']} price gap (up), with everything else held at the values "
            "set above. Green pays, red loses, and the black line is break-even: above it the arb "
            "is open. The dot is where the inputs above sit. The dearer the ship, the wider the "
            "price gap has to be. The ranges shown are our choice, and the hire rate itself is an "
@@ -142,7 +142,7 @@ move_bunkers = st.checkbox(f"Let the fuel price follow Brent {step} by {step}", 
 @st.cache_data(show_spinner="Re-running the model over past prices...")
 def run_history(window: pd.DataFrame, inputs: arbitrage.ArbInputs, destination_column: str,
                 ratio: float | None) -> pd.DataFrame:
-    return scenarios.historical_run(window, inputs, "wti", destination_column, ratio)
+    return scenarios.historical_run(window, inputs, inputs.origin_benchmark, destination_column, ratio)
 
 
 window = ui.history_window(prices, years, monthly)
@@ -161,7 +161,7 @@ else:
     if monthly:
         st.caption("Dubai is published only as a monthly average, so this view compares monthly "
                    "averages: each point is one month, the month's average Dubai price against the "
-                   "month's average WTI price.")
+                   f"month's average {dates['origin_name']} price.")
     st.warning(
         f"**Read this chart with care.** Only crude prices"
         f"{' and the fuel price' if move_bunkers else ''} change from {step} to {step}. The ship hire rate "

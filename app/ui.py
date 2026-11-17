@@ -11,6 +11,7 @@ from engine import assumptions as A
 from engine import prices as P
 from engine import voyage as V
 
+ORIGIN_BENCHMARK_LABELS = {"wti": "WTI Cushing", "brent": "Dated Brent"}
 FREIGHT_BASES = {
     "hire": "Daily hire rate (from the freight market)",
     "worldscale": "Broker quote: Worldscale",
@@ -67,15 +68,19 @@ def sidebar_setup() -> dict:
                               f"({V.get_vessel(k).cargo_capacity_bbl / 1e6:.2f}m barrels)")
     vessel = V.get_vessel(vessel_key)
     grades = A.load("costs")["grades"]
-    grade = sb.selectbox("Crude grade shipped", arbitrage.shipped_grades(), key="grade",
+    # Each load region has its own grades and its own price benchmark (WTI or Brent).
+    region = V.get_port(origin)["region"]
+    benchmark_label = ORIGIN_BENCHMARK_LABELS[arbitrage.origin_benchmark(origin)]
+    grade = sb.selectbox("Crude grade shipped", arbitrage.shipped_grades(region), key=f"grade_{region}",
                          format_func=lambda k: A.val(grades[k]["name"]),
-                         help="All three are bought against the WTI Cushing price plus a differential.")
+                         help=f"Grades loaded at this port, each bought against {benchmark_label} "
+                              "plus a differential.")
     origin_differential = sb.number_input(
-        "Differential to WTI Cushing, USD per barrel (estimated)", step=0.05, format="%.2f",
+        f"Differential to {benchmark_label}, USD per barrel (estimated)", step=0.05, format="%.2f",
         value=float(arbitrage.export_differential(grade)), key=f"origin_differential_{grade}",
-        help="What this grade costs on a ship at the Gulf Coast over the free WTI Cushing price. "
-             "Real export prices are paywalled; the starting figure is a dated estimate listed on "
-             "the Methodology page. In 2026 these swung by several dollars within weeks.")
+        help=f"What this grade costs on a ship over the free {benchmark_label} price. Real "
+             "physical prices are paywalled; the starting figure is a dated estimate listed on the "
+             "Methodology page. In 2026 these swung by several dollars within weeks.")
     warning = V.draught_warning(origin, vessel_key)
     if warning:
         sb.warning(warning, icon=":material/water:")
@@ -116,12 +121,13 @@ def sidebar_setup() -> dict:
 
     with sb.expander("Hedging: the futures curve"):
         curve = st.number_input(
-            "Second month minus first month WTI futures, USD per barrel",
+            "Second month minus first month futures, USD per barrel",
             value=float(A.get("costs", "futures_curve", "default_m2_minus_m1_usd_per_bbl")),
             step=0.05, format="%.2f", key="curve_m2_minus_m1",
             help="Positive: later months dearer (contango), which helps a hedged cargo. Negative: "
-                 "backwardation, which hurts it. The free US EIA futures data stopped in April 2024, "
-                 "so type today's figure from a futures quote. Zero means no effect.")
+                 "backwardation, which hurts it. Use WTI futures for US crude and Brent futures "
+                 "for North Sea crude. The free US EIA futures data stopped in April 2024, so type "
+                 "today's figure from a futures quote. Zero means no effect.")
         st.caption("The Arbitrage page shows the 1985-2024 history for scale.")
 
     benchmark = sb.selectbox("Sell price benchmark", list(BENCHMARK_LABELS),
@@ -170,15 +176,17 @@ def base_inputs(setup: dict, prices) -> tuple[arbitrage.ArbInputs, dict]:
 
     Every page builds its base case here, so they all show the same numbers.
     """
-    wti, wti_date = P.latest(prices, "wti")
+    # The price the cargo is bought against depends on where it loads: WTI or Brent.
+    origin_column = arbitrage.origin_benchmark(setup["origin"])
+    wti, wti_date = P.latest(prices, origin_column)
     brent, brent_date = P.latest(prices, "brent")
     benchmark = setup["benchmark"]
     monthly = benchmark == "dubai" and prices["dubai"].notna().any()
     if monthly:
         # Dubai is only published as a monthly average, so compare like with like:
-        # the latest month that has a Dubai price, against the WTI average for that month.
-        month = P.monthly_averages(prices).iloc[-1]
-        wti, destination_price = float(month["wti"]), float(month["dubai"])
+        # the latest month that has a Dubai price, against the origin benchmark's average for that month.
+        month = P.monthly_averages(prices, origin_column=origin_column).iloc[-1]
+        wti, destination_price = float(month[origin_column]), float(month["dubai"])
         wti_date = destination_date = month.name
     else:
         benchmark, destination_price, destination_date = "brent", brent, brent_date
@@ -193,9 +201,11 @@ def base_inputs(setup: dict, prices) -> tuple[arbitrage.ArbInputs, dict]:
         freight_override_usd=setup.get("freight_quote_usd"),
         curve_m2_minus_m1=setup.get("curve_m2_minus_m1", 0.0),
         grade=setup.get("grade", "wti"), origin_differential=setup.get("origin_differential", 1.0),
+        origin_benchmark=origin_column,
     )
     date_format = "%B %Y average" if monthly else "%d %b %Y"
     dates = dict(wti=wti_date, brent=brent_date, destination=destination_date,
+                 origin_column=origin_column, origin_name="WTI" if origin_column == "wti" else "Brent",
                  benchmark=benchmark, monthly=monthly,
                  wti_label=f"{wti_date:{date_format}}", destination_label=f"{destination_date:{date_format}}",
                  month_label=f"{destination_date:%B %Y}", fuel_label=f"{brent_date:%d %b %Y}")

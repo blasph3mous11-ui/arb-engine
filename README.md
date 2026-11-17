@@ -14,15 +14,15 @@ Code: https://github.com/blasph3mous11-ui/arb-engine
 
 | | Options |
 |---|---|
-| Load port (US Gulf Coast) | Corpus Christi, Houston, LOOP (offshore Louisiana), Beaumont / Nederland |
+| Load port | US Gulf Coast: Corpus Christi, Houston, LOOP (offshore Louisiana), Beaumont / Nederland. North Sea: Hound Point (UK, Forties), Mongstad (Norway, Johan Sverdrup) |
 | Discharge port | India: Sikka, Mumbai, Paradip. Europe: Rotterdam. East Asia: Singapore, Ningbo-Zhoushan, Ulsan |
 | Ship | Panamax (0.5m bbl), Aframax (0.75m), Suezmax (1m), modern eco Suezmax (1m), VLCC (2m) |
 | Route | Worked out for each voyage: Suez or Cape where the shortest path passes Suez; one direct route across the Atlantic to Europe. A VLCC, too deep for Suez when full, goes via the Cape. |
-| Crude grade | WTI, WTI Midland (light sweet export grade) or Mars (medium sour), with an editable differential to WTI Cushing |
+| Crude grade | US Gulf: WTI, WTI Midland (light sweet export grade), Mars (medium sour). North Sea: Forties (light sweet), Johan Sverdrup (medium sour). Each with an editable differential to its benchmark |
 | Freight market | Today's spot market, a one-year time charter, or a calm-market reference |
 | Freight basis | The daily hire rate from the freight market, or a broker's quote you type in (Worldscale points and flat rate, or a lump sum), with the shipowner's implied daily earnings (TCE) |
 
-It is a US crude export tool: the grades shipped are WTI, WTI Midland and Mars, each priced off WTI Cushing plus an estimated differential. The Panama Canal is not offered as a route.
+US Gulf grades (WTI, WTI Midland, Mars) are priced off WTI Cushing, North Sea grades (Forties, Johan Sverdrup) off Brent, each plus an estimated differential. The Panama Canal is not offered as a route.
 
 ![Arbitrage result](docs/screenshots/arbitrage.jpg)
 

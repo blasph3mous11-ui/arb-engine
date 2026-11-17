@@ -48,6 +48,8 @@ class ArbInputs:
     freight_override_usd: float | None = None
     # Second-month minus first-month WTI futures price, USD per barrel. Zero means a flat curve.
     curve_m2_minus_m1: float = 0.0
+    # The price series the cargo is bought against: "wti" (US Gulf) or "brent" (North Sea).
+    origin_benchmark: str = "wti"
 
     def with_changes(self, **changes) -> "ArbInputs":
         return replace(self, **changes)
@@ -59,7 +61,7 @@ def default_inputs(origin_benchmark_price: float, destination_benchmark_price: f
     vessel_key = overrides.get("vessel_key", "suezmax")
     market = A.get("market", "default_freight_market")
     base = dict(
-        origin_key="corpus_christi",
+        origin_key=overrides.get("origin_key", "corpus_christi"),
         destination_key="sikka",
         vessel_key=vessel_key,
         via="suez",
@@ -85,14 +87,23 @@ def default_inputs(origin_benchmark_price: float, destination_benchmark_price: f
     return ArbInputs(**base)
 
 
-def shipped_grades() -> list[str]:
-    """The crude grades that can be loaded in the US Gulf (the others are price benchmarks only)."""
+def shipped_grades(region: str | None = None) -> list[str]:
+    """The crude grades that can be loaded, optionally only those of one load region.
+
+    Brent and Dubai are price benchmarks only and are never shipped.
+    """
     return [key for key, grade in A.load("costs")["grades"].items()
-            if A.val(grade.get("shipped", {"value": False}))]
+            if A.val(grade.get("shipped", {"value": False}))
+            and (region is None or A.val(grade["origin_region"]) == region)]
+
+
+def origin_benchmark(origin_key: str) -> str:
+    """The price series a cargo from this load port is bought against: "wti" or "brent"."""
+    return get_port(origin_key)["price_benchmark"]
 
 
 def export_differential(grade: str) -> float:
-    """What a grade costs on a ship at the Gulf Coast over WTI at Cushing, USD per barrel (estimated)."""
+    """What a grade costs on a ship over its benchmark (WTI Cushing or Dated Brent), USD per barrel."""
     record = A.load("costs")["grades"][grade].get("export_differential_usd_per_bbl")
     if record is None:
         return A.get("costs", "pricing", "origin_differential_usd_per_bbl")
@@ -228,9 +239,11 @@ def cargo_charges(inputs: ArbInputs, voyage) -> dict:
     if needs_lightering(inputs.origin_key, inputs.vessel_key):
         lightering = C.lightering_cost(inputs.cargo_bbl, A.get("costs", "lightering", "usd_per_bbl"))
     eu_ets = 0.0
-    if get_port(inputs.destination_key)["eu_ets"]:
+    origin_in, destination_in = get_port(inputs.origin_key)["eu_ets"], get_port(inputs.destination_key)["eu_ets"]
+    if origin_in or destination_in:
         ets = A.load("costs")["eu_ets"]
-        covered = C.eu_ets_covered_fuel(voyage.fuel_tonnes, A.val(ets["share_of_voyage_outside_eu_pct"]))
+        covered = C.eu_ets_covered_fuel(voyage.fuel_tonnes, origin_in, destination_in,
+                                        A.val(ets["share_of_voyage_outside_eu_pct"]))
         eu_ets = C.eu_ets_cost(covered, A.val(ets["co2_per_tonne_fuel"]), A.val(ets["coverage_pct"]),
                                A.val(ets["eua_price_eur_per_tonne"]), A.val(ets["usd_per_eur"]))
     return {"lightering": lightering, "eu_ets": eu_ets}
