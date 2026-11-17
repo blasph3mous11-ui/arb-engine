@@ -61,6 +61,9 @@ def sidebar_setup() -> dict:
         format_func=lambda k: f"{V.get_vessel(k).name} "
                               f"({V.get_vessel(k).cargo_capacity_bbl / 1e6:.2f}m barrels)")
     vessel = V.get_vessel(vessel_key)
+    warning = V.draught_warning(origin, vessel_key)
+    if warning:
+        sb.warning(warning, icon=":material/water:")
 
     # Only offer the routes that really exist for these ports and this ship.
     options = V.route_options(origin, destination, vessel_key)

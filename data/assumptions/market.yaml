@@ -33,8 +33,10 @@ freight_markets:
         checked: 2026-11-17
         estimate: true
         note: >
-          A single-voyage rate is paid per cargo, not per ship design, so we use the standard Suezmax
-          estimate. The modern ship's advantage shows up as lower fuel cost, not a different hire.
+          We assume the owner earns the same per day on either Suezmax, so in this tool the cargo
+          gets the eco ship's fuel saving (about $0.30-0.50 a barrel to India). In a real spot
+          fixture the freight per barrel is the same for either ship and the owner keeps the saving;
+          read the lower freight shown as the eco ship's advantage to whoever controls the ship.
       aframax:
         value: 200000
         unit: USD per day
@@ -75,10 +77,9 @@ freight_markets:
       value: >
         What it costs per day to hire a modern ship for a whole year. Much lower than today's spot
         market because a one-year deal averages out the crisis spike. A trader with ships already
-        on long-term hire faces this cost, not the spot one. These are broker assessments for
-        modern fuel-efficient ("eco") ships with scrubbers, while our fuel figures are for an
-        older, thirstier ship burning low-sulphur fuel, so freight under this setting is overstated
-        by roughly $0.40 to $0.50 a barrel on a Suezmax.
+        on long-term hire faces this cost, not the spot one. The broker rates are for modern
+        fuel-efficient ("eco") ships; choose the eco Suezmax for a like-for-like figure, because
+        the other ships use older-design fuel figures and so overstate freight a little.
     hire_usd_per_day:
       panamax:
         value: 38000
@@ -138,7 +139,8 @@ freight_markets:
     description:
       value: >
         A quiet, pre-crisis market, for comparison. This is the world in which long-haul crude
-        freight costs "a few dollars a barrel".
+        freight on the large ships (Suezmax, VLCC) costs "a few dollars a barrel"; small ships on
+        long voyages cost more per barrel.
     hire_usd_per_day:
       panamax:
         value: 22000

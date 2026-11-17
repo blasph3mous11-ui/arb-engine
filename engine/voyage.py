@@ -7,6 +7,7 @@ burns, port charges at both ends, and canal tolls if it takes the canal.
 Divide that by the barrels on board and you have freight per barrel.
 """
 
+import math
 from dataclasses import dataclass, field
 from functools import lru_cache
 
@@ -42,6 +43,7 @@ class Vessel:
     can_transit_suez_laden: bool
     port_cost_factor: float
     hull_value_usd: float
+    laden_draught_ft: float
 
 
 def vessel_keys() -> list[str]:
@@ -69,7 +71,26 @@ def get_port(key: str) -> dict:
         "port_cost_usd": A.val(raw["port_cost_usd"]),
         "port_cost_is_estimate": A.is_estimate(raw["port_cost_usd"]),
         "region": A.val(raw["region"]),
+        # Only load ports carry a channel depth; it decides whether a full ship can leave.
+        "channel_depth_ft": A.val(raw["channel_depth_ft"]) if "channel_depth_ft" in raw else None,
     }
+
+
+def draught_warning(origin_key: str, vessel_key: str) -> str | None:
+    """Plain-language warning when a fully loaded ship is too deep for the load port's channel.
+
+    The tool still costs a full cargo; in reality the ship would leave part-loaded
+    and be topped up offshore (reverse lightering), which costs extra.
+    """
+    port, vessel = get_port(origin_key), get_vessel(vessel_key)
+    depth = port["channel_depth_ft"]
+    if depth is None or vessel.laden_draught_ft <= depth:
+        return None
+    return (f"A fully loaded {vessel.name} draws about {vessel.laden_draught_ft:.0f} ft of water, but "
+            f"the channel at {port['name']} is about {depth:.0f} ft deep. In practice the ship would "
+            "leave part-loaded and be topped up offshore by smaller ships (reverse lightering). This "
+            "tool still costs a full cargo and does not yet include the top-up cost, so freight per "
+            "barrel here is understated.")
 
 
 def _search(origin_key: str, destination_key: str, forbidden: list[str]) -> dict:
@@ -118,8 +139,57 @@ def sea_route(origin_key: str, destination_key: str, via: str) -> tuple[float, t
     check_route(via)
     result = _search(origin_key, destination_key,
                      ALWAYS_FORBIDDEN + (["suez"] if via == "cape" else []))
-    points = tuple(tuple(p) for p in result["geometry"]["coordinates"])
-    return float(result["properties"]["length"]), points
+    points = [tuple(p) for p in result["geometry"]["coordinates"]]
+    length = float(result["properties"]["length"])
+    # The routing network sometimes ends at a lane junction well past the port
+    # (Paradip: 85 nm beyond it). Close the path at the nearest approach instead.
+    origin, destination = get_port(origin_key), get_port(destination_key)
+    points, length = _close_to_port(points, length, (destination["longitude"], destination["latitude"]))
+    points.reverse()
+    points, length = _close_to_port(points, length, (origin["longitude"], origin["latitude"]))
+    points.reverse()
+    return length, tuple(points)
+
+
+EARTH_RADIUS_NM = 3440.065  # mean Earth radius in nautical miles
+MAX_PORT_GAP_NM = 25        # a route ending further than this from the port is corrected
+
+
+def great_circle_nm(a: tuple, b: tuple) -> float:
+    """Shortest distance over the Earth between two (longitude, latitude) points, in nautical miles."""
+    lon1, lat1, lon2, lat2 = map(math.radians, (*a, *b))
+    cos_angle = (math.sin(lat1) * math.sin(lat2)
+                 + math.cos(lat1) * math.cos(lat2) * math.cos(lon2 - lon1))
+    return math.acos(max(-1.0, min(1.0, cos_angle))) * EARTH_RADIUS_NM
+
+
+def _nearest_point_on_segment(start: tuple, end: tuple, port: tuple) -> tuple:
+    """Point on a short straight segment closest to the port (flat-map approximation)."""
+    scale = math.cos(math.radians(port[1]))  # a degree of longitude is shorter away from the equator
+    dx, dy = (end[0] - start[0]) * scale, end[1] - start[1]
+    px, py = (port[0] - start[0]) * scale, port[1] - start[1]
+    t = max(0.0, min(1.0, (px * dx + py * dy) / (dx * dx + dy * dy))) if (dx or dy) else 0.0
+    return (start[0] + t * (end[0] - start[0]), start[1] + t * (end[1] - start[1]))
+
+
+def _close_to_port(points: list, length: float, port: tuple) -> tuple[list, float]:
+    """If the path ends far from the port, cut it at its nearest approach and sail straight in.
+
+    Only the last few legs are searched, and the distance is corrected by the
+    miles removed and the short leg added. Ports already within 25 nm are left alone.
+    """
+    if great_circle_nm(points[-1], port) <= MAX_PORT_GAP_NM:
+        return points, length
+    best = None
+    for i in range(max(0, len(points) - 6), len(points) - 1):
+        candidate = _nearest_point_on_segment(points[i], points[i + 1], port)
+        gap = great_circle_nm(candidate, port)
+        if best is None or gap < best[0]:
+            best = (gap, i, candidate)
+    gap, i, cut = best
+    removed = great_circle_nm(cut, points[i + 1]) + sum(
+        great_circle_nm(points[j], points[j + 1]) for j in range(i + 1, len(points) - 1))
+    return points[:i + 1] + [cut, port], length - removed + gap
 
 
 def suez_toll_usd(net_tonnage: float, laden: bool) -> float:

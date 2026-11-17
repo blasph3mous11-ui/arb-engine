@@ -100,14 +100,45 @@ def test_eco_ship_burns_less_than_the_older_design():
     assert eco.total_fuel_tonnes < old.total_fuel_tonnes * 0.85  # at least 15% less fuel
 
 
-def test_calm_market_freight_on_new_routes_is_a_few_dollars_a_barrel():
+def test_calm_market_freight_is_sensible_for_every_ship_and_route():
+    # "A few dollars a barrel" holds for the big ships; small ships on long hauls cost more.
+    upper = {"vlcc": 6.0, "suezmax": 9.0, "suezmax_eco": 9.0, "aframax": 11.0, "panamax": 12.0}
     calm = A.load("market")["freight_markets"]["calm_2024"]["hire_usd_per_day"]
-    for origin, destination, ship in (("houston", "rotterdam", "aframax"), ("loop", "ningbo", "vlcc"),
-                                      ("beaumont", "singapore", "suezmax"), ("houston", "rotterdam", "panamax")):
-        via = voyage.route_options(origin, destination, ship)[-1]
-        v = voyage.voyage_from_assumptions(origin, destination, ship, via,
-                                           hire_usd_per_day=A.val(calm[ship]), bunker_usd_per_tonne=600)
-        assert 1.5 < v.cost_per_bbl < 9.0, f"{origin}-{destination} {ship}: ${v.cost_per_bbl:.2f}/bbl"
+    for origin in ("houston", "loop"):
+        for destination in ("rotterdam", "sikka", "ningbo", "ulsan"):
+            for ship in voyage.vessel_keys():
+                for via in voyage.route_options(origin, destination, ship):
+                    v = voyage.voyage_from_assumptions(origin, destination, ship, via,
+                                                       hire_usd_per_day=A.val(calm[ship]),
+                                                       bunker_usd_per_tonne=600)
+                    assert 1.0 < v.cost_per_bbl < upper[ship], \
+                        f"{origin}-{destination} {ship} {via}: ${v.cost_per_bbl:.2f}/bbl"
+
+
+def test_every_route_ends_at_its_port():
+    # Guards against the routing network stopping short of, or past, a port (Paradip was 85 nm out).
+    for origin in voyage.port_keys("origin"):
+        for destination in voyage.port_keys("destination"):
+            for via in voyage.route_options(origin, destination, "suezmax"):
+                _, points = voyage.sea_route(origin, destination, via)
+                o, d = voyage.get_port(origin), voyage.get_port(destination)
+                assert voyage.great_circle_nm(points[0], (o["longitude"], o["latitude"])) <= 25
+                assert voyage.great_circle_nm(points[-1], (d["longitude"], d["latitude"])) <= 25
+
+
+def test_great_circle_by_hand():
+    # One degree of latitude along a meridian is 60 nautical miles (to within 0.1%).
+    assert voyage.great_circle_nm((0, 0), (0, 1)) == pytest.approx(60.04, abs=0.05)
+
+
+def test_draught_warning_only_where_the_channel_is_too_shallow():
+    # LOOP is offshore deep water: no warning for any ship, including a VLCC.
+    assert all(voyage.draught_warning("loop", ship) is None for ship in voyage.vessel_keys())
+    # Corpus Christi (54 ft) takes a full Suezmax (50 ft) but not a full VLCC (70 ft).
+    assert voyage.draught_warning("corpus_christi", "suezmax") is None
+    assert "VLCC" in voyage.draught_warning("corpus_christi", "vlcc")
+    # Beaumont (40 ft) is too shallow for a full Suezmax.
+    assert "40 ft" in voyage.draught_warning("beaumont", "suezmax")
 
 
 def test_every_ship_has_a_hire_rate_in_every_freight_market():

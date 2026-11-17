@@ -15,7 +15,7 @@ SHIP = Vessel(
     laden_consumption_tpd=44, ballast_consumption_tpd=35,
     load_port_consumption_tpd=12, discharge_port_consumption_tpd=71, idle_consumption_tpd=7.5,
     suez_canal_net_tonnage=81_000, can_transit_suez_laden=True,
-    port_cost_factor=1.0, hull_value_usd=80_000_000,
+    port_cost_factor=1.0, hull_value_usd=80_000_000, laden_draught_ft=50,
 )
 COMMON = dict(vessel=SHIP, distance_nm=9360, cargo_bbl=1_000_000, hire_usd_per_day=50_000,
               bunker_usd_per_tonne=600, load_port_cost_usd=78_000, discharge_port_cost_usd=150_000,

@@ -7,6 +7,13 @@ ports:
     name: {value: "Corpus Christi, USA"}
     role: {value: origin}
     region: {value: us_gulf}
+    channel_depth_ft:
+      value: 54
+      unit: feet
+      source: "Port of Corpus Christi: Channel Improvement Project completed June 2025, deepening the channel from 47 to 54 feet"
+      url: https://portofcc.com/news/port-of-corpus-christi-completes-milestone-ship-channel-improvement-project/
+      checked: 2026-11-17
+      estimate: false
     latitude: {value: 27.81, unit: degrees north, source: Port location, checked: 2026-11-15, estimate: false}
     longitude: {value: -97.10, unit: degrees east, source: Port location (Gulf entrance at Port Aransas), checked: 2026-11-15, estimate: false}
     port_cost_usd:
@@ -24,6 +31,14 @@ ports:
     name: {value: "Houston, USA"}
     role: {value: origin}
     region: {value: us_gulf}
+    channel_depth_ft:
+      value: 45
+      unit: feet
+      source: Our estimate
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        The Houston Ship Channel is commonly given as about 45 ft; a deepening project (Project 11) has been under way since 2022. Not confirmed against a USACE survey.
     latitude: {value: 29.34, unit: degrees north, source: Port location (Galveston Bay entrance), checked: 2026-11-15, estimate: false}
     longitude: {value: -94.70, unit: degrees east, source: Port location (Galveston Bay entrance), checked: 2026-11-15, estimate: false}
     port_cost_usd:
@@ -69,6 +84,15 @@ ports:
     name: {value: "LOOP (Louisiana Offshore Oil Port), USA"}
     role: {value: origin}
     region: {value: us_gulf}
+    channel_depth_ft:
+      value: 85
+      unit: feet
+      source: Our estimate
+      url: https://www.eia.gov/todayinenergy/detail.php?id=36232
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        An offshore buoy terminal in deep water. The US EIA says it is the only US facility able to fully load a VLCC; the exact water depth was not checked, so the figure is set comfortably above any ship in this tool.
     latitude: {value: 28.88, unit: degrees north, source: Port location (offshore terminal, 18 miles off Louisiana), checked: 2026-11-17, estimate: false}
     longitude: {value: -90.03, unit: degrees east, source: Port location (offshore terminal, 18 miles off Louisiana), checked: 2026-11-17, estimate: false}
     port_cost_usd:
@@ -86,6 +110,13 @@ ports:
     name: {value: "Beaumont / Nederland, USA"}
     role: {value: origin}
     region: {value: us_gulf}
+    channel_depth_ft:
+      value: 40
+      unit: feet
+      source: "Marine Log: state loan approved to begin deepening the Sabine-Neches Waterway from its current 40-foot depth"
+      url: https://www.marinelog.com/inland-coastal/historic-funding-approved-for-texas-ship-channels/
+      checked: 2026-11-17
+      estimate: false
     latitude: {value: 29.6, unit: degrees north, source: Port location (Sabine Pass entrance), checked: 2026-11-17, estimate: false}
     longitude: {value: -93.83, unit: degrees east, source: Port location (Sabine Pass entrance), checked: 2026-11-17, estimate: false}
     port_cost_usd:

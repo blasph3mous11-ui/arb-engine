@@ -5,8 +5,8 @@ Read this first at the start of every session.
 ## Where things stand (17 November 2026)
 
 **All five phases are built and working**, and the tool now covers 4 US Gulf load ports, 7
-discharge ports (India, Europe, East Asia) and 5 ship types. 115 tests pass. The dashboard runs
-locally with six pages. The code is on GitHub: https://github.com/blasph3mous11-ui/arb-engine
+discharge ports (India, Europe, East Asia) and 5 ship types. See the latest dated entry for the
+test count. The dashboard has seven pages. The code is on GitHub: https://github.com/blasph3mous11-ui/arb-engine
 
 ## Upgrade plan in progress (see `docs/UPGRADE_PLAN.md`)
 
@@ -36,7 +36,22 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   2. Baltic Exchange tanker emissions white paper: VLCC 12 knots, 58.5 t/day laden, 44 ballast.
   3. sea-distances.org: Houston-Mumbai via Suez (about 9,700 nm) and via the Cape (about
      11,900 nm); Houston-Rotterdam (about 5,000 nm).
-- **Stage 0, in progress:** licence added; independent review of the expansion running.
+- **Stage 0, done 17 Nov 2026.** Licence added; route map widened; owner checklist added.
+  Independent review of the ports/ships/routes expansion (one reviewer completed before the
+  session ended; each finding was re-checked by hand before fixing):
+  1. Full cargoes were loaded at shallow ports with no warning. Added `laden_draught_ft` per ship
+     and `channel_depth_ft` per load port (Corpus Christi 54 ft and Beaumont 40 ft published;
+     Houston 45 ft and LOOP estimates) and a sidebar warning, `voyage.draught_warning`. The top-up
+     cost itself is Stage 4.
+  2. Paradip's route ended 85 nm past the port. `voyage.sea_route` now closes any route ending
+     more than 25 nm from its port at the nearest approach (Paradip 25 nm shorter each way);
+     tested for every port pair.
+  3. Eco Suezmax spot hire note now says honestly that the cargo gets the fuel saving.
+  4. Time-charter description no longer claims an overstatement that is false for the eco ship.
+  5. Calm-market wording and test: "a few dollars a barrel" holds for the big ships only; the
+     test now covers every ship and route with size-based bounds.
+  6. Stale headline counts in this file. Not done from the plan: new README screenshots.
+  134 tests pass.
 
 ## Expansion, 17 November 2026: more ports, ships and proper route handling
 

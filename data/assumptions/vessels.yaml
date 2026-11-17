@@ -9,6 +9,15 @@
 
 panamax:
   name: {value: "Panamax"}
+  laden_draught_ft:
+    value: 41
+    unit: feet (fully laden)
+    source: Kuwait Oil Tanker Company tanker size table (Panamax draught 12.6 m)
+    url: https://www.kotc.com.kw/FleetDev/Pages/KnowledgeCentre.aspx
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      12.6 m is 41 ft. A low-authority class typical; each ship differs.
   deadweight_tonnes:
     value: 74000
     unit: tonnes
@@ -119,6 +128,14 @@ panamax:
 
 aframax:
   name: {value: Aframax}
+  laden_draught_ft:
+    value: 48
+    unit: feet (fully laden)
+    source: Our estimate
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      Published class figures disagree (about 11.6 m to 15.5 m). A modern 115,000 t Aframax loads to roughly 14.5-15 m, about 48 ft.
   deadweight_tonnes:
     value: 115000
     unit: tonnes
@@ -222,6 +239,13 @@ aframax:
 
 suezmax:
   name: {value: Suezmax}
+  laden_draught_ft:
+    value: 50
+    unit: feet (fully laden)
+    source: "S&P Global (September 2020): fully laden Suezmax tankers typically need a 50-foot draft for a full 1 million barrel cargo"
+    url: https://www.spglobal.com/commodity-insights/en/news-research/latest-news/shipping/092520-neopanamax-locks-increase-draft-permits-fully-laden-suezmaxes
+    checked: 2026-11-17
+    estimate: false
   deadweight_tonnes:
     value: 158000
     unit: tonnes
@@ -334,6 +358,13 @@ suezmax:
 
 suezmax_eco:
   name: {value: "Suezmax (modern eco, scrubber)"}
+  laden_draught_ft:
+    value: 50
+    unit: feet (fully laden)
+    source: "S&P Global (September 2020): fully laden Suezmax tankers typically need a 50-foot draft for a full 1 million barrel cargo"
+    url: https://www.spglobal.com/commodity-insights/en/news-research/latest-news/shipping/092520-neopanamax-locks-increase-draft-permits-fully-laden-suezmaxes
+    checked: 2026-11-17
+    estimate: false
   deadweight_tonnes:
     value: 158000
     unit: tonnes
@@ -454,6 +485,14 @@ suezmax_eco:
 
 vlcc:
   name: {value: VLCC}
+  laden_draught_ft:
+    value: 70
+    unit: feet (fully laden)
+    source: Our estimate
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      Published class figures run from about 20 m (66 ft) to 22.5 m (74 ft) for a fully laden VLCC; we use about 21.3 m, 70 ft.
   deadweight_tonnes:
     value: 305000
     unit: tonnes

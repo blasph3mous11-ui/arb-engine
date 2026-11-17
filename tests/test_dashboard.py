@@ -144,3 +144,14 @@ def test_download_button_downloads_and_reports_it(monkeypatch):
     # The click must really ask for a download, whatever is already held in memory.
     assert True in calls
     assert any("Downloaded just now." in c.value for c in app.caption)
+
+
+def test_draught_warning_shows_in_the_sidebar():
+    app = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=120).run()
+    app.selectbox(key="origin").set_value("houston")
+    app.selectbox(key="vessel").set_value("vlcc")
+    app.run()
+    assert any("reverse lightering" in w.value for w in app.sidebar.warning)
+    app.selectbox(key="origin").set_value("loop")
+    app.run()
+    assert not any("reverse lightering" in w.value for w in app.sidebar.warning)
