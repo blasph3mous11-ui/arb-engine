@@ -1,6 +1,6 @@
 # Interview notes
 
-Figures quoted are from the model run on 15 November 2026 (prices for 11 November). Re-check them
+Figures quoted are from the model run on 17 November 2026 (prices for 11 November). Re-check them
 on the dashboard before an interview; prices move every day.
 
 ## The two-minute explanation
@@ -22,6 +22,13 @@ with Hormuz effectively shut, my estimate of freight to India is about $25 a bar
 is shut by more than $20. In a calm market the same voyage costs $5 to $6. The tool also shows
 the Suez-versus-Cape decision: the Cape costs time, Suez costs cash, and there is a break-even
 hire rate, around $86,000 a day on my numbers, above which the canal is worth paying for.
+
+From there I built it out the way a desk would use it. It covers four US Gulf terminals and two
+North Sea ones, seven discharge ports, five ship sizes and five crude grades. A ranking page costs
+one cargo to every destination, the netback view. You can type a broker's Worldscale or lump-sum
+quote and see what it pays the owner per day. It includes the costs people forget: reverse
+lightering at shallow US ports, EU carbon on voyages into Rotterdam, and the futures-curve effect
+on a hedged cargo.
 
 I was careful about data. Real freight rates and physical differentials are paywalled, so I used
 public benchmarks, the published Suez tariff, and estimates that are labelled as estimates on
@@ -51,11 +58,20 @@ corresponds to roughly $230,000 to $300,000 a day, and I set it at the top of th
 hire rate in the tool is flagged as an estimate, including the published ones, because none of
 them is for this route.
 The value of my approach is not the level, it is that you can see which driver moves the answer.
+If you have a real quote, you can type it in: Worldscale points times the route's flat rate
+(which you type too, because flat rates are sold by subscription) times the cargo's tonnes, or a
+lump sum. The tool then shows the owner's daily earnings (TCE) after commissions. Typing $25m for
+the base voyage gives net freight of $24.38 a barrel to the charterer and about $286,000 a day to
+the owner.
 
 **4. Your origin price is WTI Cushing. That is not a Gulf Coast export price.**
 Correct. The export grade is WTI at Houston (MEH) or WTI Midland, priced at a differential to
-Cushing that reflects pipeline tariffs and export demand. Free data only gives Cushing, so I add
-an estimated $1.00 and expose it. In a real desk model I would use the MEH assessment.
+Cushing that reflects pipeline tariffs and export demand. Free data only gives Cushing, so each
+grade carries an estimated differential you can edit: WTI Midland +$1.30 (Argus, March 2026),
+Mars +$1.50 (May 2026). They are dated snapshots, and this year they moved a lot: Mars went from
+around $13 over WTI in March to about $1.50 by May. North Sea cargoes are priced the same way off
+Brent: Forties at Dated Brent, Johan Sverdrup at about +$6 (Platts, October-November 2026). In a
+real desk model I would use the Platts or Argus assessments.
 
 **5. How do you value the crude at destination?**
 A benchmark (Brent daily, or Dubai monthly) plus a quality adjustment: $0.40 per degree of API
@@ -65,11 +81,15 @@ price, less processing cost, for their specific refinery. And very light crude i
 worth more. I would also need the actual delivered premium, which is negotiated and private.
 
 **6. What is missing on the price side? What about hedging and curve structure?**
-The model buys and sells at today's spot prices. A real cargo prices over a window (for example
-five days around bill of lading), sells on a different window a month later, and the trader hedges
-the gap with futures or swaps. The shape of the curve then matters: in contango the cargo gains
-value at sea, in backwardation it loses. For a 36-day voyage that can be worth more than my
-financing cost. It is the first thing I would add.
+A real cargo prices over a window (for example five days around bill of lading), sells on a
+different window a month later, and the trader hedges the gap with futures or swaps. The shape of
+the curve then matters: in contango the hedged cargo gains value at sea, in backwardation it
+loses. The tool models that one effect: you type the gap between the first two futures months,
+and it adds that gap times the months the cargo is financed. A $0.60 contango over 34 days is
+worth +$0.68 a barrel. The free EIA futures series stopped in April 2024, so I show its 1985-2024
+history for scale: half of all months were within about 35 cents either way, with extremes of
++$7.38 in April 2020 and -$2.70 in July 2022. What I still do not model: pricing windows, basis
+risk between the futures and the destination benchmark, and the cost of the hedge.
 
 **7. How did you get the Suez Canal toll?**
 From the canal authority's published tariff (Circular 7/2023, effective January 2024): a sliding
@@ -110,9 +130,27 @@ US arrivals into India fell to zero this autumn.
   My calculator runs that logic in reverse.
 - **Why can a VLCC not use Suez loaded?** Draught: the canal allows about 20.1 m and a full VLCC
   draws about 22 m. It can go through empty, or part-discharge into the SUMED pipeline.
-- **How would you extend it?** Curve structure and hedging; real freight assessments if I had
-  access; more routes and grades (the ports, ships and grades are data files, so that is mostly
-  adding entries); gross-product-worth valuation by refinery type.
+- **Who pays the commissions?** In a voyage charter they come out of the freight. The address
+  commission (often 2.5%) goes back to the charterer, so a quote costs the charterer a little less
+  than its headline; the brokerage (often 1.25%) is paid by the owner. Adding them as an extra
+  cost would double-count, so the tool applies them only to a typed-in quote.
+- **Why does a VLCC from Houston cost more than one from LOOP?** Houston's channel is about 45 ft
+  and a full VLCC draws about 70, so it leaves part-loaded and is topped up offshore by smaller
+  ships (reverse lightering). The tool charges an estimated 60 cents a barrel (a 2018 Columbia
+  University range of 50-75 cents) and shows a warning. LOOP is offshore deep water, so a VLCC
+  loads in full there.
+- **What does EU carbon add?** Since 2026 ships pay for 100% of CO2 under the EU scheme: half of
+  a voyage into or out of the EU, all of a voyage between EU (or Norwegian) ports, all of the fuel
+  at berth in those ports. On a Suezmax from Houston to Rotterdam it is about 20 cents a barrel.
+  The UK is outside the EU scheme; its own scheme covers only domestic voyages for now.
+- **Where should the cargo go?** The ranking page costs the same cargo to every port by its
+  cheapest route. Today Rotterdam is the least bad (-$11.03 on the base case) because it is the
+  shortest voyage; Ulsan is the worst (-$33.67). All ports are valued against one benchmark, so
+  the ranking shows the effect of the voyage only, not of local premiums.
+- **How would you extend it?** Real freight and physical price assessments if I had access;
+  valuation by the products a refinery makes (gross product worth), which needs yield data I
+  could not get free; pricing windows and basis risk on the hedge; a Panama Canal option for
+  smaller ships once I can source the toll.
 
 ## Numbers to have in your head
 
@@ -127,3 +165,8 @@ US arrivals into India fell to zero this autumn.
 | Barrels per tonne, light crude | about 7.6 |
 | Financing a $90m cargo for 36 days at 5.9% | about $0.54 a barrel |
 | One day of delay at $300,000 a day on 1m barrels | about $0.30 a barrel |
+| North Sea to west coast India | about 6,600 nm via Suez |
+| Quality rule ($0.40 per API degree, $1 per sulphur point) vs Brent | WTI Midland +$1.65, Mars -$5.04, Johan Sverdrup -$4.28 |
+| Reverse lightering (estimate) | about $0.60 a barrel |
+| EU carbon, US Gulf to Rotterdam, Suezmax | about $0.20 a barrel |
+| Suez or Cape break-even hire rate | about $86,000 a day with war-risk cover, $32,000 without |

@@ -38,6 +38,8 @@ US Gulf grades (WTI, WTI Midland, Mars) are priced off WTI Cushing, North Sea gr
 | **Methodology** | Every assumption with its value, source, date checked and whether it is an estimate, plus what the model leaves out. |
 
 ![Voyage calculator](docs/screenshots/voyage.jpg)
+![Where to send it: the same cargo costed to every discharge port](docs/screenshots/ranking.jpg)
+![Ship cost against price gap: where the arb opens](docs/screenshots/grid.jpg)
 
 ## What is real and what is estimated
 

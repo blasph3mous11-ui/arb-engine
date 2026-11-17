@@ -1,6 +1,9 @@
 # Case study: Suez or Cape? What the Red Sea diversions do to a US crude cargo for India
 
 *Model run on 15 November 2026 with prices for 11 November 2026 (WTI $89.62, Brent $92.14, US EIA).
+Re-checked on 17 November 2026 after the tool gained more ports, grades and cost lines: none of
+them apply to this voyage (Corpus Christi takes a full Suezmax, and India is outside the EU carbon
+scheme), so every figure below is unchanged.
 All model figures use public benchmarks and documented estimates, not traded freight data.*
 
 ## What happened
