@@ -21,6 +21,16 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   voyage only; real per-market premiums are paywalled and the page says so. Today (spot market,
   Suezmax from Corpus Christi): Rotterdam is least bad at -$10.82 a barrel, Ulsan worst at
   -$33.67. 127 tests pass.
+- **Stage 4, done 17 Nov 2026: missing voyage costs.** Two new lines in the cost stack, paid by
+  the cargo on top of freight: "Reverse lightering" ($0.60/bbl, estimate from Columbia CGEP's
+  2018 range of 50-75 cents, charged whenever `voyage.needs_lightering` is true) and "EU carbon
+  (ETS)" (`costs.eu_ets_covered_fuel`, `costs.eu_ets_cost`; Rotterdam is flagged `eu_ets`; 3.114
+  t CO2/t fuel, 100% coverage from 2026, half of voyage emissions, EUR 75/t May 2026 snapshot and
+  $1.10/EUR both estimates). Decision on commissions: they come out of freight, so adding them as
+  a cost would double-count. They apply only to typed-in quotes: the charterer pays the quote less
+  2.5% address commission, and the owner's TCE (`arbitrage.owner_tce`) is after 3.75% in total.
+  Sanity: EU carbon about $0.20-0.23/bbl on a US Gulf-Rotterdam voyage; base case unchanged at
+  -$23.64. 151 tests pass.
 - **Stage 3, done 17 Nov 2026: broker freight quotes.** Sidebar "How is freight set?": daily
   hire rate (default), Worldscale (points and flat rate) or lump sum. Engine:
   `voyage.worldscale_freight_usd`, `voyage.implied_tce`, `arbitrage.cargo_tonnes`,

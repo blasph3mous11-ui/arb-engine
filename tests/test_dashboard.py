@@ -71,11 +71,13 @@ def test_pages_agree_on_a_broker_quote(basis):
 
     lines = arbitrage_page.dataframe[0].value.set_index("Line")["USD per barrel"]
     arbitrage_freight = next(value for line, value in lines.items() if line.startswith("+ Freight"))
-    assert metric(voyage_page, "Quoted freight per barrel") == arbitrage_freight
+    assert metric(voyage_page, "Net freight per barrel") == arbitrage_freight
     assert metric(scenarios_page, "Freight per barrel") == arbitrage_freight
-    # Pre-filled to match the daily-hire estimate, so the owner earns about the hire rate.
+    # Pre-filled to match the daily-hire estimate, so before commissions the owner would earn
+    # the $300,000 hire rate. The 3.75% of commissions on about $25m of freight, spread over
+    # about 70 days, takes roughly $13,000 a day off that.
     tce = float(metric(voyage_page, "Owner's daily earnings").replace("$", "").replace(",", ""))
-    assert tce == pytest.approx(300_000, rel=0.002)
+    assert 280_000 < tce < 295_000
     # The grid needs a daily hire rate, so in quote mode it is replaced by an explanation.
     assert any("broker's quote replaces" in i.value for i in scenarios_page.info)
 

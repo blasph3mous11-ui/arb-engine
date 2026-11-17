@@ -59,3 +59,34 @@ def demurrage_cost(delay_days: float, hire_usd_per_day: float, rate_as_share_of_
     daily_rate = hire_usd_per_day * rate_as_share_of_hire
     idle_fuel = idle_consumption_tpd * bunker_usd_per_tonne
     return delay_days * (daily_rate + idle_fuel)
+
+
+def lightering_cost(cargo_bbl: float, usd_per_bbl: float) -> float:
+    """Cost of topping up a ship offshore from smaller ships, when the port is too shallow.
+
+    Charged per barrel of the whole cargo: a published rule of thumb, not a voyage model.
+    """
+    return cargo_bbl * usd_per_bbl
+
+
+def eu_ets_covered_fuel(fuel_tonnes_by_activity: dict, share_outside_eu_pct: float) -> float:
+    """Tonnes of fuel whose CO2 must be paid for, on a voyage between a non-EU and an EU port.
+
+    The load port is outside the EU, so its fuel is not covered. Fuel burned at sea
+    (and in canals) on the way there and back counts at the outside-EU share (half).
+    Fuel burned at berth in the EU port counts in full.
+    """
+    at_sea = sum(t for activity, t in fuel_tonnes_by_activity.items()
+                 if activity not in ("load_port", "discharge_port"))
+    return at_sea * share_outside_eu_pct / 100 + fuel_tonnes_by_activity["discharge_port"]
+
+
+def eu_ets_cost(covered_fuel_tonnes: float, co2_per_tonne_fuel: float, coverage_pct: float,
+                eua_price_eur: float, usd_per_eur: float) -> float:
+    """Cost of the EU carbon allowances for that fuel, in USD.
+
+    Fuel x CO2 per tonne of fuel = tonnes of CO2; x the share of emissions the
+    scheme covers this year; x the allowance price; converted to dollars.
+    """
+    co2_tonnes = covered_fuel_tonnes * co2_per_tonne_fuel * coverage_pct / 100
+    return co2_tonnes * eua_price_eur * usd_per_eur

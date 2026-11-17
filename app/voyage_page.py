@@ -5,6 +5,7 @@ import streamlit as st
 
 import charts
 import ui
+from engine import arbitrage
 from engine import assumptions as A
 from engine import voyage as V
 
@@ -63,17 +64,23 @@ c4.metric("Freight per barrel (estimated)" if setup["freight_basis"] == "hire"
 
 if setup["freight_basis"] != "hire":
     quote = setup["freight_quote_usd"]
-    tce = V.implied_tce(chosen, quote)
+    tce = arbitrage.owner_tce(chosen, quote)
     st.subheader("The broker's quote")
-    q1, q2, q3 = st.columns(3)
+    address_pct = A.get("costs", "commissions", "address_commission_pct")
+    q1, q4, q2, q3 = st.columns(4)
     q1.metric("Quoted freight per barrel", ui.usd(quote / cargo),
               help=f"{ui.usd(quote / 1e6, 2)} million for {cargo:,.0f} barrels, from the sidebar.")
+    q4.metric("Net freight per barrel (estimated)", ui.usd(quote * (1 - address_pct / 100) / cargo),
+              help=f"What the charterer actually pays: the quote less the {address_pct}% address "
+                   "commission returned to it (estimated). This is the freight on the Arbitrage page.")
     q2.metric("Owner's daily earnings (TCE)", ui.usd(tce, 0),
-              help="What the shipowner keeps per day: the quote minus fuel, ports, canal and war-risk "
-                   "cover, divided by the days the ship is tied up.")
+              help="What the shipowner keeps per day: the quote less address commission and "
+                   "brokerage (estimated), minus fuel, ports, canal and war-risk cover, divided by "
+                   "the days the ship is tied up.")
     q3.metric("Compared with the hire rate", ui.usd(tce - hire, 0),
               help="Positive: the quote pays the owner more than the daily hire rate in the box above.")
-    st.caption("The quote sets the freight used on the Arbitrage, Scenarios and Start pages. The cost "
+    st.caption("The quote sets the freight used on the Arbitrage, Scenarios and Start pages, less the "
+               "address commission the charterer gets back (estimated). The cost "
                "breakdown below is what the voyage costs the owner (estimated), which the quote has "
                "to cover. TCE stands for time charter equivalent.")
 

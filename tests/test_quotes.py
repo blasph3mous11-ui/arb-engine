@@ -35,13 +35,16 @@ def test_tce_of_a_lump_sum_by_hand():
 
 def test_quote_replaces_built_up_freight(fixed_distance):
     r = arbitrage.run(hand_inputs(freight_override_usd=6_000_000))
-    # Freight is the quote: $6.00 a barrel on a million barrels.
-    assert r.cost_stack["Freight"] == pytest.approx(6.0)
+    # The charterer gets the 2.5% address commission back: 6,000,000 x 0.975 = $5,850,000,
+    # which is $5.85 a barrel on a million barrels.
+    assert r.cost_stack["Freight"] == pytest.approx(5.85)
     # The hand-worked trade had freight $5.0348; the margin falls by the difference,
     # plus the insurance on the extra freight (x 110% x 0.05%).
-    extra = 6.0 - 5.0348
+    extra = 5.85 - 5.0348
     assert r.margin_per_bbl == pytest.approx(3.92758086 - extra * (1 + 1.10 * 0.0005))
-    assert r.implied_tce == pytest.approx(4_225_200 / 65.2)
+    # The owner pays both commissions, 3.75%: 6,000,000 x 0.9625 = 5,775,000. Less fuel and
+    # ports (1,774,800) leaves 4,000,200 over 65.2 days = $61,352.76 a day.
+    assert r.implied_tce == pytest.approx(4_000_200 / 65.2)
 
 
 def test_without_a_quote_nothing_changes(fixed_distance):
@@ -51,13 +54,14 @@ def test_without_a_quote_nothing_changes(fixed_distance):
 
 
 def test_delay_with_a_quote_is_charged_at_the_quote_s_daily_earnings(fixed_distance):
-    # 3 days late: 3 x (64,803.68 + 7.5 t x $600 idle fuel) = $207,911.04.
+    # 3 days late: 3 x (61,352.76 + 7.5 t x $600 idle fuel) = $197,558.28.
     r = arbitrage.run(hand_inputs(freight_override_usd=6_000_000, delay_days=3))
-    assert r.cost_stack["Demurrage"] == pytest.approx(3 * (4_225_200 / 65.2 + 4_500) / 1_000_000)
+    assert r.cost_stack["Demurrage"] == pytest.approx(3 * (4_000_200 / 65.2 + 4_500) / 1_000_000)
 
 
 def test_tornado_flexes_the_quote_in_quote_mode(fixed_distance):
     rows = {r["driver"].split(" (")[0]: r for r in scenarios.tornado(hand_inputs(freight_override_usd=6_000_000))}
     assert "Freight quote" in rows and "Vessel hire rate" not in rows
-    # 25% of a $6.00 quote is $1.50 each way, plus insurance on it: swing $3.00 x (1 + 0.00055).
-    assert rows["Freight quote"]["swing"] == pytest.approx(3.0 * (1 + 1.10 * 0.0005))
+    # 25% of the $5.85 net freight is $1.4625 each way, plus insurance on it:
+    # swing $2.925 x (1 + 0.00055).
+    assert rows["Freight quote"]["swing"] == pytest.approx(2.925 * (1 + 1.10 * 0.0005))

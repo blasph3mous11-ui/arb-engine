@@ -74,6 +74,12 @@ lines = [
     ("+ Demurrage" + E, result.cost_stack["Demurrage"],
      f"{inputs.delay_days:.0f} days of delay, charged at the daily hire rate plus fuel burned while "
      "waiting. Add delay days on the Scenarios page."),
+    ("+ Reverse lightering" + E, result.cost_stack["Reverse lightering"],
+     "Topping the ship up offshore from smaller ships, charged when the load port is too shallow "
+     "for it to leave fully loaded; zero otherwise. A published 2018 rule of thumb."),
+    ("+ EU carbon (ETS)" + E, result.cost_stack["EU carbon (ETS)"],
+     "CO2 allowances for a voyage into an EU port: half the fuel burned at sea plus all of it at "
+     "berth, at 3.114 t of CO2 per tonne of fuel and the estimated allowance price; zero outside the EU."),
     ("= Landed cost", result.landed_cost, "Total cost of a barrel delivered to the buyer."),
     (f"{benchmark_name} benchmark price", inputs.destination_benchmark_price,
      f"Latest available, {dates['destination_label']}."),

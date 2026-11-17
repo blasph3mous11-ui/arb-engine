@@ -146,6 +146,12 @@ ports:
     name: {value: "Rotterdam, Netherlands"}
     role: {value: destination}
     region: {value: europe}
+    eu_ets:
+      value: true
+      source: "An EU port, so voyages to and from it fall under the EU Emissions Trading System"
+      url: https://www.zeronorth.com/blog/regulations-what-is-the-eu-ets
+      checked: 2026-11-17
+      estimate: false
     latitude: {value: 52.0, unit: degrees north, source: Port location (Maasvlakte entrance), checked: 2026-11-17, estimate: false}
     longitude: {value: 3.9, unit: degrees east, source: Port location (Maasvlakte entrance), checked: 2026-11-17, estimate: false}
     port_cost_usd:

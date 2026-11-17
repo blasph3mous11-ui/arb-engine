@@ -3,7 +3,7 @@
 Generated from the YAML files in `data/assumptions/`. Do not edit by hand: change the
 YAML and run `python -m engine.assumptions`.
 
-170 assumptions, of which 113 are marked **estimated**: our own figures,
+179 assumptions, of which 118 are marked **estimated**: our own figures,
 published figures used as a proxy, or figures not yet confirmed against their source.
 Real traded freight rates and physical price premiums are paywalled, so every ship hire rate
 here is an estimate: either our own figure, or a published broker or press figure for another
@@ -114,6 +114,7 @@ search-engine extract are also marked estimated until confirmed against the docu
 | ports / paradip / latitude | 20.2 | degrees north | published | Port location (port approach) | 2026-11-17 |  |
 | ports / paradip / longitude | 86.75 | degrees east | published | Port location (port approach) | 2026-11-17 |  |
 | ports / paradip / port_cost_usd | 150000 | USD per call (Suezmax) | **estimated** | Our estimate | 2026-11-17 | No free published figure found. Same reasoning as Sikka. |
+| ports / rotterdam / eu_ets | True |  | published | [An EU port, so voyages to and from it fall under the EU Emissions Trading System](https://www.zeronorth.com/blog/regulations-what-is-the-eu-ets) | 2026-11-17 |  |
 | ports / rotterdam / latitude | 52.0 | degrees north | published | Port location (Maasvlakte entrance) | 2026-11-17 |  |
 | ports / rotterdam / longitude | 3.9 | degrees east | published | Port location (Maasvlakte entrance) | 2026-11-17 |  |
 | ports / rotterdam / port_cost_usd | 130000 | USD per call (Suezmax) | **estimated** | Our estimate | 2026-11-17 | No free published figure found. Rotterdam's harbour dues are charged on ship size and cargo and are known to be high for a large tanker; we place it between the US Gulf and Indian figures. |
@@ -199,3 +200,11 @@ search-engine extract are also marked estimated until confirmed against the docu
 | scenario_ranges / grid_spread_min_usd | -5 | USD per barrel | **estimated** | Our choice | 2026-11-17 |  |
 | scenario_ranges / grid_spread_max_usd | 40 | USD per barrel | **estimated** | Our choice | 2026-11-17 |  |
 | scenario_ranges / grid_steps | 16 | points per axis | **estimated** | Our choice | 2026-11-17 |  |
+| commissions / address_commission_pct | 2.5 | percent of freight | **estimated** | [Handybulk shipbroking guide: address commission is usually deducted from freight and returned to the charterer; 2.5% with 1.25% brokerage (3.75% in total) is a common combination](https://www.handybulk.com/shipbrokers-commissions-and-brokerage-in-chartering/) | 2026-11-17 | There is no fixed market rate (1.25% to 2.5% is common for tankers) and the source is a broker's guide, not an official one, so this is an estimate. Used only when a broker's quote is typed in: the charterer's net freight is the quote less this commission. |
+| commissions / brokerage_pct | 1.25 | percent of freight | **estimated** | [Handybulk shipbroking guide: tanker brokerage is commonly 1.25%, paid by the owner out of freight](https://www.handybulk.com/shipbrokers-commission-brokerage-address-commission-and-sp-fees-explained/) | 2026-11-17 | Paid by the shipowner to the brokers, so it lowers the owner's daily earnings (TCE) but does not change what the charterer pays. |
+| lightering / usd_per_bbl | 0.6 | USD per barrel of cargo | **estimated** | [Columbia University Center on Global Energy Policy (2018): lightering adds an estimated 50 to 75 cents a barrel to the cost of transport from the US Gulf Coast](https://www.energypolicy.columbia.edu/sites/default/files/pictures/GulfofMexCongestionRisk_CGEP_commentary.pdf) | 2026-11-17 | Mid-point of the published 50-75 cent range, which dates from 2018 and was worked out for VLCCs. Charged on the whole cargo whenever the ship is too deep to leave the load port fully loaded (see the draught warning). Today's much higher freight rates would make the hire of the small top-up ships dearer, so this is probably low in the current market. |
+| eu_ets / co2_per_tonne_fuel | 3.114 | tonnes of CO2 per tonne of fuel oil | published | [EU MRV Regulation (EU) 2015/757 default factor for heavy fuel oil; the IMO uses 3.114 for fuel oil with 0.10-0.50% sulphur](https://www.zerocarbonshipping.com/files/countdown-nzf-3_lca-guidelines_figures.pdf) | 2026-11-17 |  |
+| eu_ets / coverage_pct | 100 | percent of emissions | published | [EU ETS maritime phase-in: 40% of 2024 emissions, 70% of 2025, 100% from 2026](https://www.zeronorth.com/blog/regulations-what-is-the-eu-ets) | 2026-11-17 |  |
+| eu_ets / share_of_voyage_outside_eu_pct | 50 | percent of emissions | published | [EU ETS maritime: half of the emissions of a voyage that starts or ends outside the EU are covered; all emissions at berth in an EU port are covered](https://www.zeronorth.com/blog/regulations-what-is-the-eu-ets) | 2026-11-17 |  |
+| eu_ets / eua_price_eur_per_tonne | 75 | EUR per tonne of CO2 | **estimated** | [Market reports, May 2026: EU carbon allowances trading in the EUR 74-77 a tonne range](https://kpioceanconnect.com/euas-september-is-the-deadline-but-strategy-is-the-bigger-story/) | 2026-11-17 | The allowance price moves every day and no free live feed was found, so this is a dated snapshot. Methane and nitrous oxide, added to the scheme in 2026, are not counted. |
+| eu_ets / usd_per_eur | 1.1 | USD per EUR | **estimated** | Our estimate | 2026-11-17 | Round figure for converting the allowance price into dollars; the exchange rate moves daily and was not checked against a live source. |

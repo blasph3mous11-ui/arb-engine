@@ -213,3 +213,85 @@ scenario_ranges:
   grid_spread_min_usd: {value: -5, unit: USD per barrel, source: Our choice, checked: 2026-11-17, estimate: true}
   grid_spread_max_usd: {value: 40, unit: USD per barrel, source: Our choice, checked: 2026-11-17, estimate: true}
   grid_steps: {value: 16, unit: points per axis, source: Our choice, checked: 2026-11-17, estimate: true}
+
+commissions:
+  # Deducted from the freight in a voyage charter. They change what a broker's
+  # quote costs the charterer and what the owner keeps; they are not an extra cost.
+  address_commission_pct:
+    value: 2.5
+    unit: percent of freight
+    source: "Handybulk shipbroking guide: address commission is usually deducted from freight and returned to the charterer; 2.5% with 1.25% brokerage (3.75% in total) is a common combination"
+    url: https://www.handybulk.com/shipbrokers-commissions-and-brokerage-in-chartering/
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      There is no fixed market rate (1.25% to 2.5% is common for tankers) and the source is a
+      broker's guide, not an official one, so this is an estimate. Used only when a broker's
+      quote is typed in: the charterer's net freight is the quote less this commission.
+  brokerage_pct:
+    value: 1.25
+    unit: percent of freight
+    source: "Handybulk shipbroking guide: tanker brokerage is commonly 1.25%, paid by the owner out of freight"
+    url: https://www.handybulk.com/shipbrokers-commission-brokerage-address-commission-and-sp-fees-explained/
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      Paid by the shipowner to the brokers, so it lowers the owner's daily earnings (TCE) but does
+      not change what the charterer pays.
+
+lightering:
+  usd_per_bbl:
+    value: 0.60
+    unit: USD per barrel of cargo
+    source: "Columbia University Center on Global Energy Policy (2018): lightering adds an estimated 50 to 75 cents a barrel to the cost of transport from the US Gulf Coast"
+    url: https://www.energypolicy.columbia.edu/sites/default/files/pictures/GulfofMexCongestionRisk_CGEP_commentary.pdf
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      Mid-point of the published 50-75 cent range, which dates from 2018 and was worked out for
+      VLCCs. Charged on the whole cargo whenever the ship is too deep to leave the load port fully
+      loaded (see the draught warning). Today's much higher freight rates would make the hire of
+      the small top-up ships dearer, so this is probably low in the current market.
+
+eu_ets:
+  # The EU Emissions Trading System: ships pay for the CO2 they emit on voyages to and from EU ports.
+  co2_per_tonne_fuel:
+    value: 3.114
+    unit: tonnes of CO2 per tonne of fuel oil
+    source: "EU MRV Regulation (EU) 2015/757 default factor for heavy fuel oil; the IMO uses 3.114 for fuel oil with 0.10-0.50% sulphur"
+    url: https://www.zerocarbonshipping.com/files/countdown-nzf-3_lca-guidelines_figures.pdf
+    checked: 2026-11-17
+    estimate: false
+  coverage_pct:
+    value: 100
+    unit: percent of emissions
+    source: "EU ETS maritime phase-in: 40% of 2024 emissions, 70% of 2025, 100% from 2026"
+    url: https://www.zeronorth.com/blog/regulations-what-is-the-eu-ets
+    checked: 2026-11-17
+    estimate: false
+  share_of_voyage_outside_eu_pct:
+    value: 50
+    unit: percent of emissions
+    source: "EU ETS maritime: half of the emissions of a voyage that starts or ends outside the EU are covered; all emissions at berth in an EU port are covered"
+    url: https://www.zeronorth.com/blog/regulations-what-is-the-eu-ets
+    checked: 2026-11-17
+    estimate: false
+  eua_price_eur_per_tonne:
+    value: 75
+    unit: EUR per tonne of CO2
+    source: "Market reports, May 2026: EU carbon allowances trading in the EUR 74-77 a tonne range"
+    url: https://kpioceanconnect.com/euas-september-is-the-deadline-but-strategy-is-the-bigger-story/
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      The allowance price moves every day and no free live feed was found, so this is a dated
+      snapshot. Methane and nitrous oxide, added to the scheme in 2026, are not counted.
+  usd_per_eur:
+    value: 1.10
+    unit: USD per EUR
+    source: Our estimate
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      Round figure for converting the allowance price into dollars; the exchange rate moves daily
+      and was not checked against a live source.

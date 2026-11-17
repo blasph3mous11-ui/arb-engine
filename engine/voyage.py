@@ -73,7 +73,14 @@ def get_port(key: str) -> dict:
         "region": A.val(raw["region"]),
         # Only load ports carry a channel depth; it decides whether a full ship can leave.
         "channel_depth_ft": A.val(raw["channel_depth_ft"]) if "channel_depth_ft" in raw else None,
+        "eu_ets": bool(A.val(raw["eu_ets"])) if "eu_ets" in raw else False,
     }
+
+
+def needs_lightering(origin_key: str, vessel_key: str) -> bool:
+    """True when a fully loaded ship is too deep to leave the load port's channel."""
+    depth = get_port(origin_key)["channel_depth_ft"]
+    return depth is not None and get_vessel(vessel_key).laden_draught_ft > depth
 
 
 def draught_warning(origin_key: str, vessel_key: str) -> str | None:
@@ -88,9 +95,8 @@ def draught_warning(origin_key: str, vessel_key: str) -> str | None:
         return None
     return (f"A fully loaded {vessel.name} draws about {vessel.laden_draught_ft:.0f} ft of water, but "
             f"the channel at {port['name']} is about {depth:.0f} ft deep. In practice the ship would "
-            "leave part-loaded and be topped up offshore by smaller ships (reverse lightering). This "
-            "tool still costs a full cargo and does not yet include the top-up cost, so freight per "
-            "barrel here is understated.")
+            "leave part-loaded and be topped up offshore by smaller ships (reverse lightering). The "
+            "tool adds an estimated top-up cost per barrel to the trade (see the Arbitrage page).")
 
 
 def _search(origin_key: str, destination_key: str, forbidden: list[str]) -> dict:

@@ -116,6 +116,17 @@ Worldscale Association for a standard ship. Brokers quote a percentage of it: WS
 rate, WS 150 is one and a half times it. Freight = points / 100 x flat rate x tonnes of cargo.
 Flat rates are sold by subscription, so the tool asks you to type the one for your route.
 
+**Address commission and brokerage**
+Percentages taken out of the freight in a voyage charter. The address commission (often 2.5%) is
+returned to the charterer, so a quote costs the charterer a little less than its headline. The
+brokerage (often 1.25%) is paid by the owner to the brokers. Both reduce what the owner keeps.
+
+**EU ETS (Emissions Trading System)**
+The EU's carbon market. Since 2024 ships calling at EU ports must buy allowances for their CO2:
+all of it at berth and on voyages between EU ports, half of it on voyages to or from outside the
+EU. Coverage was phased in (40% of 2024 emissions, 70% of 2025) and is 100% from 2026. Charter
+contracts usually pass the cost to the charterer.
+
 **Lump sum**
 A single dollar figure for the whole voyage, used instead of Worldscale for some routes and
 cargoes, such as US Gulf exports to Asia.

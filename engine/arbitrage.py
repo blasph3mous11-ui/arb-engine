@@ -13,7 +13,8 @@ from dataclasses import dataclass, replace
 from engine import assumptions as A
 from engine import costs as C
 from engine.units import barrels_to_tonnes
-from engine.voyage import VoyageResult, get_vessel, implied_tce, voyage_from_assumptions
+from engine.voyage import (VoyageResult, get_port, get_vessel, implied_tce, needs_lightering,
+                           voyage_from_assumptions)
 
 
 @dataclass(frozen=True)
@@ -122,8 +123,13 @@ class ArbResult:
 
     @property
     def implied_tce(self) -> float:
-        """What the shipowner earns per day on this freight (time charter equivalent)."""
-        return implied_tce(self.voyage, self.cost_stack["Freight"] * self.inputs.cargo_bbl)
+        """What the shipowner earns per day on this freight (time charter equivalent).
+
+        With a broker's quote this is after both commissions; without one it is the hire rate.
+        """
+        if self.inputs.freight_override_usd is None:
+            return implied_tce(self.voyage, self.cost_stack["Freight"] * self.inputs.cargo_bbl)
+        return owner_tce(self.voyage, self.inputs.freight_override_usd)
 
     @property
     def benchmark_spread(self) -> float:
@@ -151,10 +157,13 @@ def run(inputs: ArbInputs) -> ArbResult:
 
     cargo_value = purchase_price * barrels
     # A broker's quote, when given, replaces the freight built up from the daily hire rate.
-    freight = voyage.total_cost if inputs.freight_override_usd is None else inputs.freight_override_usd
+    # The charterer gets the address commission back out of a quoted freight, so pays the net figure.
+    address_pct = A.get("costs", "commissions", "address_commission_pct")
+    freight = (voyage.total_cost if inputs.freight_override_usd is None
+               else inputs.freight_override_usd * (1 - address_pct / 100))
     # Demurrage tracks what the ship earns per day: the hire rate, or the quote's implied TCE.
     daily_rate = (inputs.hire_usd_per_day if inputs.freight_override_usd is None
-                  else max(implied_tce(voyage, freight), 0.0))
+                  else max(owner_tce(voyage, inputs.freight_override_usd), 0.0))
 
     # Money is tied up from loading until the buyer pays.
     financed_days = voyage.laden_days + inputs.delay_days + inputs.financing_extra_days
@@ -167,12 +176,15 @@ def run(inputs: ArbInputs) -> ArbResult:
                                  A.get("costs", "demurrage", "rate_as_share_of_hire"),
                                  vessel.idle_consumption_tpd, inputs.bunker_usd_per_tonne)
 
+    extra_costs = cargo_charges(inputs, voyage)
     cost_stack = {
         "Freight": freight / barrels,
         "Financing": financing / barrels,
         "Insurance": insurance / barrels,
         "Transit loss": loss / barrels,
         "Demurrage": demurrage / barrels,
+        "Reverse lightering": extra_costs["lightering"] / barrels,
+        "EU carbon (ETS)": extra_costs["eu_ets"] / barrels,
     }
     return ArbResult(inputs=inputs, voyage=voyage, purchase_price=purchase_price,
                      cost_stack=cost_stack, quality_differential=quality, sale_value=sale_value)
@@ -181,3 +193,24 @@ def run(inputs: ArbInputs) -> ArbResult:
 def cargo_tonnes(cargo_bbl: float, grade: str) -> float:
     """The cargo's weight in tonnes, from its volume and the grade's API gravity."""
     return barrels_to_tonnes(cargo_bbl, A.get("costs", "grades", grade, "api_gravity"))
+
+
+def owner_tce(voyage, quoted_freight_usd: float) -> float:
+    """The owner's daily earnings from a broker's quote, after both commissions come out of it."""
+    commission_pct = (A.get("costs", "commissions", "address_commission_pct")
+                      + A.get("costs", "commissions", "brokerage_pct"))
+    return implied_tce(voyage, quoted_freight_usd * (1 - commission_pct / 100))
+
+
+def cargo_charges(inputs: ArbInputs, voyage) -> dict:
+    """Costs the cargo pays on top of freight: offshore top-up and EU carbon allowances, in USD."""
+    lightering = 0.0
+    if needs_lightering(inputs.origin_key, inputs.vessel_key):
+        lightering = C.lightering_cost(inputs.cargo_bbl, A.get("costs", "lightering", "usd_per_bbl"))
+    eu_ets = 0.0
+    if get_port(inputs.destination_key)["eu_ets"]:
+        ets = A.load("costs")["eu_ets"]
+        covered = C.eu_ets_covered_fuel(voyage.fuel_tonnes, A.val(ets["share_of_voyage_outside_eu_pct"]))
+        eu_ets = C.eu_ets_cost(covered, A.val(ets["co2_per_tonne_fuel"]), A.val(ets["coverage_pct"]),
+                               A.val(ets["eua_price_eur_per_tonne"]), A.val(ets["usd_per_eur"]))
+    return {"lightering": lightering, "eu_ets": eu_ets}

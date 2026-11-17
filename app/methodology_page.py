@@ -30,7 +30,10 @@ st.markdown("""
 | **Insurance** | A small percentage of cargo value plus freight, plus 10%. |
 | **Transit loss** | A small percentage of the cargo, valued at the sale price. |
 | **Quality adjustment** | (difference in API gravity x a dollar value per degree) minus (difference in sulphur x a dollar value per percentage point), comparing the grade shipped with the benchmark it is sold against. |
-| **Demurrage** | Days of delay x (daily hire rate + fuel burned while waiting). |
+| **Demurrage** | Days of delay x (daily hire rate + fuel burned while waiting). With a broker's quote, the quote's implied daily earnings replace the hire rate. |
+| **Reverse lightering** | When a fully loaded ship is too deep for the load port's channel, an estimated 60 cents a barrel for topping it up offshore from smaller ships (published 2018 range 50-75 cents). |
+| **EU carbon (ETS)** | For a voyage into an EU port: half the fuel burned at sea plus all the fuel burned at berth, x 3.114 tonnes of CO2 per tonne of fuel, x the carbon allowance price, in dollars. |
+| **Commissions** | With a broker's quote only: the charterer gets a 2.5% address commission back, and the owner pays it plus 1.25% brokerage, which lowers the owner's daily earnings. Both estimated. |
 | **Break-even spread** | The price gap at which the margin is zero, holding all costs fixed. |
 """)
 
@@ -56,8 +59,10 @@ st.markdown("""
   cannot use it, a full Suezmax is at or beyond its draught limit, and we have no free source
   for the tanker toll. Cargoes to Asia are offered via Suez or the Cape only.
 - **US crude only.** Every load port is on the US Gulf Coast and the grade is always WTI.
-- **Simplified logistics.** No ship-to-ship transfers to load a VLCC, no brokerage commissions,
-  no port congestion beyond the delay slider, no slow steaming to save fuel.
+- **Simplified logistics.** Reverse lightering is a flat rule of thumb per barrel, not a model of
+  the top-up ships and days; commissions apply only to typed-in quotes; EU carbon uses a dated
+  allowance price and ignores methane; no port congestion beyond the delay slider, no slow
+  steaming to save fuel.
 - **The historical view holds costs constant**, as explained on that chart.
 - **Dubai is monthly only.** No free daily Dubai price exists, so with Dubai as the sell benchmark
   the tool compares monthly averages of Dubai and WTI, today and in the historical view. The fuel
