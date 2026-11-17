@@ -21,7 +21,7 @@ st.markdown(
 st.subheader("Today's answer")
 ui.verdict_banner(result)
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Buy at origin", ui.usd(result.purchase_price), help="WTI plus an estimated Gulf Coast differential.")
+c1.metric("Buy at origin", ui.usd(result.purchase_price), help="WTI Cushing plus the estimated differential for the grade shipped.")
 c2.metric("Cost to deliver (estimated)", ui.usd(sum(result.cost_stack.values())),
           help="Freight, financing, insurance, transit loss and demurrage, per barrel. "
                "Built largely from estimates, above all the ship's daily hire rate.")

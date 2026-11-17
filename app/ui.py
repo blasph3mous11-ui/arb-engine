@@ -66,6 +66,16 @@ def sidebar_setup() -> dict:
         format_func=lambda k: f"{V.get_vessel(k).name} "
                               f"({V.get_vessel(k).cargo_capacity_bbl / 1e6:.2f}m barrels)")
     vessel = V.get_vessel(vessel_key)
+    grades = A.load("costs")["grades"]
+    grade = sb.selectbox("Crude grade shipped", arbitrage.shipped_grades(), key="grade",
+                         format_func=lambda k: A.val(grades[k]["name"]),
+                         help="All three are bought against the WTI Cushing price plus a differential.")
+    origin_differential = sb.number_input(
+        "Differential to WTI Cushing, USD per barrel (estimated)", step=0.05, format="%.2f",
+        value=float(arbitrage.export_differential(grade)), key=f"origin_differential_{grade}",
+        help="What this grade costs on a ship at the Gulf Coast over the free WTI Cushing price. "
+             "Real export prices are paywalled; the starting figure is a dated estimate listed on "
+             "the Methodology page. In 2026 these swung by several dollars within weeks.")
     warning = V.draught_warning(origin, vessel_key)
     if warning:
         sb.warning(warning, icon=":material/water:")
@@ -101,7 +111,8 @@ def sidebar_setup() -> dict:
                           "for the voyage. Type a quote here to use it instead of the daily hire rate.")
     quote_usd = None
     if basis != "hire":
-        quote_usd = _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, A.val(hire_record))
+        quote_usd = _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via,
+                                          A.val(hire_record), grade)
 
     with sb.expander("Hedging: the futures curve"):
         curve = st.number_input(
@@ -120,10 +131,10 @@ def sidebar_setup() -> dict:
     return dict(origin=origin, destination=destination, vessel_key=vessel_key, via=via,
                 market=market, hire=A.val(hire_record), hire_is_estimate=A.is_estimate(hire_record),
                 benchmark=benchmark, freight_basis=basis, freight_quote_usd=quote_usd,
-                curve_m2_minus_m1=curve)
+                curve_m2_minus_m1=curve, grade=grade, origin_differential=origin_differential)
 
 
-def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire) -> float:
+def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire, grade) -> float:
     """Boxes for a broker's freight quote. Returns the quoted freight for the whole cargo, in USD.
 
     The boxes start at the figure the daily hire rate gives for this exact voyage, so
@@ -140,7 +151,7 @@ def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire)
                                    help="The total freight the broker quotes for this voyage.")
         sb.caption("Pre-filled with the daily-hire estimate for this voyage. Type the broker's figure.")
         return millions * 1e6
-    tonnes = arbitrage.cargo_tonnes(V.get_vessel(vessel_key).cargo_capacity_bbl, "wti")
+    tonnes = arbitrage.cargo_tonnes(V.get_vessel(vessel_key).cargo_capacity_bbl, grade)
     points = sb.number_input("Worldscale points", min_value=0.0, step=5.0, value=100.0,
                              key=f"ws_points_{voyage_key}",
                              help="The percentage of the flat rate the broker quotes: WS 150 means 1.5 x.")
@@ -148,7 +159,8 @@ def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire)
                            value=round(built_up / tonnes, 2), key=f"ws_flat_{voyage_key}",
                            help="Published each year by the Worldscale Association (subscription only).")
     sb.caption(f"Pre-filled so that WS 100 matches the daily-hire estimate for this voyage "
-               f"({tonnes:,.0f} tonnes of WTI). Type the broker's points and the route's flat rate. "
+               f"({tonnes:,.0f} tonnes of {A.val(A.load('costs')['grades'][grade]['name']).split(' (')[0]}). "
+               "Type the broker's points and the route's flat rate. "
                "The real flat rates are paywalled, so the tool does not guess them.")
     return V.worldscale_freight_usd(points, flat, tonnes)
 
@@ -180,6 +192,7 @@ def base_inputs(setup: dict, prices) -> tuple[arbitrage.ArbInputs, dict]:
         hire_usd_per_day=setup["hire"],
         freight_override_usd=setup.get("freight_quote_usd"),
         curve_m2_minus_m1=setup.get("curve_m2_minus_m1", 0.0),
+        grade=setup.get("grade", "wti"), origin_differential=setup.get("origin_differential", 1.0),
     )
     date_format = "%B %Y average" if monthly else "%d %b %Y"
     dates = dict(wti=wti_date, brent=brent_date, destination=destination_date,

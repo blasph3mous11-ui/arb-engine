@@ -23,6 +23,8 @@ SETUPS = [
     {"origin": "loop", "destination": "ningbo", "vessel": "vlcc"},
     {"vessel": "panamax", "destination": "singapore", "market": "time_charter_1yr_jul_2026"},
     {"vessel": "suezmax_eco", "destination": "paradip", "origin": "beaumont", "via": "cape"},
+    {"grade": "mars", "benchmark": "dubai", "origin": "loop"},
+    {"grade": "wti_midland", "destination": "rotterdam", "freight_basis": "lump_sum"},
 ]
 
 
@@ -34,11 +36,12 @@ def offline_prices(monkeypatch):
 
 @pytest.mark.parametrize("page", PAGES)
 @pytest.mark.parametrize("setup", SETUPS, ids=["base", "vlcc", "aframax-cape-calm", "dubai-mumbai", "rotterdam-direct",
-                                              "loop-ningbo-vlcc", "panamax-singapore", "eco-paradip-cape"])
+                                              "loop-ningbo-vlcc", "panamax-singapore", "eco-paradip-cape",
+                                              "mars-dubai-loop", "midland-rotterdam-lump-sum"])
 def test_page_loads(page, setup):
     app = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=120).run()
     for key, value in setup.items():
-        widget = app.radio(key=key) if key == "via" else app.selectbox(key=key)
+        widget = app.radio(key=key) if key in ("via", "freight_basis") else app.selectbox(key=key)
         widget.set_value(value)
     app.run()
     app.switch_page(str(ROOT / "app" / page)).run()

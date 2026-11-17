@@ -21,6 +21,16 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   voyage only; real per-market premiums are paywalled and the page says so. Today (spot market,
   Suezmax from Corpus Christi): Rotterdam is least bad at -$10.82 a barrel, Ulsan worst at
   -$33.67. 127 tests pass.
+- **Stage 6, done 17 Nov 2026: more grades.** Sidebar "Crude grade shipped": WTI, WTI Midland
+  (Platts spec 40-44 API, max 0.2% S; we use 42 and 0.20) and Mars (29.5 API, 1.89% S, Nov 2017
+  assay via S&P Global). Each is bought at WTI Cushing plus its own differential
+  (`arbitrage.export_differential`; WTI Midland $1.30 from Argus 10 Mar 2026, Mars $1.50 from a
+  late-May 2026 secondary report; both estimates, editable in the sidebar because they swung by
+  many dollars in 2026). `arbitrage.shipped_grades`; Worldscale tonnes now use the grade's
+  density. Decision: no gross-product-worth valuation, because consistent free product yields per
+  grade and destination product prices do not exist; documented on the Methodology page. Sanity:
+  Mars is worth $5.04 less than Brent and $0.49 less than Dubai on the quality rule. 177 tests pass.
+- **Stage 7 (other load regions): not started; waits for the owner's choice of region.**
 - **Stage 5, done 17 Nov 2026: futures curve effect.** Found that the EIA stopped publishing its
   free NYMEX WTI futures series (RCLC1-4) in April 2024 and no other permitted free source exists,
   so today's curve is typed in (sidebar, "Hedging: the futures curve", default 0).

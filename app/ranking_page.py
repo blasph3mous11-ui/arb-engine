@@ -5,6 +5,7 @@ import streamlit as st
 
 import charts
 import ui
+from engine import assumptions as A
 from engine import ranking
 from engine import voyage as V
 
@@ -18,7 +19,8 @@ benchmark_name = dates["benchmark"].title()
 st.title("Where to send it")
 st.markdown(
     f"A trader with a cargo to place compares every destination by what is left after all "
-    f"costs. This page takes **{inputs.cargo_bbl / 1e6:.2f} million barrels** of WTI loaded at "
+    f"costs. This page takes **{inputs.cargo_bbl / 1e6:.2f} million barrels** of "
+    f"{A.val(A.load('costs')['grades'][inputs.grade]['name']).split(' (')[0]} loaded at "
     f"**{origin['name']}** on {ui.a_or_an(vessel.name)} and works out the margin to each "
     f"discharge port, using the cheapest route available to that port.")
 

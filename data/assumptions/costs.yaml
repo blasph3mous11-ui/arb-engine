@@ -11,7 +11,8 @@ pricing:
     note: >
       The free WTI price is for oil at Cushing, Oklahoma, an inland pipeline hub. Oil loaded on a
       ship at the Gulf Coast normally costs a little more, roughly the pipeline tariff to the
-      coast. Real Gulf Coast export prices (WTI at Houston, "MEH") are paywalled.
+      coast. Real Gulf Coast export prices (WTI at Houston, "MEH") are paywalled. This is the
+      differential for the "WTI" grade; WTI Midland and Mars carry their own, under grades.
   destination_differential_usd_per_bbl:
     value: 0.00
     unit: USD per barrel
@@ -152,6 +153,7 @@ quality:
 grades:
   wti:
     name: {value: "WTI (US light sweet)"}
+    shipped: {value: true}
     api_gravity:
       value: 39.6
       unit: degrees API
@@ -182,6 +184,68 @@ grades:
       url: https://www.eia.gov/todayinenergy/detail.php?id=7110
       checked: 2026-11-15
       estimate: false
+  wti_midland:
+    name: {value: "WTI Midland (US export grade)"}
+    shipped: {value: true}
+    api_gravity:
+      value: 42.0
+      unit: degrees API
+      source: "S&P Global Platts WTI Midland specification: 40 to 44 API gravity"
+      url: https://www.spglobal.com/platts/en/our-methodology/subscriber-notes/080620-platts-implements-comprehensive-platts-wti-midland-specifications
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        The middle of the published 40-44 range; each cargo's real gravity differs.
+    sulphur_pct:
+      value: 0.20
+      unit: percent by weight
+      source: "S&P Global Platts WTI Midland specification: 0.2% sulphur or less"
+      url: https://www.spglobal.com/platts/en/our-methodology/subscriber-notes/080620-platts-implements-comprehensive-platts-wti-midland-specifications
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        The specification's maximum, so real cargoes are usually a little sweeter.
+    export_differential_usd_per_bbl:
+      value: 1.30
+      unit: USD per barrel over WTI at Cushing
+      source: "Argus, 10 March 2026: Permian-quality WTI at Houston (MEH) at a $1.25-1.35/bl premium to the Cushing benchmark"
+      url: https://www.argusmedia.com/en/news-and-insights/latest-market-news/2796268-us-gulf-crude-premiums-near-6-year-high-on-iran-war
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        A dated snapshot of a price that moves daily: Platts put the Houston premium at $5.20 nine
+        days later, during the Iran war. Change it in the sidebar to test other levels.
+  mars:
+    name: {value: "Mars (US Gulf medium sour)"}
+    shipped: {value: true}
+    api_gravity:
+      value: 29.5
+      unit: degrees API
+      source: "S&P Global, January 2018: Mars assay of November 2017 at 29.5 API and 1.89% sulphur"
+      url: https://www.spglobal.com/energy/en/news-research/blog/crude-oil/012318-usgc-blended-crude-loop-sour-gets-second-full-assay-treatment-in-the-loop
+      checked: 2026-11-17
+      estimate: false
+      note: >
+        Mars is a blend of offshore Gulf of Mexico fields, loaded mainly at LOOP; its quality drifts
+        (a 2012 assay gave 28.8 API and 1.8% sulphur).
+    sulphur_pct:
+      value: 1.89
+      unit: percent by weight
+      source: "S&P Global, January 2018: Mars assay of November 2017 at 29.5 API and 1.89% sulphur"
+      url: https://www.spglobal.com/energy/en/news-research/blog/crude-oil/012318-usgc-blended-crude-loop-sour-gets-second-full-assay-treatment-in-the-loop
+      checked: 2026-11-17
+      estimate: false
+    export_differential_usd_per_bbl:
+      value: 1.50
+      unit: USD per barrel over WTI at Cushing
+      source: "Market report, late May 2026: the Mars premium to WTI fell back to about $1.50 after peaking near $18 in early April"
+      url: https://www.argusmedia.com/en/news-and-insights/latest-market-news/2799214-mars-crude-premium-swings-down-by-10-bl
+      checked: 2026-11-17
+      estimate: true
+      note: >
+        Sour crude normally trades below WTI, but with Middle East sour supply disrupted in 2026 Mars
+        swung to large premiums (Argus reported nearly $13 on 9 March). The $1.50 figure is from a
+        secondary report and is a dated snapshot; change it in the sidebar.
   dubai:
     name: {value: "Dubai (Middle East medium sour)"}
     api_gravity:

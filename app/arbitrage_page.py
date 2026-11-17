@@ -18,9 +18,17 @@ vessel = V.get_vessel(inputs.vessel_key)
 origin, destination = V.get_port(inputs.origin_key), V.get_port(inputs.destination_key)
 benchmark_name = dates["benchmark"].title()
 
+grade_record = A.load("costs")["grades"][inputs.grade]
+grade_name = A.val(grade_record["name"]).split(" (")[0]
+benchmark_record = A.load("costs")["grades"][dates["benchmark"]]
+quality_comparison = " and ".join([
+    "lighter" if A.val(grade_record["api_gravity"]) > A.val(benchmark_record["api_gravity"]) else "heavier",
+    "lower in sulphur" if A.val(grade_record["sulphur_pct"]) < A.val(benchmark_record["sulphur_pct"])
+    else "higher in sulphur"])
+
 st.title("Arbitrage result")
 st.markdown(
-    f"Buy **{inputs.cargo_bbl / 1e6:.2f} million barrels** of WTI at {origin['name']}, ship it on "
+    f"Buy **{inputs.cargo_bbl / 1e6:.2f} million barrels** of {grade_name} at {origin['name']}, ship it on "
     f"{ui.a_or_an(vessel.name)} {ui.route_phrase(inputs.via)} to {destination['name']}, and sell it against "
     f"{benchmark_name}. Does it pay today?")
 ui.verdict_banner(result)
@@ -28,7 +36,7 @@ ui.verdict_banner(result)
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Purchase price", ui.usd(result.purchase_price),
           help=f"WTI {ui.usd(inputs.origin_benchmark_price)} ({dates['wti_label']}) "
-               f"plus {ui.usd(inputs.origin_differential)} Gulf Coast differential (estimated).")
+               f"plus {ui.usd(inputs.origin_differential)} {grade_name} differential (estimated).")
 c2.metric("Landed cost", ui.usd(result.landed_cost), help="Purchase price plus every cost of delivery.")
 c3.metric("Sale value", ui.usd(result.sale_value),
           help=f"{benchmark_name} {ui.usd(inputs.destination_benchmark_price)} "
@@ -52,8 +60,10 @@ sofr, bank_margin = A.get("costs", "financing", "benchmark_rate_pct"), A.get("co
 lines = [
     ("WTI benchmark price", inputs.origin_benchmark_price,
      f"EIA spot price for WTI at Cushing, {dates['wti_label']}."),
-    ("+ Gulf Coast differential" + E, inputs.origin_differential,
-     "Oil on a ship at the coast costs a little more than oil at the inland hub."),
+    ("+ Gulf Coast differential" + E, inputs.origin_differential,  # for the grade shipped
+     f"What {grade_name} costs on a ship at the Gulf Coast over WTI at the inland Cushing hub: "
+     "the pipeline to the coast plus the grade's own market. A dated estimate you can change in "
+     "the sidebar."),
     ("= Purchase price", result.purchase_price, "What we pay per barrel at the load port."),
     # Freight always contains estimates (the fuel price at least), whatever the hire rate's status.
     ("+ Freight" + (E if setup["hire_is_estimate"] else " (part estimated)"), result.cost_stack["Freight"],
@@ -85,7 +95,9 @@ lines = [
     (f"{benchmark_name} benchmark price", inputs.destination_benchmark_price,
      f"Latest available, {dates['destination_label']}."),
     ("+ Quality adjustment" + E, result.quality_differential,
-     f"WTI is lighter and lower in sulphur than {benchmark_name}, so it is worth a little more."),
+     f"{grade_name} is {quality_comparison} than {benchmark_name}: worth "
+     f"{ui.usd(abs(result.quality_differential))} a barrel {'more' if result.quality_differential >= 0 else 'less'} "
+     "on the gravity-and-sulphur rule."),
     ("+ Destination differential" + E, inputs.destination_differential,
      "Any premium the buyer pays over the benchmark. Unknown without paid data, so zero."),
     ("+ Futures curve effect (hedged)", result.curve_value,
@@ -110,7 +122,7 @@ price_adjustments = (result.quality_differential + inputs.destination_differenti
                      - inputs.origin_differential)
 adjusted_gap = result.benchmark_spread + price_adjustments
 st.info(
-    f"**How to read this.** The price gap between {benchmark_name} and WTI is "
+    f"**How to read this.** The price gap between {benchmark_name} and WTI Cushing is "
     f"{ui.usd(result.benchmark_spread)} a barrel. After the estimated quality adjustment "
     f"({result.quality_differential:+.2f}), the estimated destination differential "
     f"({inputs.destination_differential:+.2f}) and the estimated Gulf Coast differential "

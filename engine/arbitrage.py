@@ -68,7 +68,7 @@ def default_inputs(origin_benchmark_price: float, destination_benchmark_price: f
         destination_benchmark="brent",
         origin_benchmark_price=origin_benchmark_price,
         destination_benchmark_price=destination_benchmark_price,
-        origin_differential=A.get("costs", "pricing", "origin_differential_usd_per_bbl"),
+        origin_differential=export_differential(overrides.get("grade", "wti")),
         destination_differential=A.get("costs", "pricing", "destination_differential_usd_per_bbl"),
         hire_usd_per_day=A.get("market", "freight_markets", market, "hire_usd_per_day", vessel_key),
         bunker_usd_per_tonne=bunker_usd_per_tonne,
@@ -83,6 +83,20 @@ def default_inputs(origin_benchmark_price: float, destination_benchmark_price: f
     )
     base.update(overrides)
     return ArbInputs(**base)
+
+
+def shipped_grades() -> list[str]:
+    """The crude grades that can be loaded in the US Gulf (the others are price benchmarks only)."""
+    return [key for key, grade in A.load("costs")["grades"].items()
+            if A.val(grade.get("shipped", {"value": False}))]
+
+
+def export_differential(grade: str) -> float:
+    """What a grade costs on a ship at the Gulf Coast over WTI at Cushing, USD per barrel (estimated)."""
+    record = A.load("costs")["grades"][grade].get("export_differential_usd_per_bbl")
+    if record is None:
+        return A.get("costs", "pricing", "origin_differential_usd_per_bbl")
+    return A.val(record)
 
 
 def grade_quality_differential(grade: str, benchmark: str) -> float:
