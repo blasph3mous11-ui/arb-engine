@@ -4,8 +4,9 @@ Read this first at the start of every session.
 
 ## Where things stand (17 November 2026)
 
-**All five phases are built and working**, and the tool now covers 4 US Gulf load ports, 7
-discharge ports (India, Europe, East Asia) and 5 ship types. See the latest dated entry for the
+**All five phases and all seven upgrade stages are built and working.** The tool covers 6 load
+ports (4 US Gulf, 2 North Sea), 7 discharge ports (India, Europe, East Asia), 5 ship types and 5
+shipped grades. See the latest dated entry for the
 test count. The dashboard has seven pages. The code is on GitHub: https://github.com/blasph3mous11-ui/arb-engine
 
 ## Upgrade plan in progress (see `docs/UPGRADE_PLAN.md`)
@@ -30,6 +31,27 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   density. Decision: no gross-product-worth valuation, because consistent free product yields per
   grade and destination product prices do not exist; documented on the Methodology page. Sanity:
   Mars is worth $5.04 less than Brent and $0.49 less than Dubai on the quality rule. 177 tests pass.
+- **Independent review of Stages 1-7, 17 Nov 2026.** Three reviewers (economics, pages, sources)
+  with every finding re-checked by a second reviewer; 27 confirmed, all fixed. The ones that
+  changed numbers:
+  1. Same-benchmark trades (North Sea crude sold against Brent) were bought at the market
+     differential but sold on the gravity-and-sulphur rule, valuing one barrel two ways (Forties
+     +$0.80 for nothing, Johan Sverdrup to Rotterdam -$10.28 before costs). Now such a cargo keeps
+     its differential at destination; the rule is used only across different benchmarks, and the
+     pages say the two ends then come from different sources.
+  2. Pre-filled broker quotes ignored the address commission, so switching on a quote improved the
+     margin by about $0.60. The pre-fill is now grossed up: switching on changes nothing.
+  3. In quote mode the "Suez closed" switch kept the Suez quote for the Cape voyage. A quote now
+     covers one route: no route switch in quote mode (tornado and Scenarios toggle).
+  4. Reverse lightering was charged on the whole cargo. It is now charged only on the share that
+     cannot be loaded at the berth (`voyage.lightered_share`: full and empty draught, channel
+     depth) at an estimated $1.00 per offshore barrel, derived from the 50-75 cent per-cargo-barrel
+     figure for a VLCC. VLCC at Houston still $0.60/bbl; Suezmax at Houston now $0.17.
+  5. Ranking now keeps the route with the higher margin (the curve can favour the longer route).
+  Also: EU carbon wording (either port in the scheme), cost lists including lightering and carbon,
+  demurrage wording in quote mode, "US price" wording for North Sea cargoes, Methodology formula and
+  rows, glossary, README estimates list, and four source citations (Mars, carbon price, WTI
+  Midland date, Johan Sverdrup assay date). 198 tests pass.
 - **Stage 7, done 17 Nov 2026: North Sea load region** (owner's choice). Load terminals Hound
   Point (UK, Forties) and Mongstad (Norway, Johan Sverdrup); each origin port carries a
   `price_benchmark` (wti or brent) and `arbitrage.origin_benchmark` / `ArbInputs.origin_benchmark`
@@ -226,9 +248,10 @@ At the one-year time-charter rate the arb is closed by $7.47; at calm-market rat
 - The reference distances used in one test (9,700 and 11,900 nm Houston-Mumbai) are from memory of
   published tables; verify on sea-distances.org.
 - The spot hire rate ($300,000 a day Suezmax) is an estimate anchored on press reports.
-- README has two screenshots (arbitrage, voyage). A scenarios screenshot would be a nice addition.
-- Not modelled: hedging and futures-curve structure, brokerage commission, VLCC reverse
-  lightering, slow steaming. Listed on the Methodology page.
+- The voyage screenshot in the README predates the upgrades (its content is still accurate).
+- Not modelled: pricing windows, basis risk and the cost of a hedge; under-keel clearance and tide
+  in the lightering share; methane and nitrous oxide under the EU carbon scheme; slow steaming; a
+  Panama Canal route. Listed on the Methodology page.
 
 ## How to run
 
@@ -252,7 +275,8 @@ Windows fails to load one of the packages if the full path is very long.
 
 ## What comes next
 
-1. Owner: follow `docs/DEPLOY.md` (GitHub, then Streamlit Community Cloud).
-2. Optional improvements, in order of value: futures-curve and hedging effect; a second route or
-   grade (add entries to `data/assumptions/ports.yaml` and `costs.yaml`); refresh the dated
-   assumptions before interviews.
+1. Owner: confirm the search-extract figures above, then flip their `estimate` flags.
+2. Before interviews: refresh the dated assumptions (spot hire rate, carbon allowance price,
+   grade differentials, SOFR).
+3. Optional: valuation by refinery product yields (blocked: no free yield data), a Panama Canal
+   option for small ships (needs a sourced toll), slow steaming.

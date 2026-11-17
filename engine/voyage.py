@@ -85,6 +85,21 @@ def needs_lightering(origin_key: str, vessel_key: str) -> bool:
     return depth is not None and get_vessel(vessel_key).laden_draught_ft > depth
 
 
+def lightered_share(origin_key: str, vessel_key: str) -> float:
+    """Share of a full cargo that must be topped up offshore, 0 to 1.
+
+    A ship's draught rises roughly in line with the cargo on board, from its
+    empty (ballast) draught to its full draught. If the channel allows only part
+    of that rise, the rest of the cargo has to be loaded offshore from smaller ships.
+    """
+    depth = get_port(origin_key)["channel_depth_ft"]
+    vessel = get_vessel(vessel_key)
+    if depth is None or vessel.laden_draught_ft <= depth:
+        return 0.0
+    empty = vessel.laden_draught_ft * A.get("costs", "lightering", "ballast_draught_share")
+    return min(1.0, (vessel.laden_draught_ft - depth) / (vessel.laden_draught_ft - empty))
+
+
 def draught_warning(origin_key: str, vessel_key: str) -> str | None:
     """Plain-language warning when a fully loaded ship is too deep for the load port's channel.
 

@@ -64,7 +64,8 @@ table = pd.DataFrame([{
 st.dataframe(table, hide_index=True, width="stretch")
 st.caption("Freight is built from the ship's daily hire rate in the freight market chosen in the "
            "sidebar, and the fuel price is estimated from Brent. Other costs are financing, "
-           "insurance, transit loss and demurrage. All in USD per barrel loaded.")
+           "insurance, transit loss, demurrage, reverse lightering and EU carbon. All in USD per "
+           "barrel loaded.")
 
 gap = best["margin"] - worst["margin"]
 st.info(

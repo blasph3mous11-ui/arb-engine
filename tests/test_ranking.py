@@ -59,3 +59,15 @@ def test_a_ship_too_deep_for_suez_is_ranked_via_the_cape():
     inputs = arbitrage.default_inputs(80.0, 90.0, 600.0, vessel_key="vlcc", origin_key="loop", via="cape")
     for row in ranking.rank_destinations(inputs):
         assert row["via"] in ("cape", "direct")
+
+
+def test_ranking_keeps_the_route_with_the_higher_margin(fixed_distance, monkeypatch):
+    # Make the Cape 3,000 nm longer than Suez. Normally Suez wins on cost; with a steep $6 a
+    # month contango the extra days at sea earn more from the curve than they cost.
+    monkeypatch.setattr(voyage, "sea_route",
+                        lambda origin, destination, via: (9360 + (3000 if via == "cape" else 0), ()))
+    flat = ranking.best_route_result(hand_inputs(via="suez"), "sikka")
+    steep = ranking.best_route_result(hand_inputs(via="suez", curve_m2_minus_m1=6.0), "sikka")
+    for result in (flat, steep):
+        other = arbitrage.run(result.inputs.with_changes(via="cape" if result.voyage.via == "suez" else "suez"))
+        assert result.margin_per_bbl >= other.margin_per_bbl

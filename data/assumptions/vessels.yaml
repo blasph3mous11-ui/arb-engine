@@ -591,9 +591,9 @@ vlcc:
     checked: 2026-11-15
     estimate: true
     note: >
-      Port dues are charged largely on ship size. Also note most US Gulf docks cannot fully load a
-      VLCC; real cargoes are topped up offshore by smaller ships (reverse lightering), which adds
-      a cost we do not model.
+      Port dues are charged largely on ship size. Most US Gulf docks cannot fully load a VLCC;
+      real cargoes are topped up offshore by smaller ships (reverse lightering), charged separately
+      (see costs.yaml, lightering).
   hull_value_usd:
     value: 120000000
     unit: USD

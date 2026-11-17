@@ -51,3 +51,25 @@ def test_mars_cargo_by_hand(fixed_distance):
 def test_heavier_grade_weighs_more_per_barrel():
     # Mars is denser than WTI, so a million barrels weigh more tonnes.
     assert arbitrage.cargo_tonnes(1_000_000, "mars") > arbitrage.cargo_tonnes(1_000_000, "wti")
+
+
+def test_same_benchmark_trade_keeps_the_market_differential(fixed_distance, monkeypatch):
+    # Johan Sverdrup bought at Brent + $6.00 and sold against Brent: valued at Brent + $6.00 at the
+    # other end too, not at the gravity-and-sulphur rule (which would say -$4.28).
+    from engine import voyage
+    monkeypatch.setattr(voyage, "shortest_path_uses_suez", lambda origin, destination: False)
+    r = arbitrage.run(hand_inputs(origin_key="mongstad", destination_key="rotterdam", via="direct",
+                                  grade="johan_sverdrup", origin_benchmark="brent",
+                                  origin_benchmark_price=90.0, destination_benchmark_price=90.0,
+                                  origin_differential=6.00))
+    assert r.quality_differential == pytest.approx(6.00)
+    assert r.purchase_price == pytest.approx(96.00)
+    assert r.sale_value == pytest.approx(96.00)
+    # So the margin is minus the cost of delivery, as it should be for an unchanged price.
+    assert r.margin_per_bbl == pytest.approx(-sum(r.cost_stack.values()))
+
+
+def test_cross_benchmark_trade_still_uses_the_quality_rule(fixed_distance):
+    # WTI bought against WTI, sold against Brent: the rule gives +$0.65 (see test_arbitrage.py).
+    r = arbitrage.run(hand_inputs())
+    assert r.quality_differential == pytest.approx(0.65)

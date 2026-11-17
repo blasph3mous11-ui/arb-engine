@@ -95,8 +95,8 @@ def sidebar_setup() -> dict:
         via = sb.radio("Route", options, format_func=V.ROUTES.get, key="via")
     elif options == ["direct"]:
         via = "direct"
-        sb.info("Route: straight across the Atlantic. This voyage does not go near the Suez Canal, "
-                "so there is no canal toll and no Suez-or-Cape choice.")
+        sb.info("Route: direct. This voyage does not go near the Suez Canal, so there is no canal "
+                "toll and no Suez-or-Cape choice.")
     else:
         via = "cape"
         sb.info(f"A fully laden {vessel.name} is too deep for the Suez Canal, so it goes via the Cape.")
@@ -154,21 +154,27 @@ def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire,
     brent, _ = P.latest(prices, "brent")
     built_up = V.voyage_from_assumptions(origin, destination, vessel_key, via, hire_usd_per_day=hire,
                                          bunker_usd_per_tonne=P.bunker_price_estimate(brent)).total_cost
-    voyage_key = f"{origin}_{destination}_{vessel_key}_{via}"
+    # Quotes are gross of the address commission the charterer gets back, so the pre-fill is
+    # grossed up: net of commission it equals the daily-hire freight for this voyage.
+    address_pct = A.get("costs", "commissions", "address_commission_pct")
+    gross = built_up / (1 - address_pct / 100)
+    voyage_key = f"{origin}_{destination}_{vessel_key}_{via}_{grade}"
     if basis == "lump_sum":
         millions = sb.number_input("Lump sum for the voyage, USD million", min_value=0.0, step=0.1,
-                                   value=round(built_up / 1e6, 2), key=f"lump_{voyage_key}",
+                                   value=round(gross / 1e6, 2), key=f"lump_{voyage_key}",
                                    help="The total freight the broker quotes for this voyage.")
-        sb.caption("Pre-filled with the daily-hire estimate for this voyage. Type the broker's figure.")
+        sb.caption("Pre-filled so that, after the address commission, it matches the daily-hire "
+                   "estimate for this voyage. Type the broker's figure.")
         return millions * 1e6
     tonnes = arbitrage.cargo_tonnes(V.get_vessel(vessel_key).cargo_capacity_bbl, grade)
     points = sb.number_input("Worldscale points", min_value=0.0, step=5.0, value=100.0,
                              key=f"ws_points_{voyage_key}",
                              help="The percentage of the flat rate the broker quotes: WS 150 means 1.5 x.")
     flat = sb.number_input("Flat rate for the route, USD per tonne", min_value=0.0, step=0.5,
-                           value=round(built_up / tonnes, 2), key=f"ws_flat_{voyage_key}",
+                           value=round(gross / tonnes, 2), key=f"ws_flat_{voyage_key}",
                            help="Published each year by the Worldscale Association (subscription only).")
-    sb.caption(f"Pre-filled so that WS 100 matches the daily-hire estimate for this voyage "
+    sb.caption(f"Pre-filled so that WS 100, after the address commission, matches the daily-hire "
+               f"estimate for this voyage "
                f"({tonnes:,.0f} tonnes of {A.val(A.load('costs')['grades'][grade]['name']).split(' (')[0]}). "
                "Type the broker's points and the route's flat rate. "
                "The real flat rates are paywalled, so the tool does not guess them.")

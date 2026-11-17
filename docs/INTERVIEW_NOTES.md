@@ -136,9 +136,10 @@ US arrivals into India fell to zero this autumn.
   cost would double-count, so the tool applies them only to a typed-in quote.
 - **Why does a VLCC from Houston cost more than one from LOOP?** Houston's channel is about 45 ft
   and a full VLCC draws about 70, so it leaves part-loaded and is topped up offshore by smaller
-  ships (reverse lightering). The tool charges an estimated 60 cents a barrel (a 2018 Columbia
-  University range of 50-75 cents) and shows a warning. LOOP is offshore deep water, so a VLCC
-  loads in full there.
+  ships (reverse lightering). About 60% of the cargo has to go on offshore, and at an estimated
+  $1.00 per offshore barrel that is about 60 cents a barrel of cargo, in line with a 2018 Columbia
+  University range of 50-75 cents. A Suezmax at Houston only needs a little topping up, about 17
+  cents. LOOP is offshore deep water, so a VLCC loads in full there.
 - **What does EU carbon add?** Since 2026 ships pay for 100% of CO2 under the EU scheme: half of
   a voyage into or out of the EU, all of a voyage between EU (or Norwegian) ports, all of the fuel
   at berth in those ports. On a Suezmax from Houston to Rotterdam it is about 20 cents a barrel.
@@ -167,6 +168,7 @@ US arrivals into India fell to zero this autumn.
 | One day of delay at $300,000 a day on 1m barrels | about $0.30 a barrel |
 | North Sea to west coast India | about 6,600 nm via Suez |
 | Quality rule ($0.40 per API degree, $1 per sulphur point) vs Brent | WTI Midland +$1.65, Mars -$5.04, Johan Sverdrup -$4.28 |
-| Reverse lightering (estimate) | about $0.60 a barrel |
+| Reverse lightering (estimate) | about $0.60 a barrel for a VLCC at Houston, $0.17 for a Suezmax |
+| North Sea crude sold against Brent | keeps its differential; Forties to Rotterdam costs about $1.07 a barrel to deliver (calm market) |
 | EU carbon, US Gulf to Rotterdam, Suezmax | about $0.20 a barrel |
 | Suez or Cape break-even hire rate | about $86,000 a day with war-risk cover, $32,000 without |

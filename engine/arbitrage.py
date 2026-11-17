@@ -13,7 +13,7 @@ from dataclasses import dataclass, replace
 from engine import assumptions as A
 from engine import costs as C
 from engine.units import barrels_to_tonnes
-from engine.voyage import (VoyageResult, get_port, get_vessel, implied_tce, needs_lightering,
+from engine.voyage import (VoyageResult, get_port, get_vessel, implied_tce, lightered_share, needs_lightering,
                            voyage_from_assumptions)
 
 
@@ -190,7 +190,15 @@ def run(inputs: ArbInputs) -> ArbResult:
 
     # What we pay at the load port, and what the cargo is worth at destination.
     purchase_price = inputs.origin_benchmark_price + inputs.origin_differential
-    quality = grade_quality_differential(inputs.grade, inputs.destination_benchmark)
+    # Quality: a grade bought and sold against the same benchmark (North Sea crude sold
+    # against Brent) keeps its market differential to that benchmark at the other end;
+    # applying the gravity-and-sulphur rule as well would value one barrel two ways.
+    # Across different benchmarks (WTI-priced crude sold against Brent or Dubai) the
+    # rule estimates what the grade is worth relative to the destination benchmark.
+    if inputs.origin_benchmark == inputs.destination_benchmark:
+        quality = inputs.origin_differential
+    else:
+        quality = grade_quality_differential(inputs.grade, inputs.destination_benchmark)
     physical_value = inputs.destination_benchmark_price + inputs.destination_differential + quality
 
     cargo_value = purchase_price * barrels
@@ -247,7 +255,8 @@ def cargo_charges(inputs: ArbInputs, voyage) -> dict:
     """Costs the cargo pays on top of freight: offshore top-up and EU carbon allowances, in USD."""
     lightering = 0.0
     if needs_lightering(inputs.origin_key, inputs.vessel_key):
-        lightering = C.lightering_cost(inputs.cargo_bbl, A.get("costs", "lightering", "usd_per_bbl"))
+        lightered_bbl = inputs.cargo_bbl * lightered_share(inputs.origin_key, inputs.vessel_key)
+        lightering = C.lightering_cost(lightered_bbl, A.get("costs", "lightering", "usd_per_lightered_bbl"))
     eu_ets = 0.0
     origin_in, destination_in = get_port(inputs.origin_key)["eu_ets"], get_port(inputs.destination_key)["eu_ets"]
     if origin_in or destination_in:

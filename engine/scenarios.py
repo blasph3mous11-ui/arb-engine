@@ -78,7 +78,9 @@ def tornado(inputs: ArbInputs, suez_open: bool = True) -> list[dict]:
     # Suez (US Gulf to Europe), nor for a ship too deep for the canal.
     options = route_options(inputs.origin_key, inputs.destination_key, inputs.vessel_key)
     other = "cape" if inputs.via == "suez" else "suez"
-    if inputs.via != "direct" and other in options and (other == "cape" or suez_open):
+    # A broker's quote is for one route, so the route switch is left out in quote mode.
+    if (inputs.via != "direct" and other in options and (other == "cape" or suez_open)
+            and inputs.freight_override_usd is None):
         label = "Suez closed: go via Cape" if other == "cape" else "Use Suez instead of Cape"
         cases.append((label, "no change", inputs, "switch route", inputs.with_changes(via=other)))
 

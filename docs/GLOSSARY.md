@@ -85,7 +85,8 @@ prices all fuel at the low-sulphur estimate, so it understates the scrubber's be
 LOOP, the Louisiana Offshore Oil Port, is a deep-water terminal 18 miles off Louisiana and the
 one US facility that can fully load a VLCC. Ports such as Houston and Corpus Christi are too
 shallow, so a VLCC loading there is topped up offshore from smaller ships. That ship-to-ship
-top-up is called reverse lightering and adds cost the tool does not model.
+top-up is called reverse lightering; the tool charges an estimated $1.00 for each barrel that has
+to be loaded offshore, and shows a warning when it applies.
 
 **Direct route**
 A voyage with no canal choice to make, such as the US Gulf to Rotterdam straight across the
@@ -189,8 +190,8 @@ oil left clinging to tanks, and measurement differences.
 **Contango and backwardation**
 The shape of the futures curve. Contango: later deliveries cost more than prompt ones, so a cargo
 gains value while at sea (or in storage). Backwardation: later deliveries are cheaper, so a long
-voyage loses value. This tool buys and sells at today's prices and does not model the curve; a
-real trader would hedge with futures and this effect would show up.
+voyage loses value. The tool shows this as the futures curve effect, using the gap between the
+first two futures months that you type in the sidebar.
 
 **Hedging**
 Taking an offsetting position in futures so that a move in the oil price during the voyage does

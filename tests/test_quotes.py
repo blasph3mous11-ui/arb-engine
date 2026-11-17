@@ -65,3 +65,8 @@ def test_tornado_flexes_the_quote_in_quote_mode(fixed_distance):
     # 25% of the $5.85 net freight is $1.4625 each way, plus insurance on it:
     # swing $2.925 x (1 + 0.00055).
     assert rows["Freight quote"]["swing"] == pytest.approx(2.925 * (1 + 1.10 * 0.0005))
+
+
+def test_no_route_switch_on_a_quote(fixed_distance):
+    rows = [r["driver"] for r in scenarios.tornado(hand_inputs(via="suez", freight_override_usd=6_000_000))]
+    assert not any("Suez" in row or "Cape" in row for row in rows)

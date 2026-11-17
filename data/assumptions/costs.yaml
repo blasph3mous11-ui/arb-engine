@@ -210,7 +210,7 @@ grades:
     export_differential_usd_per_bbl:
       value: 1.30
       unit: USD per barrel over WTI at Cushing
-      source: "Argus, 10 March 2026: Permian-quality WTI at Houston (MEH) at a $1.25-1.35/bl premium to the Cushing benchmark"
+      source: "Argus, March 2026: Permian-quality WTI at Houston (MEH) at a $1.25-1.35/bl premium to the Cushing benchmark"
       url: https://www.argusmedia.com/en/news-and-insights/latest-market-news/2796268-us-gulf-crude-premiums-near-6-year-high-on-iran-war
       checked: 2026-11-17
       estimate: true
@@ -241,14 +241,15 @@ grades:
     export_differential_usd_per_bbl:
       value: 1.50
       unit: USD per barrel over WTI at Cushing
-      source: "Market report, late May 2026: the Mars premium to WTI fell back to about $1.50 after peaking near $18 in early April"
-      url: https://www.argusmedia.com/en/news-and-insights/latest-market-news/2799214-mars-crude-premium-swings-down-by-10-bl
+      source: "Pulse (secondary news summary), late May 2026: the Mars premium to WTI fell back to about $1.50 after peaking near $18 in early April"
+      url: https://www.pulse.bot/energy/news/key-us-medium-sour-crude-weakens-as-exports-ease-from-records-14a33b9f-c880-43b6-a32e-613713e85812/
       checked: 2026-11-17
       estimate: true
       note: >
         Sour crude normally trades below WTI, but with Middle East sour supply disrupted in 2026 Mars
         swung to large premiums (Argus reported nearly $13 on 9 March). The $1.50 figure is from a
-        secondary report and is a dated snapshot; change it in the sidebar.
+        secondary report, not confirmed against Argus or Platts, and is a dated snapshot; change it
+        in the sidebar.
   forties:
     name: {value: "Forties (North Sea light sweet)"}
     shipped: {value: true}
@@ -289,14 +290,14 @@ grades:
     api_gravity:
       value: 28.7
       unit: degrees API
-      source: "TotalEnergies crude assay, November 2025: Johan Sverdrup 28.7 API, 0.81% sulphur"
+      source: "TotalEnergies crude assay dated 1 April 2021 (file posted November 2025): Johan Sverdrup 28.7 API, 0.81% sulphur"
       url: https://trading.totalenergies.com/wp-content/uploads/2025/11/JOHAN-SVERDRUP.pdf
       checked: 2026-11-17
       estimate: false
     sulphur_pct:
       value: 0.81
       unit: percent by weight
-      source: "TotalEnergies crude assay, November 2025: Johan Sverdrup 28.7 API, 0.81% sulphur"
+      source: "TotalEnergies crude assay dated 1 April 2021 (file posted November 2025): Johan Sverdrup 28.7 API, 0.81% sulphur"
       url: https://trading.totalenergies.com/wp-content/uploads/2025/11/JOHAN-SVERDRUP.pdf
       checked: 2026-11-17
       estimate: false
@@ -369,18 +370,29 @@ commissions:
       not change what the charterer pays.
 
 lightering:
-  usd_per_bbl:
-    value: 0.60
-    unit: USD per barrel of cargo
-    source: "Columbia University Center on Global Energy Policy (2018): lightering adds an estimated 50 to 75 cents a barrel to the cost of transport from the US Gulf Coast"
+  usd_per_lightered_bbl:
+    value: 1.00
+    unit: USD per barrel loaded offshore
+    source: "Our estimate, derived from Columbia University Center on Global Energy Policy (2018): lightering adds an estimated 50 to 75 cents a barrel to the cost of a VLCC cargo from the US Gulf Coast"
     url: https://www.energypolicy.columbia.edu/sites/default/files/pictures/GulfofMexCongestionRisk_CGEP_commentary.pdf
     checked: 2026-11-17
     estimate: true
     note: >
-      Mid-point of the published 50-75 cent range, which dates from 2018 and was worked out for
-      VLCCs. Charged on the whole cargo whenever the ship is too deep to leave the load port fully
-      loaded (see the draught warning). Today's much higher freight rates would make the hire of
-      the small top-up ships dearer, so this is probably low in the current market.
+      The published 50-75 cents is per barrel of the whole VLCC cargo, of which roughly 60% has to
+      be loaded offshore at a 45 ft Gulf port (see ballast_draught_share). 60 cents / 0.6 is about
+      $1.00 per barrel actually loaded offshore, which lets the same figure apply to smaller ships
+      that only need a little topping up. The range dates from 2018; today's much higher freight
+      rates would make the small top-up ships dearer, so this is probably low.
+  ballast_draught_share:
+    value: 0.4
+    unit: share of full (laden) draught
+    source: Our estimate
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      An empty tanker floats at roughly 35-45% of its fully loaded draught; draught is taken to rise
+      in line with the cargo between the two. Used only to work out how much of a cargo cannot be
+      loaded at a shallow berth. Under-keel clearance and tide are ignored.
 
 eu_ets:
   # The EU Emissions Trading System: ships pay for the CO2 they emit on voyages to and from EU ports.
@@ -408,13 +420,14 @@ eu_ets:
   eua_price_eur_per_tonne:
     value: 75
     unit: EUR per tonne of CO2
-    source: "Market reports, May 2026: EU carbon allowances trading in the EUR 74-77 a tonne range"
-    url: https://kpioceanconnect.com/euas-september-is-the-deadline-but-strategy-is-the-bigger-story/
+    source: "GMK Center, May 2026: EU carbon allowances (ICE December 2026 contract) ranged from EUR 74 to 77 a tonne in the first half of May"
+    url: https://gmk.center/en/news/european-carbon-prices-in-the-first-half-of-may-ranged-from-e74-to-e77-per-ton/
     checked: 2026-11-17
     estimate: true
     note: >
       The allowance price moves every day and no free live feed was found, so this is a dated
-      snapshot. Methane and nitrous oxide, added to the scheme in 2026, are not counted.
+      snapshot; prices reached about EUR 79 by the end of May and the November 2026 level was not
+      checked. Methane and nitrous oxide, added to the scheme in 2026, are not counted.
   usd_per_eur:
     value: 1.10
     unit: USD per EUR

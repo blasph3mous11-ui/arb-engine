@@ -61,12 +61,13 @@ def demurrage_cost(delay_days: float, hire_usd_per_day: float, rate_as_share_of_
     return delay_days * (daily_rate + idle_fuel)
 
 
-def lightering_cost(cargo_bbl: float, usd_per_bbl: float) -> float:
+def lightering_cost(lightered_bbl: float, usd_per_lightered_bbl: float) -> float:
     """Cost of topping up a ship offshore from smaller ships, when the port is too shallow.
 
-    Charged per barrel of the whole cargo: a published rule of thumb, not a voyage model.
+    Charged on the barrels that have to be loaded offshore: a rule of thumb, not a
+    model of the top-up ships and days.
     """
-    return cargo_bbl * usd_per_bbl
+    return lightered_bbl * usd_per_lightered_bbl
 
 
 def eu_ets_covered_fuel(fuel_tonnes_by_activity: dict, origin_in_scheme: bool,

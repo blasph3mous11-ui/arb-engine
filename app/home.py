@@ -24,10 +24,12 @@ ui.verdict_banner(result)
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("Buy at origin", ui.usd(result.purchase_price), help="The origin benchmark (WTI or Brent) plus the estimated differential for the grade shipped.")
 c2.metric("Cost to deliver (estimated)", ui.usd(sum(result.cost_stack.values())),
-          help="Freight, financing, insurance, transit loss and demurrage, per barrel. "
+          help="Freight, financing, insurance, transit loss, demurrage, reverse lightering (shallow "
+               "load ports only) and EU carbon (EU and Norwegian ports only), per barrel. "
                "Built largely from estimates, above all the ship's daily hire rate.")
 c3.metric("Sell at destination", ui.usd(result.sale_value),
-          help=f"{dates['benchmark'].title()} plus an estimated quality adjustment.")
+          help=f"{dates['benchmark'].title()} plus an estimated quality adjustment, plus the "
+               "futures curve effect if one is typed in.")
 c4.metric("Margin per barrel", ui.usd(result.margin_per_bbl))
 st.caption(f"{inputs.cargo_bbl / 1e6:.2f} million barrels, {V.get_port(inputs.origin_key)['name']} to "
            f"{V.get_port(inputs.destination_key)['name']}, {V.get_vessel(inputs.vessel_key).name}, "

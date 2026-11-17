@@ -9,7 +9,7 @@ st.title("Methodology")
 st.markdown("""
 Everything on this dashboard comes from one piece of arithmetic:
 
-> **margin = sale value at destination - (purchase price at origin + freight + financing + insurance + transit loss + demurrage)**
+> **margin = sale value (benchmark + quality adjustment + futures curve effect) - (purchase price + freight + financing + insurance + transit loss + demurrage + reverse lightering + EU carbon)**
 
 Each term is built from the assumptions listed below. No number is hidden in the code: every one
 lives in a file under `data/assumptions/`, with its source and the date it was checked.
@@ -19,7 +19,7 @@ st.subheader("How each number is calculated")
 st.markdown("""
 | Step | How it is worked out |
 |---|---|
-| **Distance and route** | Shortest sea path between the two ports from the open-source `searoute` library. If that path passes the Suez Canal the tool offers two routes: Suez, or the Cape (the same search with the canal forbidden, so the path goes round South Africa). If it does not (US Gulf to Europe) there is one direct route and no canal cost. The Panama Canal is never used. |
+| **Distance and route** | Shortest sea path between the two ports from the open-source `searoute` library. If that path passes the Suez Canal the tool offers two routes: Suez, or the Cape (the same search with the canal forbidden, so the path goes round South Africa). If it does not (US Gulf or North Sea to Europe) there is one direct route and no canal cost. The Panama Canal is never used. |
 | **Voyage days** | Distance divided by speed, loaded and empty, plus days in port and a day for each canal transit. |
 | **Vessel hire** | Days the ship is tied up (the full round trip) times the daily hire rate. |
 | **Bunkers (fuel)** | Tonnes burned each day (at sea, in port, in the canal) times the fuel price. The fuel price is estimated from the latest daily Brent price. |
@@ -30,10 +30,10 @@ st.markdown("""
 | **Insurance** | A small percentage of cargo value plus freight, plus 10%. |
 | **Transit loss** | A small percentage of the cargo, valued at the sale price. |
 | **Quality adjustment** | (difference in API gravity x a dollar value per degree) minus (difference in sulphur x a dollar value per percentage point), comparing the grade shipped with the benchmark it is sold against. |
-| **Futures curve effect** | (second-month minus first-month WTI futures price, typed in) x days financed / 30. Positive in contango, negative in backwardation. |
+| **Futures curve effect** | (second-month minus first-month futures price, typed in: WTI futures for US Gulf cargoes, Brent futures for North Sea cargoes) x days financed / 30. Positive in contango, negative in backwardation. |
 | **Demurrage** | Days of delay x (daily hire rate + fuel burned while waiting). With a broker's quote, the quote's implied daily earnings replace the hire rate. |
-| **Reverse lightering** | When a fully loaded ship is too deep for the load port's channel, an estimated 60 cents a barrel for topping it up offshore from smaller ships (published 2018 range 50-75 cents). |
-| **EU carbon (ETS)** | For a voyage into an EU port: half the fuel burned at sea plus all the fuel burned at berth, x 3.114 tonnes of CO2 per tonne of fuel, x the carbon allowance price, in dollars. |
+| **Reverse lightering** | When a fully loaded ship is too deep for the load port's channel, the share of the cargo that cannot be loaded at the berth (from the ship's full and empty draught and the channel depth) x an estimated $1.00 per barrel loaded offshore, derived from a published 2018 range of 50-75 cents per barrel of a whole VLCC cargo. |
+| **EU carbon (ETS)** | Fuel burned at berth in a scheme port (EU, Norway, Iceland) in full; fuel at sea in full between two scheme ports, half when one end is outside; x 3.114 t CO2 per tonne of fuel x coverage (100% from 2026) x the allowance price, in dollars. The UK is outside the EU scheme. |
 | **Commissions** | With a broker's quote only: the charterer gets a 2.5% address commission back, and the owner pays it plus 1.25% brokerage, which lowers the owner's daily earnings. Both estimated. |
 | **Break-even spread** | The price gap at which the margin is zero, holding all costs fixed. |
 """)
@@ -48,9 +48,12 @@ st.markdown("""
   quotes or Worldscale flat rates, which are paywalled; it only does the arithmetic on the ones you
   enter, and shows what they pay the shipowner per day. Without a quote the result depends heavily
   on the hire rate chosen.
-- **The origin price is WTI at an inland hub plus an estimated differential**, not an actual
-  Gulf Coast export price. The sale price is a benchmark plus a rule-of-thumb quality adjustment,
-  not a negotiated delivered price.
+- **The origin price is WTI Cushing (US Gulf) or Brent (North Sea) plus an estimated
+  differential**, not an actual export price. The sale price is a benchmark plus a quality
+  adjustment, not a negotiated delivered price. When a cargo is bought and sold against the same
+  benchmark it keeps its market differential; otherwise the adjustment is a gravity-and-sulphur
+  rule of thumb, while the purchase differential is a dated market snapshot, so the two ends of a
+  cross-benchmark trade do not come from the same source.
 - **The quality rule is a straight line.** Refiners value crude by the products it yields in their
   particular refinery, which a two-number rule cannot capture.
 - **The futures curve is a typed-in figure.** A hedged cargo gains or loses the curve's slope over

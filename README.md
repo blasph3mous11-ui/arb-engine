@@ -48,13 +48,17 @@ traded freight rates or physical price premiums, which are sold by subscription 
 Platts, Argus).
 
 - **Published data:** Brent and WTI daily spot prices, Dubai monthly average, the Suez Canal
-  Authority toll tariff and surcharges, SOFR, ship sizes and crude grade qualities.
+  Authority toll tariff and surcharges, SOFR, ship sizes, crude grade qualities from assays (WTI
+  Midland's taken from its specification range and flagged as an estimate) and the EU carbon
+  scheme's rules.
 - **Documented estimates:** the daily ship hire rate (our own figure, or a published broker or
   press figure for another route or contract used as a proxy), bunker (fuel) price, ship speeds
   and fuel consumption (reported from the Platts and Baltic Exchange guides via search extracts
   and not yet confirmed against the documents, or scaled from those figures), canal tonnage, port
   costs and port days, the bank margin, insurance and war-risk cover, transit loss, quality
-  adjustment, the Gulf Coast price differential and the dollar-per-SDR rate used for canal tolls.
+  adjustment, each grade's differential to WTI or Brent, the dollar-per-SDR rate used for canal
+  tolls, the reverse-lightering cost, the carbon allowance price and dollar-euro rate, and broker
+  commissions.
   Each is flagged `estimate: true` in the assumption files and labelled "estimated" on screen.
 - **No forecasting.** The tool explains today's economics. It does not predict prices or
   generate trading signals.

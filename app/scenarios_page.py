@@ -47,12 +47,16 @@ delay = right.slider("Delay at port, days", 0, 30, int(base_inputs.delay_days),
                      help="Days the ship waits beyond the agreed time. Charged as demurrage.")
 # The switch only means something when the voyage is currently routed through Suez.
 on_suez = base_inputs.via == "suez"
+switch_allowed = on_suez and base_inputs.freight_override_usd is None
 suez_closed = right.toggle("Suez Canal closed (force the Cape route)", value=False,
-                           disabled=not on_suez,
+                           disabled=not switch_allowed,
                            help="Sends the ship round South Africa whatever the sidebar says."
-                                if on_suez else
-                                "This voyage is not routed through the Suez Canal, so the switch "
-                                "changes nothing.")
+                                if switch_allowed else
+                                ("A broker's quote covers one route. Choose the Cape route in the "
+                                 "sidebar and type the Cape quote to compare."
+                                 if on_suez else
+                                 "This voyage is not routed through the Suez Canal, so the switch "
+                                 "changes nothing."))
 
 # The sliders work in whole dollars; if one has not been moved, keep the exact base value.
 if bunker == int(round(base_inputs.bunker_usd_per_tonne)):
@@ -92,6 +96,12 @@ c4.metric("Spread in this scenario", ui.usd(spread),
           delta=f"{spread - breakeven:+,.2f} vs break-even")
 st.caption(f"Break-even: with these costs the arb opens once {benchmark_name} is more than "
            f"{ui.usd(breakeven)} a barrel above {dates['origin_name']}. Route: {V.ROUTES[scenario_inputs.via]}.")
+
+if base_inputs.origin_benchmark == base_inputs.destination_benchmark:
+    st.info(f"This cargo is bought and sold against {benchmark_name}, so the price gap between the two "
+            "is zero by construction. The trade pays only if the buyer pays a premium over the "
+            f"cargo's differential bigger than the cost of delivery, {ui.usd(sum(base.cost_stack.values()))} "
+            "a barrel here. The spread slider and the grid below show that premium.")
 
 # ---------------------------------------------------------------- tornado
 st.subheader("Which input matters most?")

@@ -7,8 +7,8 @@ from tests.test_arbitrage import hand_inputs
 
 
 def test_lightering_cost_by_hand():
-    # 2,000,000 barrels topped up at $0.60 a barrel = $1,200,000.
-    assert costs.lightering_cost(2_000_000, 0.60) == pytest.approx(1_200_000)
+    # 1,190,476 barrels loaded offshore at $1.00 a barrel = $1,190,476.
+    assert costs.lightering_cost(1_190_476, 1.00) == pytest.approx(1_190_476)
 
 
 def test_eu_ets_covered_fuel_by_hand():
@@ -45,10 +45,6 @@ def test_no_charges_on_the_hand_worked_trade(fixed_distance):
     assert r.margin_per_bbl == pytest.approx(3.92758086)
 
 
-def test_shallow_load_port_adds_lightering(fixed_distance):
-    # Beaumont (40 ft) is too shallow for a full Suezmax: $0.60 a barrel on the whole cargo.
-    r = arbitrage.run(hand_inputs(origin_key="beaumont"))
-    assert r.cost_stack["Reverse lightering"] == pytest.approx(0.60)
 
 
 def test_eu_port_adds_carbon_and_others_do_not(fixed_distance, monkeypatch):
@@ -64,3 +60,20 @@ def test_draught_warning_and_lightering_agree():
     for origin in voyage.port_keys("origin"):
         for ship in voyage.vessel_keys():
             assert (voyage.draught_warning(origin, ship) is not None) == voyage.needs_lightering(origin, ship)
+
+
+def test_lightered_share_by_hand():
+    # VLCC (70 ft full, empty at 0.4 x 70 = 28 ft) at Houston (45 ft):
+    # (70 - 45) / (70 - 28) = 25 / 42 = 0.5952 of the cargo is loaded offshore.
+    assert voyage.lightered_share("houston", "vlcc") == pytest.approx(25 / 42)
+    # Suezmax (50 ft, empty 20 ft) at Beaumont (40 ft): (50 - 40) / 30 = 1/3.
+    assert voyage.lightered_share("beaumont", "suezmax") == pytest.approx(1 / 3)
+    # No top-up where the ship fits.
+    assert voyage.lightered_share("loop", "vlcc") == 0
+    assert voyage.lightered_share("corpus_christi", "suezmax") == 0
+
+
+def test_lightering_only_on_the_topped_up_barrels(fixed_distance):
+    # Suezmax at Beaumont: a third of the cargo at $1.00 a barrel = $0.3333 per barrel of cargo.
+    r = arbitrage.run(hand_inputs(origin_key="beaumont"))
+    assert r.cost_stack["Reverse lightering"] == pytest.approx(1 / 3)

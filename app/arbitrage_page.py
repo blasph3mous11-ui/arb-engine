@@ -87,21 +87,26 @@ lines = [
     ("+ Transit loss" + E, result.cost_stack["Transit loss"],
      f"{inputs.transit_loss_pct}% of the oil loaded is not there to sell at discharge."),
     ("+ Demurrage" + E, result.cost_stack["Demurrage"],
-     f"{inputs.delay_days:.0f} days of delay, charged at the daily hire rate plus fuel burned while "
-     "waiting. Add delay days on the Scenarios page."),
+     f"{inputs.delay_days:.0f} days of delay, charged at "
+     f"{'the daily hire rate' if inputs.freight_override_usd is None else 'the quote' + chr(39) + 's implied daily earnings'} "
+     "plus fuel burned while waiting. Add delay days on the Scenarios page."),
     ("+ Reverse lightering" + E, result.cost_stack["Reverse lightering"],
      "Topping the ship up offshore from smaller ships, charged when the load port is too shallow "
      "for it to leave fully loaded; zero otherwise. A published 2018 rule of thumb."),
     ("+ EU carbon (ETS)" + E, result.cost_stack["EU carbon (ETS)"],
-     "CO2 allowances for a voyage into an EU port: half the fuel burned at sea plus all of it at "
-     "berth, at 3.114 t of CO2 per tonne of fuel and the estimated allowance price; zero outside the EU."),
+     "CO2 allowances when either port is in the EU scheme (EU plus Norway and Iceland): all fuel burned at sea between two scheme ports, half of it when one port is outside, plus all fuel burned at berth in a scheme port, at 3.114 t of CO2 per tonne of fuel and the estimated allowance price; zero when neither port is in the scheme."),
     ("= Landed cost", result.landed_cost, "Total cost of a barrel delivered to the buyer."),
     (f"{benchmark_name} benchmark price", inputs.destination_benchmark_price,
      f"Latest available, {dates['destination_label']}."),
     ("+ Quality adjustment" + E, result.quality_differential,
-     f"{grade_name} is {quality_comparison} than {benchmark_name}: worth "
-     f"{ui.usd(abs(result.quality_differential))} a barrel {'more' if result.quality_differential >= 0 else 'less'} "
-     "on the gravity-and-sulphur rule."),
+     (f"{grade_name} is bought and sold against the same benchmark, so it keeps its market "
+      f"differential of {ui.usd(result.quality_differential)} to {benchmark_name} at the other end "
+      "(the gravity-and-sulphur rule is not applied on top)."
+      if inputs.origin_benchmark == inputs.destination_benchmark else
+      f"{grade_name} is {quality_comparison} than {benchmark_name}: worth "
+      f"{ui.usd(abs(result.quality_differential))} a barrel {'more' if result.quality_differential >= 0 else 'less'} "
+      "on the gravity-and-sulphur rule. The purchase differential is a market snapshot while this is "
+      "a rule of thumb, so the two do not come from the same source.")),
     ("+ Destination differential" + E, inputs.destination_differential,
      "Any premium the buyer pays over the benchmark. Unknown without paid data, so zero."),
     ("+ Futures curve effect (hedged)", result.curve_value,
@@ -135,7 +140,8 @@ st.info(
     f"{freight_share:.0%}. "
     + ("The adjusted gap is wide enough to cover it." if result.is_open else
        "The adjusted gap is not wide enough to cover it, so nobody would ship this cargo on these "
-       "terms: either the US price must fall, the price at destination must rise, or freight must get cheaper.")
+       f"terms: either the purchase price at {origin['name']} must fall, the price at destination must "
+       "rise, or freight must get cheaper.")
     + " Try the other freight markets in the sidebar to see how much the answer depends on the ship.")
 
 with st.expander("How big is the futures-curve effect usually?"):

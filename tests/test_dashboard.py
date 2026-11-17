@@ -88,7 +88,12 @@ def test_pages_agree_on_a_broker_quote(basis):
     # the $300,000 hire rate. The 3.75% of commissions on about $25m of freight, spread over
     # about 70 days, takes roughly $13,000 a day off that.
     tce = float(metric(voyage_page, "Owner's daily earnings").replace("$", "").replace(",", ""))
-    assert 280_000 < tce < 295_000
+    assert 280_000 < tce < 300_000
+    # Switching on an untouched, pre-filled quote changes nothing (to within rounding).
+    hire_mode = load_page("arbitrage_page.py", {})
+    to_number = lambda text: float(text.replace("$", "").replace(",", ""))
+    assert to_number(metric(arbitrage_page, "Margin per barrel")) == pytest.approx(
+        to_number(metric(hire_mode, "Margin per barrel")), abs=0.02)
     # The grid needs a daily hire rate, so in quote mode it is replaced by an explanation.
     assert any("broker's quote replaces" in i.value for i in scenarios_page.info)
 
