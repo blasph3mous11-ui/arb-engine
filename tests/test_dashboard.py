@@ -178,3 +178,19 @@ def test_draught_warning_shows_in_the_sidebar():
     app.selectbox(key="origin").set_value("loop")
     app.run()
     assert not any("reverse lightering" in w.value for w in app.sidebar.warning)
+
+
+def test_typed_in_curve_reaches_the_arbitrage_page():
+    flat = load_page("arbitrage_page.py", {})
+    app = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=120).run()
+    app.number_input(key="curve_m2_minus_m1").set_value(0.60)
+    app.run()
+    app.switch_page(str(ROOT / "app" / "arbitrage_page.py")).run()
+    assert not app.exception
+    lines = app.dataframe[0].value.set_index("Line")["USD per barrel"]
+    curve = next(value for line, value in lines.items() if line.startswith("+ Futures curve"))
+    assert curve.startswith("$") and curve != "$0.00"
+    # Contango raises the margin by exactly the curve effect.
+    to_number = lambda text: float(text.replace("$", "").replace(",", ""))
+    assert to_number(metric(app, "Margin per barrel")) == pytest.approx(
+        to_number(metric(flat, "Margin per barrel")) + to_number(curve), abs=0.011)

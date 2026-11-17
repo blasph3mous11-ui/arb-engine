@@ -182,4 +182,7 @@ real trader would hedge with futures and this effect would show up.
 
 **Hedging**
 Taking an offsetting position in futures so that a move in the oil price during the voyage does
-not change the profit. Not modelled here.
+not change the profit. The trader sells futures when the cargo is bought and buys them back when
+it is sold. The tool models one consequence of this, the futures curve effect: a hedged cargo
+gains about the gap between the first two futures months for each month at sea in contango, and
+loses it in backwardation. You type today's gap in the sidebar.

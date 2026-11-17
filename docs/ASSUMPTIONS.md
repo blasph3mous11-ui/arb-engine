@@ -3,7 +3,7 @@
 Generated from the YAML files in `data/assumptions/`. Do not edit by hand: change the
 YAML and run `python -m engine.assumptions`.
 
-179 assumptions, of which 118 are marked **estimated**: our own figures,
+181 assumptions, of which 119 are marked **estimated**: our own figures,
 published figures used as a proxy, or figures not yet confirmed against their source.
 Real traded freight rates and physical price premiums are paywalled, so every ship hire rate
 here is an estimate: either our own figure, or a published broker or press figure for another
@@ -208,3 +208,5 @@ search-engine extract are also marked estimated until confirmed against the docu
 | eu_ets / share_of_voyage_outside_eu_pct | 50 | percent of emissions | published | [EU ETS maritime: half of the emissions of a voyage that starts or ends outside the EU are covered; all emissions at berth in an EU port are covered](https://www.zeronorth.com/blog/regulations-what-is-the-eu-ets) | 2026-11-17 |  |
 | eu_ets / eua_price_eur_per_tonne | 75 | EUR per tonne of CO2 | **estimated** | [Market reports, May 2026: EU carbon allowances trading in the EUR 74-77 a tonne range](https://kpioceanconnect.com/euas-september-is-the-deadline-but-strategy-is-the-bigger-story/) | 2026-11-17 | The allowance price moves every day and no free live feed was found, so this is a dated snapshot. Methane and nitrous oxide, added to the scheme in 2026, are not counted. |
 | eu_ets / usd_per_eur | 1.1 | USD per EUR | **estimated** | Our estimate | 2026-11-17 | Round figure for converting the allowance price into dollars; the exchange rate moves daily and was not checked against a live source. |
+| futures_curve / default_m2_minus_m1_usd_per_bbl | 0.0 | USD per barrel per month | **estimated** | Our choice | 2026-11-17 | The US EIA stopped publishing NYMEX WTI futures prices in April 2024 and no other free source was found, so the tool does not know today's curve. It starts at zero (a flat curve, no effect) and you type the gap between the second and first futures months. The EIA history from 1985 to April 2024 is shown on the Arbitrage page for scale. |
+| futures_curve / history_source | EIA series RCLC1 and RCLC2 (NYMEX WTI futures contracts 1 and 2), monthly average of the daily gap, January 1985 to April 2024 |  | published | [US EIA, Cushing OK Crude Oil Future Contracts 1 and 2 (Dollars per Barrel)](https://www.eia.gov/dnav/pet/pet_pri_fut_s1_d.htm) | 2026-11-17 |  |

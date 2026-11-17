@@ -21,6 +21,15 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   voyage only; real per-market premiums are paywalled and the page says so. Today (spot market,
   Suezmax from Corpus Christi): Rotterdam is least bad at -$10.82 a barrel, Ulsan worst at
   -$33.67. 127 tests pass.
+- **Stage 5, done 17 Nov 2026: futures curve effect.** Found that the EIA stopped publishing its
+  free NYMEX WTI futures series (RCLC1-4) in April 2024 and no other permitted free source exists,
+  so today's curve is typed in (sidebar, "Hedging: the futures curve", default 0).
+  `costs.curve_roll_value` = slope x days financed / 30, added to the sale value as "Futures
+  curve effect (hedged)" (`ArbInputs.curve_m2_minus_m1`, `ArbResult.curve_value`); transit loss
+  is still charged on the physical value only. The 1985-2024 monthly history is saved in
+  `data/seed/wti_curve_history.csv` (`prices.curve_history`) and charted on the Arbitrage page
+  for scale: half of all months between -$0.37 and +$0.34; extremes +$7.38 (April 2020) and
+  -$2.70 (July 2022). Not modelled: pricing windows, basis risk, hedge costs. 157 tests pass.
 - **Stage 4, done 17 Nov 2026: missing voyage costs.** Two new lines in the cost stack, paid by
   the cargo on top of freight: "Reverse lightering" ($0.60/bbl, estimate from Columbia CGEP's
   2018 range of 50-75 cents, charged whenever `voyage.needs_lightering` is true) and "EU carbon

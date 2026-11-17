@@ -103,13 +103,24 @@ def sidebar_setup() -> dict:
     if basis != "hire":
         quote_usd = _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, A.val(hire_record))
 
+    with sb.expander("Hedging: the futures curve"):
+        curve = st.number_input(
+            "Second month minus first month WTI futures, USD per barrel",
+            value=float(A.get("costs", "futures_curve", "default_m2_minus_m1_usd_per_bbl")),
+            step=0.05, format="%.2f", key="curve_m2_minus_m1",
+            help="Positive: later months dearer (contango), which helps a hedged cargo. Negative: "
+                 "backwardation, which hurts it. The free US EIA futures data stopped in April 2024, "
+                 "so type today's figure from a futures quote. Zero means no effect.")
+        st.caption("The Arbitrage page shows the 1985-2024 history for scale.")
+
     benchmark = sb.selectbox("Sell price benchmark", list(BENCHMARK_LABELS),
                              format_func=BENCHMARK_LABELS.get, key="benchmark",
                              help="The published price the cargo is valued against at the discharge port. Brent is "
                                   "the usual reference in Europe; India and East Asia use both Brent and Dubai.")
     return dict(origin=origin, destination=destination, vessel_key=vessel_key, via=via,
                 market=market, hire=A.val(hire_record), hire_is_estimate=A.is_estimate(hire_record),
-                benchmark=benchmark, freight_basis=basis, freight_quote_usd=quote_usd)
+                benchmark=benchmark, freight_basis=basis, freight_quote_usd=quote_usd,
+                curve_m2_minus_m1=curve)
 
 
 def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire) -> float:
@@ -168,6 +179,7 @@ def base_inputs(setup: dict, prices) -> tuple[arbitrage.ArbInputs, dict]:
         vessel_key=setup["vessel_key"], via=setup["via"], destination_benchmark=benchmark,
         hire_usd_per_day=setup["hire"],
         freight_override_usd=setup.get("freight_quote_usd"),
+        curve_m2_minus_m1=setup.get("curve_m2_minus_m1", 0.0),
     )
     date_format = "%B %Y average" if monthly else "%d %b %Y"
     dates = dict(wti=wti_date, brent=brent_date, destination=destination_date,

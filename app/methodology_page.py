@@ -30,6 +30,7 @@ st.markdown("""
 | **Insurance** | A small percentage of cargo value plus freight, plus 10%. |
 | **Transit loss** | A small percentage of the cargo, valued at the sale price. |
 | **Quality adjustment** | (difference in API gravity x a dollar value per degree) minus (difference in sulphur x a dollar value per percentage point), comparing the grade shipped with the benchmark it is sold against. |
+| **Futures curve effect** | (second-month minus first-month WTI futures price, typed in) x days financed / 30. Positive in contango, negative in backwardation. |
 | **Demurrage** | Days of delay x (daily hire rate + fuel burned while waiting). With a broker's quote, the quote's implied daily earnings replace the hire rate. |
 | **Reverse lightering** | When a fully loaded ship is too deep for the load port's channel, an estimated 60 cents a barrel for topping it up offshore from smaller ships (published 2018 range 50-75 cents). |
 | **EU carbon (ETS)** | For a voyage into an EU port: half the fuel burned at sea plus all the fuel burned at berth, x 3.114 tonnes of CO2 per tonne of fuel, x the carbon allowance price, in dollars. |
@@ -52,9 +53,10 @@ st.markdown("""
   not a negotiated delivered price.
 - **The quality rule is a straight line.** Refiners value crude by the products it yields in their
   particular refinery, which a two-number rule cannot capture.
-- **No hedging, no price movement during the voyage.** The cargo is bought and sold at today's
-  prices. A real trader would hedge the weeks at sea with futures, and the shape of the futures
-  curve (contango or backwardation) would add or subtract value.
+- **The futures curve is a typed-in figure.** A hedged cargo gains or loses the curve's slope over
+  the days at sea (shown as "futures curve effect" on the Arbitrage page). The free EIA futures
+  data stopped in April 2024, so today's slope must be typed in; the tool does not model pricing
+  windows, basis risk between WTI futures and the destination benchmark, or the cost of the hedge.
 - **No Panama Canal.** It is the shortest way from the US Gulf to China or Korea, but a VLCC
   cannot use it, a full Suezmax is at or beyond its draught limit, and we have no free source
   for the tanker toll. Cargoes to Asia are offered via Suez or the Cape only.

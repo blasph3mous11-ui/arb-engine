@@ -6,6 +6,7 @@ import streamlit as st
 import charts
 import ui
 from engine import arbitrage
+from engine import prices as P
 from engine import assumptions as A
 from engine import voyage as V
 
@@ -87,6 +88,10 @@ lines = [
      f"WTI is lighter and lower in sulphur than {benchmark_name}, so it is worth a little more."),
     ("+ Destination differential" + E, inputs.destination_differential,
      "Any premium the buyer pays over the benchmark. Unknown without paid data, so zero."),
+    ("+ Futures curve effect (hedged)", result.curve_value,
+     f"A hedged cargo gains in contango and loses in backwardation: the "
+     f"{inputs.curve_m2_minus_m1:+.2f} a month typed in the sidebar over {financed_days:.1f} days. "
+     "Zero unless a figure is typed there."),
     ("= Sale value", result.sale_value, "What a barrel is worth delivered."),
     ("MARGIN (sale value minus landed cost)", result.margin_per_bbl,
      "Positive: the arb is open. Negative: it is closed."),
@@ -116,6 +121,19 @@ st.info(
        "The adjusted gap is not wide enough to cover it, so nobody would ship this cargo on these "
        "terms: either the US price must fall, the price at destination must rise, or freight must get cheaper.")
     + " Try the other freight markets in the sidebar to see how much the answer depends on the ship.")
+
+with st.expander("How big is the futures-curve effect usually?"):
+    history = P.curve_history()
+    st.plotly_chart(charts.single_line(history, "Second month minus first month",
+                                       zero_label="flat curve"), width="stretch")
+    st.caption(
+        f"Monthly average gap between the second and first WTI futures months, "
+        f"{history.index.min():%B %Y} to {history.index.max():%B %Y}, from the US EIA, which stopped "
+        f"publishing it after that. Half of all months fell between {history.quantile(0.25):+.2f} and "
+        f"{history.quantile(0.75):+.2f} a barrel, so on a five-week voyage the effect is usually under "
+        f"half a dollar. The extremes were {history.max():+.2f} in {history.idxmax():%B %Y}, when US "
+        f"storage filled up, and {history.min():+.2f} in {history.idxmin():%B %Y}. This is history for "
+        "scale, not a forecast.")
 
 st.caption("Real delivered prices and freight rates are negotiated privately and published only by "
            "paid services. This page uses public benchmark prices and the documented estimates "

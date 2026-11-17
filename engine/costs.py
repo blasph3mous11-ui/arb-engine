@@ -90,3 +90,15 @@ def eu_ets_cost(covered_fuel_tonnes: float, co2_per_tonne_fuel: float, coverage_
     """
     co2_tonnes = covered_fuel_tonnes * co2_per_tonne_fuel * coverage_pct / 100
     return co2_tonnes * eua_price_eur * usd_per_eur
+
+
+def curve_roll_value(m2_minus_m1_per_month: float, days: float) -> float:
+    """Value per barrel that the shape of the futures curve adds to a hedged cargo.
+
+    A trader who buys a cargo sells futures against it and buys them back when the
+    oil is sold. If later months trade above nearer ones (contango, a positive gap)
+    the hedge locks in that higher later price, so the cargo gains about the monthly
+    gap for each month it spends at sea. In backwardation (a negative gap) it loses.
+    Days are converted to months at 30 days a month.
+    """
+    return m2_minus_m1_per_month * days / 30

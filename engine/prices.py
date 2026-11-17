@@ -150,3 +150,16 @@ def bunker_price_estimate(brent_usd_per_bbl: float) -> float:
     The ratio and its reasoning are in data/assumptions/market.yaml.
     """
     return brent_usd_per_bbl * A.get("market", "bunkers", "usd_per_tonne_per_brent_dollar")
+
+
+CURVE_HISTORY_FILE = ROOT / "data" / "seed" / "wti_curve_history.csv"
+
+
+def curve_history() -> pd.Series:
+    """Monthly average of the second-month minus first-month WTI futures price, 1985 to April 2024.
+
+    Built from the EIA's RCLC1 and RCLC2 series, which the EIA stopped publishing in
+    April 2024. Shown for scale only: it says nothing about today's curve.
+    """
+    table = pd.read_csv(CURVE_HISTORY_FILE, parse_dates=["month"], index_col="month")
+    return table["m2_minus_m1"]

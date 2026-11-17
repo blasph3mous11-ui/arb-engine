@@ -46,6 +46,8 @@ class ArbInputs:
     # A broker's freight quote for the whole cargo, in USD. None means freight is
     # built from the daily hire rate, fuel, ports and canal instead.
     freight_override_usd: float | None = None
+    # Second-month minus first-month WTI futures price, USD per barrel. Zero means a flat curve.
+    curve_m2_minus_m1: float = 0.0
 
     def with_changes(self, **changes) -> "ArbInputs":
         return replace(self, **changes)
@@ -103,6 +105,7 @@ class ArbResult:
     purchase_price: float        # USD/bbl paid at origin (free on board)
     cost_stack: dict             # USD/bbl for each cost between origin and destination
     quality_differential: float  # USD/bbl
+    curve_value: float           # USD/bbl the futures curve adds to a hedged cargo
     sale_value: float            # USD/bbl received at destination
 
     @property
@@ -153,7 +156,7 @@ def run(inputs: ArbInputs) -> ArbResult:
     # What we pay at the load port, and what the cargo is worth at destination.
     purchase_price = inputs.origin_benchmark_price + inputs.origin_differential
     quality = grade_quality_differential(inputs.grade, inputs.destination_benchmark)
-    sale_value = inputs.destination_benchmark_price + inputs.destination_differential + quality
+    physical_value = inputs.destination_benchmark_price + inputs.destination_differential + quality
 
     cargo_value = purchase_price * barrels
     # A broker's quote, when given, replaces the freight built up from the daily hire rate.
@@ -167,11 +170,14 @@ def run(inputs: ArbInputs) -> ArbResult:
 
     # Money is tied up from loading until the buyer pays.
     financed_days = voyage.laden_days + inputs.delay_days + inputs.financing_extra_days
+    # A hedged cargo gains (contango) or loses (backwardation) the curve's slope over that time.
+    curve_value = C.curve_roll_value(inputs.curve_m2_minus_m1, financed_days)
+    sale_value = physical_value + curve_value
     financing = C.financing_cost(cargo_value, inputs.interest_rate_pct, financed_days,
                                  A.get("costs", "financing", "day_count"))
     insurance = C.insurance_cost(cargo_value, freight, inputs.insurance_rate_pct,
                                  A.get("costs", "insurance", "insured_value_uplift_pct"))
-    loss = C.transit_loss_cost(sale_value * barrels, inputs.transit_loss_pct)
+    loss = C.transit_loss_cost(physical_value * barrels, inputs.transit_loss_pct)
     demurrage = C.demurrage_cost(inputs.delay_days, daily_rate,
                                  A.get("costs", "demurrage", "rate_as_share_of_hire"),
                                  vessel.idle_consumption_tpd, inputs.bunker_usd_per_tonne)
@@ -187,7 +193,7 @@ def run(inputs: ArbInputs) -> ArbResult:
         "EU carbon (ETS)": extra_costs["eu_ets"] / barrels,
     }
     return ArbResult(inputs=inputs, voyage=voyage, purchase_price=purchase_price,
-                     cost_stack=cost_stack, quality_differential=quality, sale_value=sale_value)
+                     cost_stack=cost_stack, quality_differential=quality, curve_value=curve_value, sale_value=sale_value)
 
 
 def cargo_tonnes(cargo_bbl: float, grade: str) -> float:

@@ -295,3 +295,22 @@ eu_ets:
     note: >
       Round figure for converting the allowance price into dollars; the exchange rate moves daily
       and was not checked against a live source.
+
+futures_curve:
+  default_m2_minus_m1_usd_per_bbl:
+    value: 0.0
+    unit: USD per barrel per month
+    source: Our choice
+    checked: 2026-11-17
+    estimate: true
+    note: >
+      The US EIA stopped publishing NYMEX WTI futures prices in April 2024 and no other free source
+      was found, so the tool does not know today's curve. It starts at zero (a flat curve, no effect)
+      and you type the gap between the second and first futures months. The EIA history from 1985 to
+      April 2024 is shown on the Arbitrage page for scale.
+  history_source:
+    value: "EIA series RCLC1 and RCLC2 (NYMEX WTI futures contracts 1 and 2), monthly average of the daily gap, January 1985 to April 2024"
+    source: "US EIA, Cushing OK Crude Oil Future Contracts 1 and 2 (Dollars per Barrel)"
+    url: https://www.eia.gov/dnav/pet/pet_pri_fut_s1_d.htm
+    checked: 2026-11-17
+    estimate: false
