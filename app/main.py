@@ -14,6 +14,28 @@ for folder in (ROOT, ROOT / "app"):
 
 import streamlit as st
 
+
+def _refresh_code_if_updated() -> None:
+    """Drop the loaded engine code if the files on disk are newer.
+
+    When new code is uploaded, the hosting service updates the files but keeps
+    the app running, so the calculation code already in memory would be the old
+    version while the pages are the new one. Comparing the newest file time on
+    each run and forgetting the old copy keeps the two in step. Cached price
+    data and chart results are cleared too, since they were built by old code.
+    """
+    watched = [*(ROOT / "engine").glob("*.py"), *(ROOT / "data" / "assumptions").glob("*.yaml"),
+               ROOT / "app" / "ui.py", ROOT / "app" / "charts.py"]
+    newest = max(path.stat().st_mtime for path in watched)
+    if getattr(sys, "_arb_engine_code_time", newest) != newest:
+        for name in [m for m in sys.modules if m in ("ui", "charts", "engine") or m.startswith("engine.")]:
+            del sys.modules[name]
+        st.cache_data.clear()
+    sys._arb_engine_code_time = newest
+
+
+_refresh_code_if_updated()
+
 import ui
 
 st.set_page_config(page_title="Crude Arbitrage & Voyage Engine", page_icon=":material/sailing:",
