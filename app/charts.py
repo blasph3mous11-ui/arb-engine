@@ -168,6 +168,25 @@ def ranking_bars(rows: list[dict]) -> go.Figure:
     return fig
 
 
+def speed_curve(rows: list[dict], usual_knots: float, used_knots: float) -> go.Figure:
+    """Cost per barrel of the loaded leg at each speed: time falls, fuel rises, the total bottoms out."""
+    knots = [r["knots"] for r in rows]
+    fig = go.Figure()
+    for key, label, colour, width in [("time", "Time: hire and cargo interest", BLUE, 2),
+                                      ("fuel", "Fuel (and EU carbon where it applies)", ORANGE, 2),
+                                      ("total", "Total", INK, 3)]:
+        fig.add_trace(go.Scatter(x=knots, y=[r[key] for r in rows], mode="lines", name=label,
+                                 line=dict(width=width, color=colour),
+                                 hovertemplate="%{x:.1f} knots: $%{y:,.2f} per barrel<extra>" + label + "</extra>"))
+    fig.add_vline(x=usual_knots, line=dict(color=MUTED, width=1, dash="dot"),
+                  annotation_text="usual", annotation_position="top left", annotation_font_color=SECONDARY)
+    if abs(used_knots - usual_knots) > 0.01:
+        fig.add_vline(x=used_knots, line=dict(color=INK, width=1),
+                      annotation_text="used", annotation_position="top right", annotation_font_color=INK)
+    fig.update_layout(hovermode="x unified")
+    return _style(fig, height=380, x_title="Loaded speed, knots", y_title="USD per barrel")
+
+
 def margin_heatmap(grid, today_hire: float, today_spread: float) -> go.Figure:
     """Margin for each pairing of hire rate (across) and price spread (up).
 

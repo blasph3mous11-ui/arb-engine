@@ -2,9 +2,10 @@
 
 Read this first at the start of every session.
 
-## Where things stand (17 November 2026)
+## Where things stand (19 November 2026)
 
-**All five phases and all seven upgrade stages are built and working.** The tool covers 6 load
+**All five phases and all seven upgrade stages are built and working, plus ship speed, a
+downloadable trade recap and automatic test runs on GitHub (19 Nov entry below).** The tool covers 6 load
 ports (4 US Gulf, 2 North Sea), 7 discharge ports (India, Europe, East Asia), 5 ship types and 5
 shipped grades. See the latest dated entry for the
 test count. The dashboard has seven pages. The code is on GitHub: https://github.com/blasph3mous11-ui/arb-engine
@@ -31,6 +32,26 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   density. Decision: no gross-product-worth valuation, because consistent free product yields per
   grade and destination product prices do not exist; documented on the Methodology page. Sanity:
   Mars is worth $5.04 less than Brent and $0.49 less than Dubai on the quality rule. 177 tests pass.
+- **Ship speed, trade recap and automatic tests, 19 Nov 2026.**
+  - Ship speed (closes the "no slow steaming" gap on the Methodology page). Sidebar "Ship speed":
+    usual, cheapest at these costs, or set my own (10-15 knots, both ends our estimate). Fuel at
+    another speed: the idle figure stays fixed and the engine's share follows the cube of speed
+    (IMO GreenVoyage2050 rule of thumb, flagged as an estimate; Adland, Cariou and Wolff 2020 find
+    it overstates savings well below the design speed, which the page says). The cheapest speed per
+    leg is closed-form, `voyage.cheapest_speed`: usual x [(time cost + fuel price x fixed fuel) /
+    (2 x fuel price x engine fuel)]^(1/3). `arbitrage.speed_cost_terms` builds the time cost from
+    the insured hire, plus cargo interest and less the futures-curve gain while loaded, and the fuel
+    price from the insured fuel plus EU carbon. `tests/test_speed.py` checks it against the whole
+    model: no speed in the range beats it. With a broker's quote the owner sets the speed, so
+    "cheapest" keeps the usual speed. Voyage page: a cost-by-speed chart and the gain over the
+    usual speed. Today: at $151,000 a day the Suezmax should sail flat out (15 knots), round trip
+    70.1 to 60.5 days, freight $14.59 to $13.64, margin -$12.32 to -$11.30. Calm market ($30,000):
+    12.8 / 12.1 knots, worth 0.3 cents. +$0.50 a month contango slows the loaded leg to 11.2 knots.
+  - Trade recap: `engine/recap.py`, a 45-line CSV download on the Arbitrage page, each line marked
+    published, estimated, typed in or calculated, ending with the not-traded-data note.
+  - `.github/workflows/tests.yml` runs every test on GitHub after each upload; badge on the README.
+  - README: speed and recap added, "cheapest route" corrected, confirmed Aframax/VLCC figures no
+    longer described as unconfirmed, ranking.py and recap.py added to the file list.
 - **Figures confirmed and refreshed, 19 Nov 2026.**
   - Confirmed by eye: the Platts guide (page 38) gives its standard Aframax (80,000 t cargo) as
     13 / 12.5 knots and 43 / 36 / 10 / 55 / 5 t/day (laden, ballast, loading, discharging, idle);

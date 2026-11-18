@@ -1,0 +1,27 @@
+# Runs every test on GitHub's computers after each upload, so a change that breaks a
+# calculation shows up as a red cross on the repository page (and the README badge).
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install the packages the dashboard needs
+        run: pip install -r requirements.txt
+      - name: Run the tests (offline: prices come from the saved snapshot)
+        run: python -m pytest -q

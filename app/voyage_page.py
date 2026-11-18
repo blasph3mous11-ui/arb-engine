@@ -37,11 +37,16 @@ if bunker == round(bunker_default):
 st.caption("Changes made in these two boxes apply to this page only. The Arbitrage and Scenarios "
            "pages use the sidebar hire rate and the estimated fuel price.")
 cargo = vessel.cargo_capacity_bbl
+# The sidebar's speed choice, worked out at this page's hire and fuel price. The cheapest
+# speed does not depend on the distance, so both routes sail at the same speeds.
+page_inputs = base_inputs.with_changes(hire_usd_per_day=hire, bunker_usd_per_tonne=bunker)
+laden_knots, ballast_knots = arbitrage.ship_speeds(page_inputs)
 
 
 def run(via: str) -> V.VoyageResult:
     return V.voyage_from_assumptions(setup["origin"], setup["destination"], setup["vessel_key"],
-                                     via, hire_usd_per_day=hire, bunker_usd_per_tonne=bunker)
+                                     via, hire_usd_per_day=hire, bunker_usd_per_tonne=bunker,
+                                     laden_speed_knots=laden_knots, ballast_speed_knots=ballast_knots)
 
 
 chosen = run(setup["via"])
@@ -61,6 +66,12 @@ c4.metric("Freight per barrel (estimated)" if setup["freight_basis"] == "hire"
           help=f"Total voyage cost {ui.usd(chosen.total_cost / 1e6, 2)} million over {cargo:,.0f} barrels. "
                "An estimate: the hire rate, fuel price and several ship figures behind it are "
                "estimates (listed at the bottom of this page).")
+speed_note = {"usual": "the ship's usual speeds",
+              "cheapest": ("the usual speeds: with a broker's quote the owner chooses"
+                           if setup["freight_basis"] != "hire" else "the cheapest speeds at these costs (estimated)"),
+              "custom": "speeds set in the sidebar (fuel estimated)"}[setup["speed_mode"]]
+st.caption(f"Sailing at {laden_knots:.1f} knots loaded and {ballast_knots:.1f} knots empty: {speed_note}. "
+           "Change it under Ship speed in the sidebar.")
 
 if setup["freight_basis"] != "hire":
     quote = setup["freight_quote_usd"]
@@ -114,6 +125,47 @@ if other is not None:
     st.info(f"**{V.ROUTES[cheaper.via]}** is cheaper by {ui.usd(dearer.cost_per_bbl - cheaper.cost_per_bbl)} "
             f"a barrel at these rates. The Cape adds {abs(chosen.total_days - other.total_days):,.1f} days "
             "to the round trip, so the dearer the ship is per day, the more the canal toll is worth paying.")
+
+st.subheader("How fast should it sail?")
+if setup["freight_basis"] != "hire":
+    st.info("With a broker's quote the shipowner pays for the fuel and chooses the speed, so this "
+            "section applies only to freight built from a daily hire rate. A speed set in the sidebar "
+            "still changes how long the cargo is at sea, and so the interest on it.")
+else:
+    slowest, fastest = arbitrage.speed_range()
+    cheapest_inputs = page_inputs.with_changes(speed_mode="cheapest")
+    best_laden, best_ballast = arbitrage.ship_speeds(cheapest_inputs)
+    steps = [round(slowest + tenth / 10, 1) for tenth in range(int(round((fastest - slowest) * 10)) + 1)]
+    curve_rows = arbitrage.speed_cost_curve(page_inputs, chosen.distance_nm, steps)
+    gain = (arbitrage.run(cheapest_inputs).margin_per_bbl
+            - arbitrage.run(page_inputs.with_changes(speed_mode="usual")).margin_per_bbl)
+    s1, s2, s3 = st.columns(3)
+    s1.metric("Speed used, loaded / empty", f"{laden_knots:.1f} / {ballast_knots:.1f} knots")
+    s2.metric("Cheapest at these costs (estimated)", f"{best_laden:.1f} / {best_ballast:.1f} knots")
+    s3.metric("Cheapest speed instead of usual (estimated)", f"{ui.usd(gain)} a barrel",
+              help="How much the margin improves by sailing at the cheapest speeds instead of the "
+                   "usual ones: hire, fuel, carbon and the interest on the cargo, all estimated.")
+    st.plotly_chart(charts.speed_curve(curve_rows, vessel.laden_speed_knots, laden_knots), width="stretch")
+    if best_laden >= fastest:
+        why = (f"At {ui.usd(hire, 0)} a day the ship's time costs more than the extra fuel of going "
+               f"faster, so the cheapest plan is to sail as fast as the tool allows ({fastest:g} knots, "
+               "our estimate of a crude tanker's top service speed).")
+    elif best_laden <= slowest:
+        why = ("Time is cheap here (or the futures curve pays the cargo to wait), so the cheapest plan "
+               f"is to sail as slowly as the tool allows ({slowest:g} knots, estimated).")
+    else:
+        why = (f"The total is lowest at {best_laden:.1f} knots loaded: any slower and the extra days of "
+               "hire and cargo interest cost more than the fuel saved; any faster and the extra fuel "
+               "costs more than the days saved.")
+    if abs(gain) < 0.01:
+        why += " The usual speeds are already close to the cheapest, so changing speed is worth less than a cent a barrel here."
+    st.caption(
+        f"Cost per barrel of the loaded sea leg at each speed. {why} The empty leg is worked out the "
+        "same way without the cargo interest. Fuel at other speeds uses the IMO's rule of thumb that "
+        "engine fuel rises with the cube of speed (10% slower, 27% less engine fuel a day), with the "
+        "ship's idle consumption burned whatever the speed. Studies of tanker logs find fuel less "
+        "sensitive to speed than that well below the usual speed, so slow speeds look somewhat too "
+        "good here. In practice the charter terms and the engine also limit the speed.")
 
 with st.expander("Day-by-day and fuel detail"):
     labels = {"load_port": "Loading", "laden_sea": "At sea, loaded", "laden_canal": "Canal, loaded",

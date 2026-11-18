@@ -459,3 +459,41 @@ futures_curve:
     url: https://www.eia.gov/dnav/pet/pet_pri_fut_s1_d.htm
     checked: 2026-11-17
     estimate: false
+
+ship_speed:
+  # Used only when the sidebar's "Ship speed" is not the ship's usual speed.
+  fuel_speed_exponent:
+    value: 3
+    unit: power of speed
+    source: "IMO GreenVoyage2050, Speed management: rule of thumb that engine power follows the cube of speed, so 10% slower cuts propulsion power and fuel per day by 27%"
+    url: https://greenvoyage2050.imo.org/technology/speed-management/
+    checked: 2026-11-19
+    estimate: true
+    note: >
+      A rule of thumb, not a measurement for these ships. Only the engine's share of the fuel
+      follows it; the part the ship burns whatever its speed (taken as its idle consumption in
+      vessels.yaml) stays fixed. Adland, Cariou and Wolff (2020, Transportation Research Part E,
+      vol. 140), using noon reports from 16 Aframax and Suezmax tankers, found the cubic law holds
+      only near the design speed and that fuel is less sensitive to speed at the speeds actually
+      sailed, so well below the usual speed the tool overstates the fuel saved
+      (https://ideas.repec.org/a/eee/transe/v140y2020ics1366554520306232.html).
+  min_knots:
+    value: 10.0
+    unit: knots
+    source: Our estimate
+    checked: 2026-11-19
+    estimate: true
+    note: >
+      The slowest speed the tool will choose or accept. Tankers slow-steam to around 10-11 knots in
+      weak markets; below that engines run at very low loads, which the IMO page above notes adds
+      wear, and the cube rule is least reliable (see fuel_speed_exponent).
+  max_knots:
+    value: 15.0
+    unit: knots
+    source: Our estimate
+    checked: 2026-11-19
+    estimate: true
+    note: >
+      The fastest speed the tool will choose or accept, for every ship. Crude tankers are commonly
+      built for a service speed of about 14.5-15.5 knots; the usual speeds in vessels.yaml (12-13
+      knots) are the published assessment speeds, below that.

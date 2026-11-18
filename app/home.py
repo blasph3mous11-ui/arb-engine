@@ -52,9 +52,10 @@ a.markdown("""
 b.markdown("""
 **The pages**
 
-- **Voyage calculator** - how long the trip takes and what the ship costs, Suez versus Cape.
+- **Voyage calculator** - how long the trip takes and what the ship costs, Suez versus Cape, and
+  the cheapest speed to sail at.
 - **Prices** - benchmark crude prices and the gap between them.
-- **Arbitrage result** - every cost from purchase to sale, and the verdict.
+- **Arbitrage result** - every cost from purchase to sale, the verdict, and a recap to download.
 - **Where to send it** - the same cargo costed to every discharge port and ranked by margin.
 - **Scenarios & history** - sliders, what matters most, the break-even gap, and a look back.
 - **Methodology** - every assumption, where it came from, and what the model leaves out.
@@ -64,11 +65,12 @@ st.subheader("What is real and what is estimated")
 st.markdown(f"""
 - **Published data:** daily Brent and WTI prices (US Energy Information Administration), monthly
   Dubai (World Bank), the Suez Canal toll tariff and surcharges, the benchmark interest rate
-  (SOFR), ship sizes and the quality of each crude grade.
+  (SOFR), ship sizes, the Aframax and VLCC speeds and fuel use (Platts, Baltic Exchange) and the
+  quality of each crude grade.
 - **Estimates, marked** {ui.ESTIMATED} **or "(estimated)":** the ship's daily hire rate (our own
   figure, or a public broker or press figure for another route or contract used as a stand-in),
-  the fuel price, ship speeds and fuel use (reported from industry guides but not yet confirmed
-  against the documents, or scaled from those figures), the ship's canal tonnage, port costs and
+  the fuel price, the other ships' speeds and fuel use (not found in the guides, or scaled from
+  their figures), fuel use at other speeds, the ship's canal tonnage, port costs and
   port days, the bank's lending margin, insurance and war-risk cover, transit loss, the quality
   adjustment and the Gulf Coast price differential. Real freight rates and physical price premiums
   are sold by subscription and are not used here. The Methodology page lists every one.

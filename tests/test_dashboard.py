@@ -15,6 +15,7 @@ from engine import assumptions as A
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = ["home.py", "voyage_page.py", "prices_page.py", "arbitrage_page.py", "ranking_page.py",
          "scenarios_page.py", "methodology_page.py"]
+RADIOS = ("via", "freight_basis", "speed_mode")
 SETUPS = [
     {},                                                    # the starting case
     {"vessel": "vlcc"},                                    # too deep for Suez: forced via the Cape
@@ -29,6 +30,11 @@ SETUPS = [
     {"origin": "hound_point", "destination": "rotterdam", "vessel": "aframax"},
     {"origin": "mongstad", "benchmark": "dubai",
      "destination": "ningbo", "vessel": "vlcc"},
+    {"speed_mode": "cheapest"},                            # spot market: flat out
+    {"speed_mode": "cheapest", "market": "calm_2024",      # calm market, EU carbon: slower
+     "destination": "rotterdam", "vessel": "aframax"},
+    {"speed_mode": "custom"},
+    {"speed_mode": "cheapest", "freight_basis": "lump_sum"},
 ]
 
 
@@ -42,11 +48,13 @@ def offline_prices(monkeypatch):
 @pytest.mark.parametrize("setup", SETUPS, ids=["base", "vlcc", "aframax-cape-calm", "dubai-mumbai", "rotterdam-direct",
                                               "loop-ningbo-vlcc", "panamax-singapore", "eco-paradip-cape",
                                               "mars-dubai-loop", "midland-rotterdam-lump-sum",
-                                              "forties-rotterdam", "sverdrup-dubai-ningbo-vlcc"])
+                                              "forties-rotterdam", "sverdrup-dubai-ningbo-vlcc",
+                                              "speed-cheapest", "speed-cheapest-calm-rotterdam",
+                                              "speed-custom", "speed-cheapest-lump-sum"])
 def test_page_loads(page, setup):
     app = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=120).run()
     for key, value in setup.items():
-        widget = app.radio(key=key) if key in ("via", "freight_basis") else app.selectbox(key=key)
+        widget = app.radio(key=key) if key in RADIOS else app.selectbox(key=key)
         widget.set_value(value)
         if key == "origin":
             app.run()  # the grade list depends on the load port, so apply it first
@@ -61,7 +69,7 @@ def test_page_loads(page, setup):
 def load_page(page, setup):
     app = AppTest.from_file(str(ROOT / "app" / "main.py"), default_timeout=120).run()
     for key, value in setup.items():
-        widget = app.radio(key=key) if key in ("via", "freight_basis") else app.selectbox(key=key)
+        widget = app.radio(key=key) if key in RADIOS else app.selectbox(key=key)
         widget.set_value(value)
         if key == "origin":
             app.run()  # the grade list depends on the load port, so apply it first
@@ -106,8 +114,9 @@ def metric(app, label_start):
 
 
 @pytest.mark.parametrize("setup", [{}, {"benchmark": "dubai"},
-                                   {"benchmark": "dubai", "vessel": "vlcc", "market": "calm_2024"}],
-                         ids=["brent", "dubai", "dubai-vlcc-calm"])
+                                   {"benchmark": "dubai", "vessel": "vlcc", "market": "calm_2024"},
+                                   {"speed_mode": "cheapest", "market": "calm_2024"}],
+                         ids=["brent", "dubai", "dubai-vlcc-calm", "cheapest-speed-calm"])
 def test_pages_agree_on_freight_spread_and_fuel(setup):
     """Same sidebar choices, same numbers on every page.
 
@@ -223,3 +232,26 @@ def test_north_sea_cargo_is_priced_off_brent():
     assert not any("Gulf Coast" in line for line in lines)
     labels = [s.label for s in load_page("scenarios_page.py", {"origin": "mongstad"}).slider]
     assert any("minus Brent" in label for label in labels)
+
+
+def test_cheapest_speed_shows_on_the_voyage_page():
+    calm = load_page("voyage_page.py", {"speed_mode": "cheapest", "market": "calm_2024"})
+    assert any(s.value.startswith("How fast should it sail") for s in calm.subheader)
+    used = metric(calm, "Speed used, loaded / empty")
+    assert used == metric(calm, "Cheapest at these costs")
+    # Cheaper than the usual speed, or the same: never worse.
+    gain = metric(calm, "Cheapest speed instead of usual")
+    assert not gain.startswith("-")
+    # The Arbitrage page states the same speeds in its freight line.
+    arbitrage_page = load_page("arbitrage_page.py", {"speed_mode": "cheapest", "market": "calm_2024"})
+    freight_text = next(text for text in arbitrage_page.dataframe[0].value["Where it comes from"]
+                        if "days of ship hire" in text)
+    laden, ballast = used.replace(" knots", "").split(" / ")
+    assert f"sailing at {laden} knots loaded and {ballast} empty" in freight_text
+
+
+def test_arbitrage_page_offers_the_trade_recap():
+    app = load_page("arbitrage_page.py", {})
+    buttons = app.get("download_button")
+    assert len(buttons) == 1
+    assert "Download this trade" in buttons[0].proto.label

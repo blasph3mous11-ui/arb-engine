@@ -1,5 +1,7 @@
 # Physical Crude Arbitrage & Voyage Engine
 
+[![tests](https://github.com/blasph3mous11-ui/arb-engine/actions/workflows/tests.yml/badge.svg)](https://github.com/blasph3mous11-ui/arb-engine/actions/workflows/tests.yml)
+
 A dashboard that answers the question a physical oil trader asks every day:
 
 > **If I buy a cargo of crude at port A and ship it to port B, do I make money today, and what drives the answer?**
@@ -21,6 +23,7 @@ Code: https://github.com/blasph3mous11-ui/arb-engine
 | Crude grade | US Gulf: WTI, WTI Midland (light sweet export grade), Mars (medium sour). North Sea: Forties (light sweet), Johan Sverdrup (medium sour). Each with an editable differential to its benchmark |
 | Freight market | Today's spot market, a one-year time charter, or a calm-market reference |
 | Freight basis | The daily hire rate from the freight market, or a broker's quote you type in (Worldscale points and flat rate, or a lump sum), with the shipowner's implied daily earnings (TCE) |
+| Ship speed | The ship's usual speeds, the cheapest speeds for today's hire, fuel, cargo interest and carbon costs, or your own (10 to 15 knots) |
 
 US Gulf grades (WTI, WTI Midland, Mars) are priced off WTI Cushing, North Sea grades (Forties, Johan Sverdrup) off Brent, each plus an estimated differential. The Panama Canal is not offered as a route.
 
@@ -30,10 +33,10 @@ US Gulf grades (WTI, WTI Midland, Mars) are priced off WTI Cushing, North Sea gr
 
 | Page | What you see |
 |---|---|
-| **Voyage calculator** | Sea distance, voyage days and freight cost per barrel, broken down into ship hire, fuel, port charges, canal tolls and war-risk premium. Suez and Cape side by side, with a route map. |
+| **Voyage calculator** | Sea distance, voyage days and freight cost per barrel, broken down into ship hire, fuel, port charges, canal tolls and war-risk premium. Suez and Cape side by side, with a route map, and a chart of what each loaded speed costs, showing the cheapest. |
 | **Prices** | Daily Brent and WTI history (US EIA), monthly Dubai (World Bank), and the spread between origin and destination benchmarks (monthly averages when Dubai is chosen). |
-| **Arbitrage result** | The full cost stack from purchase price to landed cost to margin as a waterfall, with an **ARB OPEN** or **ARB CLOSED** verdict and every line explained. |
-| **Where to send it** | The same cargo costed to every discharge port by its cheapest route, ranked by margin: the netback view a trader uses to place a cargo. |
+| **Arbitrage result** | The full cost stack from purchase price to landed cost to margin as a waterfall, with an **ARB OPEN** or **ARB CLOSED** verdict, every line explained, and a one-click spreadsheet recap of the trade with every line marked published, estimated, typed in or calculated. |
+| **Where to send it** | The same cargo costed to every discharge port by its better route, ranked by margin: the netback view a trader uses to place a cargo. |
 | **Scenarios & history** | Sliders for the main drivers, a tornado chart of what moves the margin most, the break-even spread, a grid of ship cost against price gap showing where the arb opens, and the model re-run over past prices. |
 | **Methodology** | Every assumption with its value, source, date checked and whether it is an estimate, plus what the model leaves out. |
 
@@ -48,13 +51,15 @@ traded freight rates or physical price premiums, which are sold by subscription 
 Platts, Argus).
 
 - **Published data:** Brent and WTI daily spot prices, Dubai monthly average, the Suez Canal
-  Authority toll tariff and surcharges, SOFR, ship sizes, crude grade qualities from assays (WTI
+  Authority toll tariff and surcharges, SOFR, ship sizes, the Aframax and VLCC speeds and fuel use
+  (Platts freight guide, Baltic Exchange), crude grade qualities from assays (WTI
   Midland's taken from its specification range and flagged as an estimate) and the EU carbon
   scheme's rules.
 - **Documented estimates:** the daily ship hire rate (our own figure, or a published broker or
-  press figure for another route or contract used as a proxy), bunker (fuel) price, ship speeds
-  and fuel consumption (reported from the Platts and Baltic Exchange guides via search extracts
-  and not yet confirmed against the documents, or scaled from those figures), canal tonnage, port
+  press figure for another route or contract used as a proxy), bunker (fuel) price, the Panamax
+  and Suezmax speeds and fuel consumption (not found in the guides, or scaled from their figures),
+  fuel use at other speeds (the IMO's cube-of-speed rule of thumb) and the allowed speed range,
+  canal tonnage, port
   costs and port days, the bank margin, insurance and war-risk cover, transit loss, quality
   adjustment, each grade's differential to WTI or Brent, the dollar-per-SDR rate used for canal
   tolls, the reverse-lightering cost, the carbon allowance price and dollar-euro rate, and broker
@@ -87,6 +92,8 @@ Run the tests with:
 pytest
 ```
 
+They also run automatically on GitHub after every upload; the badge at the top shows the result.
+
 ## How it is built
 
 ```
@@ -96,13 +103,16 @@ engine/
   prices.py           price downloads and caching
   costs.py            financing, insurance, transit loss, quality, demurrage
   arbitrage.py        combines everything into the margin
-  scenarios.py        tornado, break-even, historical re-run
+  scenarios.py        tornado, break-even, freight-versus-spread grid, historical re-run
+  ranking.py          the same cargo costed to every discharge port
+  recap.py            the downloadable line-by-line trade recap
   units.py            barrels, tonnes, knots: every conversion in one place
   assumptions.py      reads the YAML assumption files
 data/assumptions/     every assumption, with source and date checked
 data/seed/            small price snapshot used only if downloads fail on first run
 tests/                each calculation checked against a sum worked by hand
 docs/                 glossary, assumptions, case study, interview notes
+.github/workflows/    runs the tests on GitHub after every upload
 ```
 
 All calculation logic is in `engine/` with no dashboard code in it, so it is tested on its own.

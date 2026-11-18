@@ -109,6 +109,17 @@ stability). The empty return trip earns nothing, so the cargo has to pay for it.
 A nautical mile is 1.852 km. A knot is one nautical mile per hour. A tanker at 13 knots covers
 312 nautical miles a day.
 
+**Slow steaming and the cheapest speed**
+Sailing slower than a ship's normal speed to save fuel. Engine fuel per day rises roughly with
+the cube of speed (10% slower burns about 27% less a day), but every extra day costs the ship's
+hire and the interest on the cargo. The cheapest speed balances the two: when ships are dear (as
+in late 2026) it pays to sail fast; when ships are cheap and fuel dear, to slow down. In steep
+contango a hedged cargo even earns money by taking longer.
+
+**Trade recap**
+A short summary of a deal (cargo, ports, ship, prices, costs, result) that traders send to
+colleagues and counterparties. The Arbitrage page downloads one as a spreadsheet.
+
 **Bunkers**
 Ship fuel. Usually the second-largest voyage cost after the ship itself. "VLSFO" is very low
 sulphur fuel oil, the standard grade since 2020.

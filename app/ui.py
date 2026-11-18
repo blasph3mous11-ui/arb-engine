@@ -18,6 +18,11 @@ FREIGHT_BASES = {
     "lump_sum": "Broker quote: lump sum",
 }
 BENCHMARK_LABELS = {"brent": "Brent (daily)", "dubai": "Dubai (monthly average)"}
+SPEED_MODES = {
+    "usual": "Usual speed for this ship",
+    "cheapest": "Cheapest speed at these costs (estimated)",
+    "custom": "Set my own",
+}
 ESTIMATED = ":orange-badge[estimated]"
 
 
@@ -114,6 +119,30 @@ def sidebar_setup() -> dict:
     sb.caption(f"{A.val(markets[market]['description'])}  \n**Hire: {usd(A.val(hire_record), 0)} a day**"
                f"{tag(A.is_estimate(hire_record))}")
 
+    slowest, fastest = arbitrage.speed_range()
+    with sb.expander("Ship speed"):
+        speed_mode = st.radio(
+            "Speed", list(SPEED_MODES), format_func=SPEED_MODES.get, key="speed_mode",
+            help="A ship can go faster and burn more fuel, or slower and take longer. When the ship "
+                 "is dear per day it pays to hurry; when fuel is dear it pays to slow down. The "
+                 "cheapest speed weighs the daily hire and the interest on the cargo against the "
+                 "fuel, using the rule of thumb that engine fuel rises with the cube of speed.")
+        laden_knots = ballast_knots = None
+        if speed_mode == "custom":
+            laden_knots = st.number_input("Loaded, knots", min_value=slowest, max_value=fastest, step=0.5,
+                                          value=float(vessel.laden_speed_knots), key=f"laden_knots_{vessel_key}")
+            ballast_knots = st.number_input("Empty (going back), knots", min_value=slowest, max_value=fastest,
+                                            step=0.5, value=float(vessel.ballast_speed_knots),
+                                            key=f"ballast_knots_{vessel_key}")
+        if speed_mode == "cheapest" and st.session_state.get("freight_basis", "hire") != "hire":
+            st.caption("With a broker's quote the shipowner pays for the fuel and chooses the speed, "
+                       "so the usual speed is used.")
+        else:
+            st.caption(f"Usual for {a_or_an(vessel.name)}: {vessel.laden_speed_knots:g} knots loaded, "
+                       f"{vessel.ballast_speed_knots:g} empty. Allowed range {slowest:g} to {fastest:g} "
+                       "knots (estimated). The Voyage page shows the speeds used and why.")
+    custom_speeds = (laden_knots, ballast_knots) if speed_mode == "custom" else (None, None)
+
     basis = sb.radio("How is freight set?", list(FREIGHT_BASES), format_func=FREIGHT_BASES.get,
                      key="freight_basis",
                      help="Brokers quote tanker freight either in Worldscale points or as a lump sum "
@@ -121,7 +150,7 @@ def sidebar_setup() -> dict:
     quote_usd = None
     if basis != "hire":
         quote_usd = _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via,
-                                          A.val(hire_record), grade)
+                                          A.val(hire_record), grade, custom_speeds)
 
     with sb.expander("Hedging: the futures curve"):
         curve = st.number_input(
@@ -141,10 +170,12 @@ def sidebar_setup() -> dict:
     return dict(origin=origin, destination=destination, vessel_key=vessel_key, via=via,
                 market=market, hire=A.val(hire_record), hire_is_estimate=A.is_estimate(hire_record),
                 benchmark=benchmark, freight_basis=basis, freight_quote_usd=quote_usd,
-                curve_m2_minus_m1=curve, grade=grade, origin_differential=origin_differential)
+                curve_m2_minus_m1=curve, grade=grade, origin_differential=origin_differential,
+                speed_mode=speed_mode, laden_knots=laden_knots, ballast_knots=ballast_knots)
 
 
-def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire, grade) -> float:
+def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire, grade,
+                          custom_speeds=(None, None)) -> float:
     """Boxes for a broker's freight quote. Returns the quoted freight for the whole cargo, in USD.
 
     The boxes start at the figure the daily hire rate gives for this exact voyage, so
@@ -152,13 +183,16 @@ def _freight_quote_inputs(sb, basis, origin, destination, vessel_key, via, hire,
     """
     prices, _ = get_prices()
     brent, _ = P.latest(prices, "brent")
+    laden_knots, ballast_knots = custom_speeds
     built_up = V.voyage_from_assumptions(origin, destination, vessel_key, via, hire_usd_per_day=hire,
-                                         bunker_usd_per_tonne=P.bunker_price_estimate(brent)).total_cost
+                                         bunker_usd_per_tonne=P.bunker_price_estimate(brent),
+                                         laden_speed_knots=laden_knots,
+                                         ballast_speed_knots=ballast_knots).total_cost
     # Quotes are gross of the address commission the charterer gets back, so the pre-fill is
     # grossed up: net of commission it equals the daily-hire freight for this voyage.
     address_pct = A.get("costs", "commissions", "address_commission_pct")
     gross = built_up / (1 - address_pct / 100)
-    voyage_key = f"{origin}_{destination}_{vessel_key}_{via}_{grade}"
+    voyage_key = f"{origin}_{destination}_{vessel_key}_{via}_{grade}_{laden_knots}_{ballast_knots}"
     if basis == "lump_sum":
         millions = sb.number_input("Lump sum for the voyage, USD million", min_value=0.0, step=0.1,
                                    value=round(gross / 1e6, 2), key=f"lump_{voyage_key}",
@@ -212,6 +246,8 @@ def base_inputs(setup: dict, prices) -> tuple[arbitrage.ArbInputs, dict]:
         curve_m2_minus_m1=setup.get("curve_m2_minus_m1", 0.0),
         grade=setup.get("grade", "wti"), origin_differential=setup.get("origin_differential", 1.0),
         origin_benchmark=origin_column,
+        speed_mode=setup.get("speed_mode", "usual"),
+        laden_speed_knots=setup.get("laden_knots"), ballast_speed_knots=setup.get("ballast_knots"),
     )
     date_format = "%B %Y average" if monthly else "%d %b %Y"
     dates = dict(wti=wti_date, brent=brent_date, destination=destination_date,

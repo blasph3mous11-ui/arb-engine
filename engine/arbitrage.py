@@ -12,9 +12,9 @@ from dataclasses import dataclass, replace
 
 from engine import assumptions as A
 from engine import costs as C
-from engine.units import barrels_to_tonnes
-from engine.voyage import (VoyageResult, get_port, get_vessel, implied_tce, lightered_share, needs_lightering,
-                           voyage_from_assumptions)
+from engine.units import barrels_to_tonnes, sailing_days
+from engine.voyage import (VoyageResult, cheapest_speed, get_port, get_vessel, implied_tce, lightered_share,
+                           needs_lightering, sea_consumption_tpd, voyage_from_assumptions)
 
 
 @dataclass(frozen=True)
@@ -50,6 +50,11 @@ class ArbInputs:
     curve_m2_minus_m1: float = 0.0
     # The price series the cargo is bought against: "wti" (US Gulf) or "brent" (North Sea).
     origin_benchmark: str = "wti"
+    # Ship speed: "usual" (the ship's published speeds), "cheapest" (the speeds that make the
+    # voyage cheapest at these costs) or "custom" (the two speeds below, in knots).
+    speed_mode: str = "usual"
+    laden_speed_knots: float | None = None
+    ballast_speed_knots: float | None = None
 
     def with_changes(self, **changes) -> "ArbInputs":
         return replace(self, **changes)
@@ -175,9 +180,98 @@ class ArbResult:
         return self.inputs.destination_benchmark_price - self.inputs.origin_benchmark_price
 
 
+SPEED_MODES = ("usual", "cheapest", "custom")
+
+
+def speed_range() -> tuple[float, float]:
+    """The slowest and fastest speeds the tool will use, in knots."""
+    return A.get("costs", "ship_speed", "min_knots"), A.get("costs", "ship_speed", "max_knots")
+
+
+def speed_cost_terms(inputs: ArbInputs) -> dict:
+    """What a day at sea costs the cargo, apart from the fuel, and what a tonne of fuel costs.
+
+    Loaded leg: the ship's hire, plus interest on the cargo, less what a hedged cargo
+    gains from the futures curve each day (more than the hire in a steep contango).
+    Empty leg: the hire only. Freight is insured with the cargo, so hire and fuel carry
+    the insurance rate on top, and fuel burned at sea carries EU carbon where it applies.
+    Only for freight built from a daily hire rate: with a broker's quote the owner pays
+    for the ship and fuel.
+    """
+    barrels = inputs.cargo_bbl
+    cargo_value = (inputs.origin_benchmark_price + inputs.origin_differential) * barrels
+    insured = 1 + (A.get("costs", "insurance", "insured_value_uplift_pct") / 100
+                   * inputs.insurance_rate_pct / 100)
+    interest_per_day = C.financing_cost(cargo_value, inputs.interest_rate_pct, 1,
+                                        A.get("costs", "financing", "day_count"))
+    curve_per_day = C.curve_roll_value(inputs.curve_m2_minus_m1, 1) * barrels
+    carbon_per_tonne = 0.0
+    origin_in, destination_in = get_port(inputs.origin_key)["eu_ets"], get_port(inputs.destination_key)["eu_ets"]
+    if origin_in or destination_in:
+        ets = A.load("costs")["eu_ets"]
+        covered = C.eu_ets_covered_fuel({"load_port": 0.0, "laden_sea": 1.0, "discharge_port": 0.0},
+                                        origin_in, destination_in, A.val(ets["share_of_voyage_outside_eu_pct"]))
+        carbon_per_tonne = C.eu_ets_cost(covered, A.val(ets["co2_per_tonne_fuel"]), A.val(ets["coverage_pct"]),
+                                         A.val(ets["eua_price_eur_per_tonne"]), A.val(ets["usd_per_eur"]))
+    return {
+        "laden_time_cost_usd_per_day": insured * inputs.hire_usd_per_day + interest_per_day - curve_per_day,
+        "ballast_time_cost_usd_per_day": insured * inputs.hire_usd_per_day,
+        "fuel_usd_per_tonne": insured * inputs.bunker_usd_per_tonne + carbon_per_tonne,
+    }
+
+
+def ship_speeds(inputs: ArbInputs) -> tuple[float, float]:
+    """Loaded and empty speeds for this trade, in knots."""
+    if inputs.speed_mode not in SPEED_MODES:
+        raise ValueError(f"Unknown speed choice '{inputs.speed_mode}'; use one of {SPEED_MODES}.")
+    vessel = get_vessel(inputs.vessel_key)
+    usual = (vessel.laden_speed_knots, vessel.ballast_speed_knots)
+    slowest, fastest = speed_range()
+    if inputs.speed_mode == "custom":
+        chosen = (inputs.laden_speed_knots or usual[0], inputs.ballast_speed_knots or usual[1])
+        for knots in chosen:
+            if not slowest <= knots <= fastest:
+                raise ValueError(f"{knots} knots is outside the {slowest:g}-{fastest:g} knot range.")
+        return chosen
+    # With a broker's quote the shipowner pays the fuel and sets the speed.
+    if inputs.speed_mode == "usual" or inputs.freight_override_usd is not None:
+        return usual
+    terms = speed_cost_terms(inputs)
+    exponent = A.get("costs", "ship_speed", "fuel_speed_exponent")
+    laden = cheapest_speed(terms["laden_time_cost_usd_per_day"], terms["fuel_usd_per_tonne"],
+                           vessel.laden_consumption_tpd, vessel.laden_speed_knots,
+                           vessel.idle_consumption_tpd, slowest, fastest, exponent)
+    ballast = usual[1]
+    if inputs.charge_ballast_leg:
+        ballast = cheapest_speed(terms["ballast_time_cost_usd_per_day"], terms["fuel_usd_per_tonne"],
+                                 vessel.ballast_consumption_tpd, vessel.ballast_speed_knots,
+                                 vessel.idle_consumption_tpd, slowest, fastest, exponent)
+    return laden, ballast
+
+
+def speed_cost_curve(inputs: ArbInputs, distance_nm: float, knots_values: list[float]) -> list[dict]:
+    """Cost per barrel of the loaded sea leg at each speed: the time it takes and the fuel it burns.
+
+    The bottom of the total is the cheapest loaded speed (what ship_speeds picks
+    when it is inside the speed range).
+    """
+    vessel, terms = get_vessel(inputs.vessel_key), speed_cost_terms(inputs)
+    exponent = A.get("costs", "ship_speed", "fuel_speed_exponent")
+    rows = []
+    for knots in knots_values:
+        days = sailing_days(distance_nm, knots)
+        tpd = sea_consumption_tpd(vessel.laden_consumption_tpd, vessel.laden_speed_knots, knots,
+                                  vessel.idle_consumption_tpd, exponent)
+        time = days * terms["laden_time_cost_usd_per_day"] / inputs.cargo_bbl
+        fuel = days * tpd * terms["fuel_usd_per_tonne"] / inputs.cargo_bbl
+        rows.append({"knots": knots, "days": days, "time": time, "fuel": fuel, "total": time + fuel})
+    return rows
+
+
 def run(inputs: ArbInputs) -> ArbResult:
     """Run the whole calculation for one set of inputs."""
     vessel = get_vessel(inputs.vessel_key)
+    laden_knots, ballast_knots = ship_speeds(inputs)
     voyage = voyage_from_assumptions(
         inputs.origin_key, inputs.destination_key, inputs.vessel_key, inputs.via,
         hire_usd_per_day=inputs.hire_usd_per_day,
@@ -185,6 +279,8 @@ def run(inputs: ArbInputs) -> ArbResult:
         cargo_bbl=inputs.cargo_bbl,
         charge_ballast_leg=inputs.charge_ballast_leg,
         include_war_risk=inputs.include_war_risk,
+        laden_speed_knots=laden_knots,
+        ballast_speed_knots=ballast_knots,
     )
     barrels = inputs.cargo_bbl
 

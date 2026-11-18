@@ -1,5 +1,7 @@
 """Arbitrage result page: the full cost stack and the open/closed verdict."""
 
+import datetime as dt
+
 import pandas as pd
 import streamlit as st
 
@@ -9,6 +11,7 @@ from engine import arbitrage
 from engine import prices as P
 from engine import assumptions as A
 from engine import voyage as V
+from engine.recap import trade_recap
 
 setup = st.session_state["setup"]
 prices, _ = ui.get_prices()
@@ -74,7 +77,8 @@ lines = [
      (f"{result.voyage.total_days:.1f} days of ship hire at {ui.usd(inputs.hire_usd_per_day, 0)} a day"
       f"{E if setup['hire_is_estimate'] else ''}, "
       f"{result.voyage.total_fuel_tonnes:,.0f} tonnes of fuel at {ui.usd(inputs.bunker_usd_per_tonne, 0)} "
-      "(estimated), port charges, canal tolls. See the Voyage page."
+      f"(estimated), port charges, canal tolls; sailing at {result.voyage.speeds['laden']:.1f} knots "
+      f"loaded and {result.voyage.speeds['ballast']:.1f} empty. See the Voyage page."
       if inputs.freight_override_usd is None else
       f"The broker's quote typed in the sidebar: {ui.usd(inputs.freight_override_usd / 1e6, 2)} million "
       f"for the cargo. It pays the owner about {ui.usd(result.implied_tce, 0)} a day after fuel, ports "
@@ -143,6 +147,25 @@ st.info(
        f"terms: either the purchase price at {origin['name']} must fall, the price at destination must "
        "rise, or freight must get cheaper.")
     + " Try the other freight markets in the sidebar to see how much the answer depends on the ship.")
+
+market_label = A.val(A.load("market")["freight_markets"][setup["market"]]["label"])
+recap_rows = trade_recap(result, {
+    "origin_price_label": f"{dates['origin_name']} benchmark price, {dates['wti_label']} (US EIA)",
+    "destination_price_label": (f"{benchmark_name} benchmark price, {dates['destination_label']} "
+                                f"({'World Bank' if dates['benchmark'] == 'dubai' else 'US EIA'})"),
+    "freight_label": (f"Daily hire rate: {market_label}" if inputs.freight_override_usd is None
+                      else ui.FREIGHT_BASES[setup["freight_basis"]]),
+    "hire_is_estimate": setup["hire_is_estimate"],
+    "made_on": f"{dt.date.today():%d %b %Y}",
+})
+recap = pd.DataFrame(recap_rows)
+st.download_button(
+    "Download this trade as a spreadsheet (CSV)", recap.to_csv(index=False).encode("utf-8"),
+    file_name=f"trade_{inputs.origin_key}_{inputs.destination_key}_{dt.date.today():%Y%m%d}.csv",
+    mime="text/csv", icon=":material/download:",
+    help=f"A {len(recap_rows)}-line recap of this trade: ports, ship, speeds, prices with their dates, "
+         "every cost and the margin, each marked as published, estimated, typed in or calculated. "
+         "Opens in Excel.")
 
 with st.expander("How big is the futures-curve effect usually?"):
     history = P.curve_history()

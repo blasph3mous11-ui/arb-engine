@@ -237,6 +237,39 @@ def suez_toll_usd(net_tonnage: float, laden: bool) -> float:
     return dues_sdr * (1 + surcharge_pct / 100) * A.val(canal["usd_per_sdr"])
 
 
+def sea_consumption_tpd(usual_tpd: float, usual_knots: float, knots: float, fixed_tpd: float,
+                        exponent: float = 3.0) -> float:
+    """Fuel burned per day at sea at a speed other than the ship's usual one.
+
+    Part of the fuel (generators and boilers, taken as the ship's idle consumption)
+    is burned whatever the speed. The engine's share follows the rule of thumb that
+    power rises with the cube of speed: 10% slower, 27% less engine fuel per day.
+    """
+    return fixed_tpd + (usual_tpd - fixed_tpd) * (knots / usual_knots) ** exponent
+
+
+def cheapest_speed(daily_time_cost_usd: float, fuel_usd_per_tonne: float, usual_tpd: float,
+                   usual_knots: float, fixed_tpd: float, min_knots: float, max_knots: float,
+                   exponent: float = 3.0) -> float:
+    """The speed that makes a sea leg cheapest, within the ship's speed range.
+
+    A leg of D miles at v knots takes D / (24 v) days. Each day costs the time
+    (hire, plus interest on the cargo when it is on board) and the fuel. Going
+    faster saves days but burns more per day; the total is lowest where
+        v = usual speed x [(time cost + fuel price x fixed fuel)
+                           / ((exponent - 1) x fuel price x engine fuel at usual speed)] ^ (1 / exponent).
+    The distance cancels out, so the answer is the same for every route.
+    """
+    engine_fuel_bill = fuel_usd_per_tonne * (usual_tpd - fixed_tpd)
+    time_cost = daily_time_cost_usd + fuel_usd_per_tonne * fixed_tpd
+    if engine_fuel_bill <= 0:
+        return max_knots
+    if time_cost <= 0:
+        return min_knots
+    best = usual_knots * (time_cost / ((exponent - 1) * engine_fuel_bill)) ** (1 / exponent)
+    return min(max(best, min_knots), max_knots)
+
+
 @dataclass
 class VoyageResult:
     via: str
@@ -245,6 +278,7 @@ class VoyageResult:
     days: dict = field(default_factory=dict)         # days by activity
     fuel_tonnes: dict = field(default_factory=dict)  # fuel burned by activity
     costs: dict = field(default_factory=dict)        # dollars by component
+    speeds: dict = field(default_factory=dict)       # knots: {"laden": ..., "ballast": ...}
 
     @property
     def total_days(self) -> float:
@@ -288,8 +322,14 @@ def estimate_voyage(
     canal_toll_laden_usd: float = 0.0,
     canal_toll_ballast_usd: float = 0.0,
     war_risk_usd_per_transit: float = 0.0,
+    laden_speed_knots: float | None = None,
+    ballast_speed_knots: float | None = None,
+    speed_fuel_exponent: float = 3.0,
 ) -> VoyageResult:
-    """Work out days, fuel and cost for one voyage. Every input is explicit."""
+    """Work out days, fuel and cost for one voyage. Every input is explicit.
+
+    Speeds left as None are the ship's usual speeds, at its published fuel use.
+    """
     check_route(via)
     if via == "suez" and not vessel.can_transit_suez_laden:
         raise ValueError(f"A fully laden {vessel.name} is too deep for the Suez Canal.")
@@ -302,20 +342,31 @@ def estimate_voyage(
     # The empty return leg: the ship sails home by the same route.
     ballast_factor = 1.0 if charge_ballast_leg else 0.0
 
+    def leg(speed, usual_knots, usual_tpd):
+        """Speed and fuel per day for one sea leg: the usual figures unless another speed is set."""
+        if speed is None or speed == usual_knots:
+            return usual_knots, usual_tpd
+        return speed, sea_consumption_tpd(usual_tpd, usual_knots, speed, vessel.idle_consumption_tpd,
+                                          speed_fuel_exponent)
+
+    laden_knots, laden_tpd = leg(laden_speed_knots, vessel.laden_speed_knots, vessel.laden_consumption_tpd)
+    ballast_knots, ballast_tpd = leg(ballast_speed_knots, vessel.ballast_speed_knots,
+                                     vessel.ballast_consumption_tpd)
+
     days = {
         "load_port": load_days,
-        "laden_sea": sailing_days(distance_nm, vessel.laden_speed_knots),
+        "laden_sea": sailing_days(distance_nm, laden_knots),
         "laden_canal": canal_delay_days if uses_canal else 0.0,
         "discharge_port": discharge_days,
-        "ballast_sea": sailing_days(distance_nm, vessel.ballast_speed_knots) * ballast_factor,
+        "ballast_sea": sailing_days(distance_nm, ballast_knots) * ballast_factor,
         "ballast_canal": (canal_delay_days if uses_canal else 0.0) * ballast_factor,
     }
     fuel = {
         "load_port": days["load_port"] * vessel.load_port_consumption_tpd,
-        "laden_sea": days["laden_sea"] * vessel.laden_consumption_tpd,
+        "laden_sea": days["laden_sea"] * laden_tpd,
         "laden_canal": days["laden_canal"] * vessel.idle_consumption_tpd,
         "discharge_port": days["discharge_port"] * vessel.discharge_port_consumption_tpd,
-        "ballast_sea": days["ballast_sea"] * vessel.ballast_consumption_tpd,
+        "ballast_sea": days["ballast_sea"] * ballast_tpd,
         "ballast_canal": days["ballast_canal"] * vessel.idle_consumption_tpd,
     }
     canal_transits = (1 + ballast_factor) if uses_canal else 0
@@ -327,7 +378,8 @@ def estimate_voyage(
         "War-risk premium": war_risk_usd_per_transit * canal_transits,
     }
     return VoyageResult(via=via, distance_nm=distance_nm, cargo_bbl=cargo_bbl,
-                        days=days, fuel_tonnes=fuel, costs=costs)
+                        days=days, fuel_tonnes=fuel, costs=costs,
+                        speeds={"laden": laden_knots, "ballast": ballast_knots})
 
 
 def voyage_from_assumptions(
@@ -340,6 +392,8 @@ def voyage_from_assumptions(
     cargo_bbl: float | None = None,
     charge_ballast_leg: bool | None = None,
     include_war_risk: bool = True,
+    laden_speed_knots: float | None = None,
+    ballast_speed_knots: float | None = None,
 ) -> VoyageResult:
     """The same calculation, filling everything else in from the YAML files."""
     vessel = get_vessel(vessel_key)
@@ -370,6 +424,9 @@ def voyage_from_assumptions(
         canal_toll_laden_usd=suez_toll_usd(vessel.suez_canal_net_tonnage, laden=True),
         canal_toll_ballast_usd=suez_toll_usd(vessel.suez_canal_net_tonnage, laden=False),
         war_risk_usd_per_transit=war_risk,
+        laden_speed_knots=laden_speed_knots,
+        ballast_speed_knots=ballast_speed_knots,
+        speed_fuel_exponent=A.get("costs", "ship_speed", "fuel_speed_exponent"),
     )
 
 

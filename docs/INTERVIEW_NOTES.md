@@ -126,6 +126,16 @@ US arrivals into India fell to zero this autumn.
 
 ## Extra questions worth preparing
 
+- **Would the ship not slow down to save fuel?** Only if the ship is cheap. Engine fuel rises
+  roughly with the cube of speed, but every day also costs hire and interest on the cargo, so the
+  tool finds the speed where the two balance. At $151,000 a day it says sail flat out (15 knots,
+  the top of the range I allow): the round trip falls from 70 to 60 days and freight from $14.59 to
+  $13.64, improving the margin by about $1 a barrel. At the calm 2024 rate of $30,000 the cheapest
+  speed is about 12.8 knots loaded, almost exactly the published assessment speed, so the choice is
+  worth a fraction of a cent. In contango it pays a hedged cargo to dawdle: at +$0.50 a month the
+  loaded leg slows to about 11 knots. The cube rule overstates savings well below normal speed
+  (Adland, Cariou and Wolff, 2020, from tanker noon reports), which I flag on the page.
+
 - **What is demurrage and who pays it?** The daily penalty the charterer pays the owner when
   loading or discharging overruns the agreed laytime. In the model: delay days x (hire rate + idle
   fuel).

@@ -21,6 +21,7 @@ st.markdown("""
 |---|---|
 | **Distance and route** | Shortest sea path between the two ports from the open-source `searoute` library. If that path passes the Suez Canal the tool offers two routes: Suez, or the Cape (the same search with the canal forbidden, so the path goes round South Africa). If it does not (US Gulf or North Sea to Europe) there is one direct route and no canal cost. The Panama Canal is never used. |
 | **Voyage days** | Distance divided by speed, loaded and empty, plus days in port and a day for each canal transit. |
+| **Ship speed** | The ship's usual speeds and fuel use unless another is chosen under Ship speed. At another speed, the fuel the ship burns whatever its speed (its idle figure) stays fixed and the engine's share rises with the cube of speed (the IMO's rule of thumb: 10% slower, 27% less engine fuel a day). The cheapest speed for a leg is usual speed x [(daily time cost + fuel price x fixed fuel) / (2 x fuel price x engine fuel at usual speed)]^(1/3), kept within 10 to 15 knots (estimated). The daily time cost is the hire (plus the interest on the cargo, less any futures-curve gain, while loaded); hire and fuel carry the insurance rate, and fuel at sea the EU carbon cost where it applies. With a broker's quote the owner pays the fuel and sets the speed, so the usual speed is used. |
 | **Vessel hire** | Days the ship is tied up (the full round trip) times the daily hire rate. |
 | **Bunkers (fuel)** | Tonnes burned each day (at sea, in port, in the canal) times the fuel price. The fuel price is estimated from the latest daily Brent price. |
 | **Canal tolls** | The Suez Canal Authority's published sliding-scale tariff applied to the ship's canal tonnage (an estimate), plus the current surcharge, converted from SDR to dollars. Charged loaded on the way out and empty on the way back. |
@@ -73,8 +74,11 @@ st.markdown("""
   consistent data.
 - **Simplified logistics.** Reverse lightering is a flat rule of thumb per barrel, not a model of
   the top-up ships and days; commissions apply only to typed-in quotes; EU carbon uses a dated
-  allowance price and ignores methane; no port congestion beyond the delay slider, no slow
-  steaming to save fuel.
+  allowance price and ignores methane; no port congestion beyond the delay slider.
+- **Ship speed uses a rule of thumb.** Fuel at other speeds follows the cube of speed, which a
+  study of tanker logs (Adland, Cariou and Wolff, 2020) found holds only near the design speed:
+  well below the usual speed the tool overstates the fuel saved. Weather, hull condition and the
+  speed a charter party promises are not modelled.
 - **The historical view holds costs constant**, as explained on that chart.
 - **Dubai is monthly only.** No free daily Dubai price exists, so with Dubai as the sell benchmark
   the tool compares monthly averages of Dubai and WTI, today and in the historical view. The fuel
