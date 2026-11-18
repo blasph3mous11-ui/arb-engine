@@ -10,6 +10,7 @@ import pytest
 from streamlit.testing.v1 import AppTest
 
 from engine import prices
+from engine import assumptions as A
 
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = ["home.py", "voyage_page.py", "prices_page.py", "arbitrage_page.py", "ranking_page.py",
@@ -84,11 +85,13 @@ def test_pages_agree_on_a_broker_quote(basis):
     arbitrage_freight = next(value for line, value in lines.items() if line.startswith("+ Freight"))
     assert metric(voyage_page, "Net freight per barrel") == arbitrage_freight
     assert metric(scenarios_page, "Freight per barrel") == arbitrage_freight
-    # Pre-filled to match the daily-hire estimate, so before commissions the owner would earn
-    # the $300,000 hire rate. The 3.75% of commissions on about $25m of freight, spread over
-    # about 70 days, takes roughly $13,000 a day off that.
+    # Pre-filled to match the daily-hire estimate, so before commissions the owner would earn the
+    # default market's hire rate. The 1.25% brokerage on the (grossed-up) quote comes out of that,
+    # a few per cent of the daily rate.
+    hire = A.get("market", "freight_markets", A.get("market", "default_freight_market"),
+                 "hire_usd_per_day", "suezmax")
     tce = float(metric(voyage_page, "Owner's daily earnings").replace("$", "").replace(",", ""))
-    assert 280_000 < tce < 300_000
+    assert 0.93 * hire < tce < hire
     # Switching on an untouched, pre-filled quote changes nothing (to within rounding).
     hire_mode = load_page("arbitrage_page.py", {})
     to_number = lambda text: float(text.replace("$", "").replace(",", ""))

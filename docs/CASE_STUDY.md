@@ -3,7 +3,11 @@
 *Model run on 15 November 2026 with prices for 11 November 2026 (WTI $89.62, Brent $92.14, US EIA).
 Re-checked on 17 November 2026 after the tool gained more ports, grades and cost lines: none of
 them apply to this voyage (Corpus Christi takes a full Suezmax, and India is outside the EU carbon
-scheme), so every figure below is unchanged.
+scheme), so every figure below is unchanged. The crisis rates used here are kept in the tool as
+the "October 2026 peak" freight market; by mid-November spot Suezmax earnings had roughly halved
+(Baltic Exchange, $151,000 a day in the week to 13 November), which brings freight on this voyage
+down to about $14.60 a barrel. The dashboard downloads new prices daily, so reproducing the tables
+below exactly needs the 11 November prices; later prices shift every row a little.
 All model figures use public benchmarks and documented estimates, not traded freight data.*
 
 ## What happened
@@ -63,7 +67,7 @@ Now the same voyage under three freight markets (fuel estimated at $709 a tonne)
 |---|---|---|---|---|
 | Calm market (late 2024 reference) | $30,000 | $97.49 | $96.66 | **Cape** by $0.83/bbl |
 | One-year time charter (broker assessment, July 2026) | $69,500 | $100.26 | $100.02 | **Cape** by $0.24/bbl |
-| Spot market, crisis (Oct-Nov 2026, estimated) | $300,000 | $116.43 | $119.59 | **Suez** by $3.16/bbl |
+| Spot market, October 2026 peak (estimated) | $300,000 | $116.43 | $119.59 | **Suez** by $3.16/bbl |
 
 Landed cost includes financing, so the extra week at sea via the Cape also costs about $0.11 a
 barrel in interest on a $90 million cargo.
@@ -88,7 +92,7 @@ day saved is worth more than the tolls. Three things follow:
    rate. A fall in the premium would pull cargoes back to the canal long before the route was
    "safe" in any absolute sense. That fits the 2026 pattern of tankers returning while risk
    ratings stay elevated.
-3. **In today's market the route choice is second-order.** At $300,000 a day Suez saves about $3 a
+3. **At the October peak the route choice was second-order.** At $300,000 a day Suez saves about $3 a
    barrel, but the arb is shut by more than $23 either way, because the Brent-WTI gap is only
    $2.52. The binding constraint is the cost of the ship, not the route. Press reports say US
    crude arrivals into India fell to zero in the autumn of 2026
@@ -110,6 +114,6 @@ day saved is worth more than the tolls. Three things follow:
 ## Reproduce it
 
 Open the dashboard, pick **Suezmax**, switch **Route** between Suez and Cape, and step through the
-three **Freight market** settings. The **Voyage calculator** page shows the two routes side by
+**Freight market** settings ("October 2026 peak" for the figures here). The **Voyage calculator** page shows the two routes side by
 side; **Scenarios & history** has the "Suez Canal closed" switch and the hire-rate slider for
 finding the break-even yourself.

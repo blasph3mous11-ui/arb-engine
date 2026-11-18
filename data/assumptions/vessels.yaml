@@ -155,58 +155,73 @@ aframax:
   laden_speed_knots:
     value: 13.0
     unit: knots
-    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), Aframax assessment speed
+    source: "S&P Global Platts, Specifications Guide Global Freight (September 2026), page 38: Platts Base Rate standard vessel (Aframax, 80,000 t cargo), conventional bunker fuel"
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
-    checked: 2026-11-15
-    estimate: true
+    checked: 2026-11-19
+    estimate: false
     note: >
-      Read from a search-engine extract because the document blocks automated download. Flagged as
-      an estimate until the figure has been confirmed by eye against the document itself.
+      Read by eye from the guide on 19 November 2026. It is Platts' nominal standard vessel for
+      its Base Rates, not a measurement of a particular ship.
   ballast_speed_knots:
     value: 12.5
     unit: knots
-    source: As reported in a search-engine extract (not yet confirmed against the document) of S&P Global Platts, Specifications Guide Global Freight (September 2026), Aframax assessment speed
+    source: "S&P Global Platts, Specifications Guide Global Freight (September 2026), page 38: Platts Base Rate standard vessel (Aframax, 80,000 t cargo), conventional bunker fuel"
     url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
-    checked: 2026-11-15
-    estimate: true
+    checked: 2026-11-19
+    estimate: false
     note: >
-      Read from a search-engine extract because the document blocks automated download. Flagged as
-      an estimate until the figure has been confirmed by eye against the document itself.
+      Read by eye from the guide on 19 November 2026. It is Platts' nominal standard vessel for
+      its Base Rates, not a measurement of a particular ship.
   laden_consumption_tpd:
-    value: 38
+    value: 43
     unit: tonnes per day
-    source: Our estimate, scaled down from the Platts Suezmax figure
-    checked: 2026-11-15
-    estimate: true
+    source: "S&P Global Platts, Specifications Guide Global Freight (September 2026), page 38: Platts Base Rate standard vessel (Aframax, 80,000 t cargo), conventional bunker fuel"
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-19
+    estimate: false
     note: >
-      A Suezmax burns about 44 t/day laden at 13 knots (Platts). An Aframax is roughly 70% of the
-      size; fuel use scales less than proportionally with size, so we use about 85% of the Suezmax figure.
+      Read by eye from the guide on 19 November 2026. It is Platts' nominal standard vessel for
+      its Base Rates, not a measurement of a particular ship.
   ballast_consumption_tpd:
-    value: 30
+    value: 36
     unit: tonnes per day
-    source: Our estimate, scaled down from the Platts Suezmax figure
-    checked: 2026-11-15
-    estimate: true
-    note: Same reasoning as laden consumption (Suezmax 35 t/day in ballast).
+    source: "S&P Global Platts, Specifications Guide Global Freight (September 2026), page 38: Platts Base Rate standard vessel (Aframax, 80,000 t cargo), conventional bunker fuel"
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-19
+    estimate: false
+    note: >
+      Read by eye from the guide on 19 November 2026. It is Platts' nominal standard vessel for
+      its Base Rates, not a measurement of a particular ship.
   load_port_consumption_tpd:
     value: 10
     unit: tonnes per day
-    source: Our estimate, scaled from the Platts Suezmax port figures
-    checked: 2026-11-15
-    estimate: true
+    source: "S&P Global Platts, Specifications Guide Global Freight (September 2026), page 38: Platts Base Rate standard vessel (Aframax, 80,000 t cargo), conventional bunker fuel"
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-19
+    estimate: false
+    note: >
+      Read by eye from the guide on 19 November 2026. It is Platts' nominal standard vessel for
+      its Base Rates, not a measurement of a particular ship.
   discharge_port_consumption_tpd:
     value: 55
     unit: tonnes per day
-    source: Our estimate, scaled from the Platts Suezmax port figures
-    checked: 2026-11-15
-    estimate: true
-    note: Discharging burns far more than loading because the ship runs its own cargo pumps.
+    source: "S&P Global Platts, Specifications Guide Global Freight (September 2026), page 38: Platts Base Rate standard vessel (Aframax, 80,000 t cargo), conventional bunker fuel"
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-19
+    estimate: false
+    note: >
+      Read by eye from the guide on 19 November 2026. It is Platts' nominal standard vessel for
+      its Base Rates, not a measurement of a particular ship.
   idle_consumption_tpd:
-    value: 6
+    value: 5
     unit: tonnes per day
-    source: Our estimate, scaled from the Platts Suezmax port figures
-    checked: 2026-11-15
-    estimate: true
+    source: "S&P Global Platts, Specifications Guide Global Freight (September 2026), page 38: Platts Base Rate standard vessel (Aframax, 80,000 t cargo), conventional bunker fuel"
+    url: https://www.spglobal.com/content/dam/spglobal/ci/en/documents/platts/en/our-methodology/methodology-specifications/shipping/freight-specifications.pdf
+    checked: 2026-11-19
+    estimate: false
+    note: >
+      Read by eye from the guide on 19 November 2026. It is Platts' nominal standard vessel for
+      its Base Rates, not a measurement of a particular ship.
   suez_canal_net_tonnage:
     value: 58000
     unit: SCNT
@@ -510,42 +525,43 @@ vlcc:
   laden_speed_knots:
     value: 12.0
     unit: knots
-    source: As reported in a search-engine extract (not yet confirmed against the document) of Baltic Exchange tanker emissions white paper, VLCC "eco" speed
+    source: "Baltic Exchange tanker EEOI white paper, table for VLCC route TD3 (Ras Tanura-Ningbo, 280,000 t cargo), eco speed"
     url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
-    checked: 2026-11-15
-    estimate: true
+    checked: 2026-11-19
+    estimate: false
     note: >
-      Read from a search-engine extract because the document blocks automated download. Flagged as
-      an estimate until the figure has been confirmed by eye against the document itself. Full
-      speed is listed as 14 knots at 93 t/day.
+      Read by eye from the white paper on 19 November 2026. At full speed (14 knots) the same
+      table gives 93 t/day loaded and 79.5 t/day empty.
   ballast_speed_knots:
     value: 12.0
     unit: knots
-    source: As reported in a search-engine extract (not yet confirmed against the document) of Baltic Exchange tanker emissions white paper, VLCC "eco" speed
+    source: "Baltic Exchange tanker EEOI white paper, table for VLCC route TD3 (Ras Tanura-Ningbo, 280,000 t cargo), eco speed"
     url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
-    checked: 2026-11-15
-    estimate: true
-    note: The extract gives the eco ballast consumption but not its speed; we assume the same 12 knots.
+    checked: 2026-11-19
+    estimate: false
+    note: >
+      Read by eye from the white paper on 19 November 2026. At full speed (14 knots) the same
+      table gives 93 t/day loaded and 79.5 t/day empty.
   laden_consumption_tpd:
     value: 58.5
     unit: tonnes per day
-    source: As reported in a search-engine extract (not yet confirmed against the document) of Baltic Exchange tanker emissions white paper, VLCC laden at eco speed
+    source: "Baltic Exchange tanker EEOI white paper, table for VLCC route TD3 (Ras Tanura-Ningbo, 280,000 t cargo), eco speed"
     url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
-    checked: 2026-11-15
-    estimate: true
+    checked: 2026-11-19
+    estimate: false
     note: >
-      Read from a search-engine extract because the document blocks automated download. Flagged as
-      an estimate until the figure has been confirmed by eye against the document itself.
+      Read by eye from the white paper on 19 November 2026. At full speed (14 knots) the same
+      table gives 93 t/day loaded and 79.5 t/day empty.
   ballast_consumption_tpd:
     value: 44
     unit: tonnes per day
-    source: As reported in a search-engine extract (not yet confirmed against the document) of Baltic Exchange tanker emissions white paper, VLCC ballast at eco speed
+    source: "Baltic Exchange tanker EEOI white paper, table for VLCC route TD3 (Ras Tanura-Ningbo, 280,000 t cargo), eco speed"
     url: https://emissions.balticexchange.com/en/imo-regulationss/eeoi/tanker-whitepaper.html
-    checked: 2026-11-15
-    estimate: true
+    checked: 2026-11-19
+    estimate: false
     note: >
-      Read from a search-engine extract because the document blocks automated download. Flagged as
-      an estimate until the figure has been confirmed by eye against the document itself.
+      Read by eye from the white paper on 19 November 2026. At full speed (14 knots) the same
+      table gives 93 t/day loaded and 79.5 t/day empty.
   load_port_consumption_tpd:
     value: 15
     unit: tonnes per day

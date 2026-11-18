@@ -1,6 +1,7 @@
 # Interview notes
 
-Figures quoted are from the model run on 17 November 2026 (prices for 11 November). Re-check them
+Figures quoted are from the model run on 19 November 2026 (prices for 17 November, freight
+for the week to 13 November). Re-check them
 on the dashboard before an interview; prices move every day.
 
 ## The two-minute explanation
@@ -17,9 +18,10 @@ that with the value at destination after a quality adjustment. The difference is
 the tool says whether the arb is open or closed.
 
 What I learned building it is how dominant freight is, and how dominant the ship's daily rate is
-within freight. Right now the Brent-WTI spread is about $2.50, and in today's tanker market,
-with Hormuz effectively shut, my estimate of freight to India is about $25 a barrel, so the arb
-is shut by more than $20. In a calm market the same voyage costs $5 to $6. The tool also shows
+within freight. Right now the Brent-WTI spread is about $3.40. With Hormuz effectively shut,
+freight to India was about $25 a barrel at October's peak; tanker rates have since roughly halved
+and it is now about $14.60, but the arb is still shut by about $12. In a calm market the same
+voyage costs $5 to $6. The tool also shows
 the Suez-versus-Cape decision: the Cape costs time, Suez costs cash, and there is a break-even
 hire rate, around $86,000 a day on my numbers, above which the canal is worth paying for.
 
@@ -41,8 +43,8 @@ calculation has a test with a hand-worked answer."
 Time-charter basis. Days = distance / (speed x 24) for the loaded and empty legs, plus two days in
 each port, plus a day per canal transit. Cost = days x daily hire + fuel burned x bunker price +
 port charges + canal tolls + war-risk premium. Divide by barrels loaded. For the base case: 9,803
-nm, 70 days round trip, 2,707 tonnes of fuel; at $300,000 a day that is $21 of hire, $1.9 of fuel,
-$1.0 of tolls, $0.8 of war risk and $0.2 of port costs per barrel: $25.02.
+nm, 70 days round trip, 2,707 tonnes of fuel; at $151,000 a day that is $10.58 of hire, $1.94 of
+fuel, $1.04 of tolls, $0.80 of war risk and $0.23 of port costs per barrel: $14.59.
 
 **2. Why charge the cargo for the ballast leg?**
 Because that is how tanker freight is priced: Worldscale flat rates assume a round voyage back to
@@ -52,16 +54,18 @@ can be lower. The model has a switch for it, and I would call the round-trip fig
 **3. Where do your freight rates come from? Would a trader use them?**
 No. A trader would use a broker quote or a Baltic/Platts assessment in Worldscale or lump sum for
 the actual route. Those are paywalled. I use public figures: Fearnleys' one-year time charter
-rates and Baltic TCE numbers reported in the press, and for today's spot market an estimate
-anchored on press reports of $20-25 a barrel for US crude to India. In my model that range
-corresponds to roughly $230,000 to $300,000 a day, and I set it at the top of that range. Every
-hire rate in the tool is flagged as an estimate, including the published ones, because none of
-them is for this route.
+rates, and for the spot market the Baltic Exchange's weekly Atlantic assessments reported in the
+press: $151,000 a day for a Suezmax (West Africa-Europe), $72,000 for an Aframax (US Gulf-Europe)
+and $248,000 for a VLCC (US Gulf-China), all for the week to 13 November. Every hire rate in the
+tool is flagged as an estimate, including the published ones, because none of them is for this
+exact route. As a check: at that $248,000 a day the tool builds a US Gulf-China VLCC voyage at
+about $31m, against the Baltic's published lump sum of $33.8m, about 9% lower, which I would put
+down to commissions, port charges and the Baltic's exact route assumptions.
 The value of my approach is not the level, it is that you can see which driver moves the answer.
 If you have a real quote, you can type it in: Worldscale points times the route's flat rate
 (which you type too, because flat rates are sold by subscription) times the cargo's tonnes, or a
-lump sum. The tool then shows the owner's daily earnings (TCE) after commissions. Typing $25m for
-the base voyage gives net freight of $24.38 a barrel to the charterer and about $286,000 a day to
+lump sum. The tool then shows the owner's daily earnings (TCE) after commissions. Typing $15m for
+the base voyage gives net freight of $14.62 a barrel to the charterer and about $149,000 a day to
 the owner.
 
 **4. Your origin price is WTI Cushing. That is not a Gulf Coast export price.**
@@ -111,9 +115,9 @@ exactly when the arb is wide, because everyone wants a ship; so that chart overs
 the arb was open. I say so on the chart. Third, the quality and destination differentials are
 rules of thumb.
 
-**10. If the arb is closed by $23, why does anyone ship crude at all?**
+**10. If the arb is closed by $12, why does anyone ship crude at all?**
 Three reasons the model does not capture. Traders with ships on long-term charter face a much
-lower cost: at the July 2026 one-year rate of $69,500 a day my landed cost falls by about $16 a
+lower cost: at the July 2026 one-year rate of $69,500 a day my landed cost falls by about $5.70 a
 barrel (still closed at today's spread, but far closer). Physical prices in a tight market trade
 well above the benchmark, so the real delivered price in India may be much higher than Brent
 flat. And term contracts, refinery needs and security of supply move cargoes that spot arithmetic
@@ -145,8 +149,8 @@ US arrivals into India fell to zero this autumn.
   at berth in those ports. On a Suezmax from Houston to Rotterdam it is about 20 cents a barrel.
   The UK is outside the EU scheme; its own scheme covers only domestic voyages for now.
 - **Where should the cargo go?** The ranking page costs the same cargo to every port by its
-  cheapest route. Today Rotterdam is the least bad (-$11.03 on the base case) because it is the
-  shortest voyage; Ulsan is the worst (-$33.67). All ports are valued against one benchmark, so
+  better route. Today Rotterdam is the least bad (-$4.63 on the base case) because it is the
+  shortest voyage; Ulsan is the worst (-$17.19). All ports are valued against one benchmark, so
   the ranking shows the effect of the voyage only, not of local premiums.
 - **How would you extend it?** Real freight and physical price assessments if I had access;
   valuation by the products a refinery makes (gross product worth), which needs yield data I
@@ -165,7 +169,8 @@ US arrivals into India fell to zero this autumn.
 | Suez toll, loaded Suezmax | about $0.58 million including the 37% surcharge |
 | Barrels per tonne, light crude | about 7.6 |
 | Financing a $90m cargo for 36 days at 5.9% | about $0.54 a barrel |
-| One day of delay at $300,000 a day on 1m barrels | about $0.30 a barrel |
+| One day of delay at $151,000 a day on 1m barrels | about $0.15 a barrel |
+| Spot hire, week to 13 Nov 2026 (Baltic, Atlantic) | VLCC $248,000, Suezmax $151,000, Aframax $72,000 a day |
 | North Sea to west coast India | about 6,600 nm via Suez |
 | Quality rule ($0.40 per API degree, $1 per sulphur point) vs Brent | WTI Midland +$1.65, Mars -$5.04, Johan Sverdrup -$4.28 |
 | Reverse lightering (estimate) | about $0.60 a barrel for a VLCC at Houston, $0.17 for a Suezmax |

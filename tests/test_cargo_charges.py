@@ -3,6 +3,7 @@
 import pytest
 
 from engine import arbitrage, costs, voyage
+from engine import assumptions as A
 from tests.test_arbitrage import hand_inputs
 
 
@@ -52,8 +53,13 @@ def test_eu_port_adds_carbon_and_others_do_not(fixed_distance, monkeypatch):
     rotterdam = arbitrage.run(hand_inputs(destination_key="rotterdam", via="direct"))
     sikka = arbitrage.run(hand_inputs(destination_key="sikka", via="direct"))
     assert sikka.cost_stack["EU carbon (ETS)"] == 0
-    # The hand-worked voyage's fuel (see test above): 1,348 t covered -> $346,307.94 on a million barrels.
-    assert rotterdam.cost_stack["EU carbon (ETS)"] == pytest.approx(0.34630794)
+    # The hand-worked voyage's fuel (see test above): 1,348 t covered x 3.114 t CO2 = 4,197.672 t of
+    # CO2, all covered in 2026, at the allowance price and exchange rate in costs.yaml (read here so
+    # that refreshing the dated price does not break the test). At EUR 75 and $1.10 this was
+    # $346,307.94; at EUR 90 it is $415,569.53, on a million barrels.
+    ets = A.load("costs")["eu_ets"]
+    expected = 1348 * 3.114 * A.val(ets["eua_price_eur_per_tonne"]) * A.val(ets["usd_per_eur"]) / 1_000_000
+    assert rotterdam.cost_stack["EU carbon (ETS)"] == pytest.approx(expected)
 
 
 def test_draught_warning_and_lightering_agree():

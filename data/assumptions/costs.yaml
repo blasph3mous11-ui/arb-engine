@@ -26,11 +26,11 @@ pricing:
 
 financing:
   benchmark_rate_pct:
-    value: 3.90
+    value: 3.92
     unit: percent per year
-    source: Federal Reserve Bank of New York, Secured Overnight Financing Rate (SOFR), 12 November 2026
+    source: Federal Reserve Bank of New York, Secured Overnight Financing Rate (SOFR), 17 November 2026
     url: https://www.newyorkfed.org/markets/reference-rates/sofr
-    checked: 2026-11-15
+    checked: 2026-11-19
     estimate: false
   margin_pct:
     value: 2.00
@@ -302,16 +302,19 @@ grades:
       checked: 2026-11-17
       estimate: false
     export_differential_usd_per_bbl:
-      value: 6.00
+      value: 2.85
       unit: USD per barrel over Dated Brent
-      source: "S&P Global Platts, October 2026: Johan Sverdrup FOB Mongstad at $5.685/b over Dated Brent on 15 October; early-November cargoes heard at about +$6"
-      url: https://www.spglobal.com/energy/en/news-research/latest-news/crude-oil/101526-northwest-european-sour-crude-outlook-constructive-amid-wide-sulfur-spread
-      checked: 2026-11-17
+      source: "Market report (USO via Rallies), 22 October 2026: BP offered a 4-6 November loading Johan Sverdrup cargo at Dated Brent plus $2.85"
+      url: https://rallies.ai/news/north-sea-crude-wti-trades-sverdrup-on-offer-f9cb689d6a801941
+      checked: 2026-11-19
       estimate: true
       note: >
-        Normally a discount (Wood Mackenzie cites a typical 3% below Brent), but with Middle East
-        sour supply to Europe disrupted in 2026 it swung to record premiums (Platts $19.55 on 15
-        September). A dated snapshot of a fast-moving price; change it in the sidebar.
+        An offer, not a trade or an assessment, from a secondary report; the newest free figure
+        found. Platts assessed Johan Sverdrup FOB Mongstad at +$5.685 on 15 October and +$19.55 (a
+        record) on 15 September, after BP had offered October cargoes at +$14.40 to +$23.30. Normally
+        a discount (Wood Mackenzie cites a typical 3% below Brent). A fast-moving price: change it
+        in the sidebar.
+
   dubai:
     name: {value: "Dubai (Middle East medium sour)"}
     api_gravity:
@@ -418,16 +421,16 @@ eu_ets:
     checked: 2026-11-17
     estimate: false
   eua_price_eur_per_tonne:
-    value: 75
+    value: 90
     unit: EUR per tonne of CO2
-    source: "GMK Center, May 2026: EU carbon allowances (ICE December 2026 contract) ranged from EUR 74 to 77 a tonne in the first half of May"
-    url: https://gmk.center/en/news/european-carbon-prices-in-the-first-half-of-may-ranged-from-e74-to-e77-per-ton/
+    source: "GMK Center, November 2026: EU carbon allowances (December 2026 contract) back above EUR 90 a tonne on 12-13 November; OPIS assessed EUR 90.10"
+    url: https://gmk.center/en/news/european-carbon-prices-exceeded-e90-t-in-november/
     checked: 2026-11-17
     estimate: true
     note: >
       The allowance price moves every day and no free live feed was found, so this is a dated
-      snapshot; prices reached about EUR 79 by the end of May and the November 2026 level was not
-      checked. Methane and nitrous oxide, added to the scheme in 2026, are not counted.
+      snapshot (Platts had it at EUR 86.69 on 6 November; it was EUR 74-77 in May). Methane and
+      nitrous oxide, added to the scheme in 2026, are not counted.
   usd_per_eur:
     value: 1.10
     unit: USD per EUR

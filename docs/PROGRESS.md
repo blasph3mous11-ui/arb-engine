@@ -31,6 +31,24 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
   density. Decision: no gross-product-worth valuation, because consistent free product yields per
   grade and destination product prices do not exist; documented on the Methodology page. Sanity:
   Mars is worth $5.04 less than Brent and $0.49 less than Dubai on the quality rule. 177 tests pass.
+- **Figures confirmed and refreshed, 19 Nov 2026.**
+  - Confirmed by eye: the Platts guide (page 38) gives its standard Aframax (80,000 t cargo) as
+    13 / 12.5 knots and 43 / 36 / 10 / 55 / 5 t/day (laden, ballast, loading, discharging, idle);
+    these replace our scaled Aframax guesses and are now `estimate: false`. The Baltic Exchange
+    white paper's VLCC TD3 table gives 12 knots both ways and 58.5 / 44 t/day at eco speed, as
+    used; now `estimate: false`. Not found in the guide's tanker pages: the Suezmax 44 / 35 t/day
+    and eco 37 / 25 t/day figures and the $78,000 Corpus Christi port cost, which stay estimates.
+    Reading the guide through an injected PDF reader was refused by the safety check, so it was
+    read page by page in the browser.
+  - Refreshed: new default "Spot market, mid-November 2026" from the Baltic Exchange weekly report
+    of 13 November (VLCC TD22 $248,000/day, Suezmax TD20 $151,000, Aframax TD25 $72,000; Panamax
+    $48,000 estimated). October's rates kept as "Spot market, October 2026 peak" so the case study
+    reproduces. SOFR 3.92% (17 Nov), EU carbon EUR 90/t (mid-Nov), Johan Sverdrup +$2.85 (offer for
+    4-6 Nov loading). No newer free figures found for the Mars and WTI Midland differentials.
+  - Cross-check: at the Baltic's $248,000/day the tool builds a US Gulf-China VLCC voyage at about
+    $31m against the Baltic's published $33.8m lump sum (about 9% lower).
+  - Base case now (prices 17 Nov): freight $14.59/bbl, margin -$12.32, break-even spread $15.75.
+    Tests that had prices built in now read them from the YAML. 198 tests pass.
 - **Independent review of Stages 1-7, 17 Nov 2026.** Three reviewers (economics, pages, sources)
   with every finding re-checked by a second reviewer; 27 confirmed, all fixed. The ones that
   changed numbers:

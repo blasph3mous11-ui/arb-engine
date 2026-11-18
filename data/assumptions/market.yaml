@@ -10,12 +10,70 @@ default_freight_market: {value: spot_nov_2026}
 
 freight_markets:
   spot_nov_2026:
-    label: {value: "Spot market, Oct-Nov 2026 (Hormuz crisis)"}
+    label: {value: "Spot market, mid-November 2026"}
     description:
       value: >
-        What a ship earns per day if hired for a single voyage today. The Strait of Hormuz has been
-        effectively closed to commercial traffic for most of 2026, which has pushed tanker earnings
-        to record levels.
+        What a ship earns per day if hired for a single voyage now. Tanker earnings have fallen
+        steeply from October's record (US Gulf-China VLCC earnings about 45% below their 8 October
+        high) but remain far above normal, with the Strait of Hormuz still effectively closed.
+    hire_usd_per_day:
+      panamax:
+        value: 48000
+        unit: USD per day
+        source: Our estimate
+        checked: 2026-11-19
+        estimate: true
+        note: >
+          No free Panamax crude figure. Set at about two-thirds of the Baltic US Gulf-Europe Aframax
+          figure for the same week, in line with the usual step down between ship sizes.
+      suezmax_eco:
+        value: 151000
+        unit: USD per day
+        source: Our estimate, the same figure as the standard Suezmax in this market
+        checked: 2026-11-19
+        estimate: true
+        note: >
+          We assume the owner earns the same per day on either Suezmax, so in this tool the cargo
+          gets the eco ship's fuel saving. In a real spot fixture the freight per barrel is the
+          same for either ship and the owner keeps the saving.
+      aframax:
+        value: 72000
+        unit: USD per day
+        source: "Baltic Exchange weekly report, 13 November 2026: TD25 (70,000 t US Gulf-UK Continent) at just below WS295, daily round-trip TCE about $71,700"
+        url: https://www.thedcn.com.au/news/baltic-exchange-weekly-report-13-november-2026
+        checked: 2026-11-19
+        estimate: true
+        note: >
+          A published assessment for a US Gulf-Europe voyage, used as a proxy for the cost of an
+          Aframax on any route here, so flagged as an estimate. Rates move daily.
+      suezmax:
+        value: 151000
+        unit: USD per day
+        source: "Baltic Exchange weekly report, 13 November 2026: TD20 (130,000 t Nigeria-UK Continent) at WS307.22, daily round-trip TCE about $151,300"
+        url: https://www.thedcn.com.au/news/baltic-exchange-weekly-report-13-november-2026
+        checked: 2026-11-19
+        estimate: true
+        note: >
+          The nearest published Atlantic Suezmax assessment, used as a proxy for a US Gulf or North Sea
+          Suezmax, so flagged as an estimate. It fell from about $224,500 a day a week earlier and
+          about $561,600 in mid-October. The Black Sea route (TD6) was still near $305,000.
+      vlcc:
+        value: 248000
+        unit: USD per day
+        source: "Baltic Exchange weekly report, 13 November 2026: TD22 (US Gulf-China) lump sum about $33.8 million, daily round-trip TCE $247,973"
+        url: https://www.thedcn.com.au/news/baltic-exchange-weekly-report-13-november-2026
+        checked: 2026-11-19
+        estimate: true
+        note: >
+          A published figure for a US Gulf-China voyage, used as a proxy for a VLCC on any route
+          here, so flagged as an estimate.
+  spot_oct_2026:
+    label: {value: "Spot market, October 2026 peak (Hormuz crisis)"}
+    description:
+      value: >
+        What a ship earned per day on a single voyage at the October 2026 peak. The Strait of Hormuz
+        had been effectively closed to commercial traffic for most of 2026, pushing tanker earnings
+        to record levels. Kept for comparison and for the case study.
     hire_usd_per_day:
       panamax:
         value: 130000
