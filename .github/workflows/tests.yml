@@ -23,5 +23,5 @@ jobs:
           cache: pip
       - name: Install the packages the dashboard needs
         run: pip install -r requirements.txt
-      - name: Run the tests (offline: prices come from the saved snapshot)
+      - name: "Run the tests (offline: prices come from the saved snapshot)"
         run: python -m pytest -q
