@@ -237,16 +237,16 @@ def test_north_sea_cargo_is_priced_off_brent():
 def test_cheapest_speed_shows_on_the_voyage_page():
     calm = load_page("voyage_page.py", {"speed_mode": "cheapest", "market": "calm_2024"})
     assert any(s.value.startswith("How fast should it sail") for s in calm.subheader)
-    used = metric(calm, "Speed used, loaded / empty")
-    assert used == metric(calm, "Cheapest at these costs")
+    used = metric(calm, "Knots used, loaded / empty")
+    assert used == metric(calm, "Cheapest knots")
     # Cheaper than the usual speed, or the same: never worse.
-    gain = metric(calm, "Cheapest speed instead of usual")
+    gain = metric(calm, "Gain per barrel vs usual")
     assert not gain.startswith("-")
     # The Arbitrage page states the same speeds in its freight line.
     arbitrage_page = load_page("arbitrage_page.py", {"speed_mode": "cheapest", "market": "calm_2024"})
     freight_text = next(text for text in arbitrage_page.dataframe[0].value["Where it comes from"]
                         if "days of ship hire" in text)
-    laden, ballast = used.replace(" knots", "").split(" / ")
+    laden, ballast = used.split(" / ")
     assert f"sailing at {laden} knots loaded and {ballast} empty" in freight_text
 
 

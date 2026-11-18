@@ -140,11 +140,12 @@ else:
     gain = (arbitrage.run(cheapest_inputs).margin_per_bbl
             - arbitrage.run(page_inputs.with_changes(speed_mode="usual")).margin_per_bbl)
     s1, s2, s3 = st.columns(3)
-    s1.metric("Speed used, loaded / empty", f"{laden_knots:.1f} / {ballast_knots:.1f} knots")
-    s2.metric("Cheapest at these costs (estimated)", f"{best_laden:.1f} / {best_ballast:.1f} knots")
-    s3.metric("Cheapest speed instead of usual (estimated)", f"{ui.usd(gain)} a barrel",
-              help="How much the margin improves by sailing at the cheapest speeds instead of the "
-                   "usual ones: hire, fuel, carbon and the interest on the cargo, all estimated.")
+    s1.metric("Knots used, loaded / empty", f"{laden_knots:.1f} / {ballast_knots:.1f}")
+    s2.metric("Cheapest knots (estimated)", f"{best_laden:.1f} / {best_ballast:.1f}",
+              help="Loaded / empty: the speeds that make this voyage cheapest at these costs.")
+    s3.metric("Gain per barrel vs usual (estimated)", ui.usd(gain),
+              help="How much the margin improves per barrel by sailing at the cheapest speeds instead "
+                   "of the usual ones: hire, fuel, carbon and the interest on the cargo, all estimated.")
     st.plotly_chart(charts.speed_curve(curve_rows, vessel.laden_speed_knots, laden_knots), width="stretch")
     if best_laden >= fastest:
         why = (f"At {ui.usd(hire, 0)} a day the ship's time costs more than the extra fuel of going "
