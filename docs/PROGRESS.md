@@ -49,6 +49,10 @@ Stages: 0 loose ends, 1 destination ranking, 2 freight-vs-spread grid, 3 broker 
     $31m against the Baltic's published $33.8m lump sum (about 9% lower).
   - Base case now (prices 17 Nov): freight $14.59/bbl, margin -$12.32, break-even spread $15.75.
     Tests that had prices built in now read them from the YAML. 198 tests pass.
+  - All four README screenshots retaken from the live site at the mid-November rates. The
+    "Where to send it" page said it used the cheapest route; it keeps the higher-margin route
+    (as `engine/ranking.py` does, which differs only when a steep contango is typed in), so the
+    wording now says that.
 - **Independent review of Stages 1-7, 17 Nov 2026.** Three reviewers (economics, pages, sources)
   with every finding re-checked by a second reviewer; 27 confirmed, all fixed. The ones that
   changed numbers:
