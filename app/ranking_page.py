@@ -22,7 +22,8 @@ st.markdown(
     f"costs. This page takes **{inputs.cargo_bbl / 1e6:.2f} million barrels** of "
     f"{A.val(A.load('costs')['grades'][inputs.grade]['name']).split(' (')[0]} loaded at "
     f"**{origin['name']}** on {ui.a_or_an(vessel.name)} and works out the margin to each "
-    f"discharge port, using the cheapest route available to that port.")
+    f"discharge port. Where a port can be reached by more than one route, it keeps the one that "
+    f"leaves the higher margin: usually the cheaper voyage.")
 
 if inputs.freight_override_usd is not None:
     st.info("A broker's quote covers one voyage only, so this ranking costs every destination from "
